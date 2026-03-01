@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -13,7 +14,7 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  role: varchar('role', { length: 20 }).notNull().default('member'),
+  role: varchar('role', { length: 20 }).notNull().default('member'), // Gecko: admin | teacher | parent | student
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
@@ -54,6 +55,53 @@ export const activityLogs = pgTable('activity_logs', {
   ipAddress: varchar('ip_address', { length: 45 }),
 });
 
+// --- Gecko schema ---
+
+export const organizations = pgTable('organizations', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 200 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const classes = pgTable('classes', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 200 }).notNull(),
+  description: text('description'),
+  meetingLink: text('meeting_link'),
+  recordingUrl: text('recording_url'),
+  teacherId: integer('teacher_id')
+    .notNull()
+    .references(() => users.id),
+  organizationId: integer('organization_id').references(() => organizations.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const enrollments = pgTable('enrollments', {
+  id: serial('id').primaryKey(),
+  studentId: integer('student_id')
+    .notNull()
+    .references(() => users.id),
+  classId: integer('class_id')
+    .notNull()
+    .references(() => classes.id),
+  enrolledAt: timestamp('enrolled_at').notNull().defaultNow(),
+});
+
+export const assignments = pgTable('assignments', {
+  id: serial('id').primaryKey(),
+  classId: integer('class_id')
+    .notNull()
+    .references(() => classes.id),
+  studentId: integer('student_id')
+    .notNull()
+    .references(() => users.id),
+  title: varchar('title', { length: 200 }).notNull(),
+  completed: boolean('completed').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 export const invitations = pgTable('invitations', {
   id: serial('id').primaryKey(),
   teamId: integer('team_id')
@@ -77,6 +125,9 @@ export const teamsRelations = relations(teams, ({ many }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   teamMembers: many(teamMembers),
   invitationsSent: many(invitations),
+  classesTeaching: many(classes),
+  enrollments: many(enrollments),
+  assignments: many(assignments),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -101,6 +152,30 @@ export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
   }),
 }));
 
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+  classes: many(classes),
+}));
+
+export const classesRelations = relations(classes, ({ one, many }) => ({
+  teacher: one(users, { fields: [classes.teacherId], references: [users.id] }),
+  organization: one(organizations, {
+    fields: [classes.organizationId],
+    references: [organizations.id],
+  }),
+  enrollments: many(enrollments),
+  assignments: many(assignments),
+}));
+
+export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
+  student: one(users, { fields: [enrollments.studentId], references: [users.id] }),
+  class: one(classes, { fields: [enrollments.classId], references: [classes.id] }),
+}));
+
+export const assignmentsRelations = relations(assignments, ({ one }) => ({
+  class: one(classes, { fields: [assignments.classId], references: [classes.id] }),
+  student: one(users, { fields: [assignments.studentId], references: [users.id] }),
+}));
+
 export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   team: one(teams, {
     fields: [activityLogs.teamId],
@@ -122,6 +197,16 @@ export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
+export type Organization = typeof organizations.$inferSelect;
+export type NewOrganization = typeof organizations.$inferInsert;
+export type Class = typeof classes.$inferSelect;
+export type NewClass = typeof classes.$inferInsert;
+export type Enrollment = typeof enrollments.$inferSelect;
+export type NewEnrollment = typeof enrollments.$inferInsert;
+export type Assignment = typeof assignments.$inferSelect;
+export type NewAssignment = typeof assignments.$inferInsert;
+
+export const USER_ROLES = ['admin', 'teacher', 'parent', 'student'] as const;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Menu } from 'lucide-react';
+import { Users, Settings, Shield, Activity, Menu, LayoutDashboard } from 'lucide-react';
 
 export default function DashboardLayout({
   children
@@ -15,6 +15,7 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
+    { href: '/dashboard/class-hub', icon: LayoutDashboard, label: 'Class Hub' },
     { href: '/dashboard', icon: Users, label: 'Team' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },
     { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
@@ -51,7 +52,7 @@ export default function DashboardLayout({
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} passHref>
                 <Button
-                  variant={pathname === item.href ? 'secondary' : 'ghost'}
+                  variant={pathname === item.href ? 'muted' : 'ghost'}
                   className={`shadow-none my-1 w-full justify-start ${
                     pathname === item.href ? 'bg-gray-100' : ''
                   }`}

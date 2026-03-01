@@ -77,7 +77,7 @@
 
 @layer utilities {
   body {
-    font-family: "Manrope", Arial, Helvetica, sans-serif;
+    font-family: "Nunito", Arial, Helvetica, sans-serif;
   }
 }
 
@@ -168,8 +168,13 @@
 */
 
 :root {
+  /* Brand colors */
+  --brand-accent: #7daf41;
+  --brand-accent-dark: #5f893a;
+  --brand-foreground: #3d4236;
+
   --background: hsl(0 0% 100%);
-  --foreground: hsl(240 10% 3.9%);
+  --foreground: hsl(97 7% 26%); /* #3d4236 */
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(240 10% 3.9%);
   --popover: hsl(0 0% 100%);
@@ -231,6 +236,9 @@
 */
 
 @theme inline {
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-dark: var(--brand-accent-dark);
+  --color-brand-foreground: var(--brand-foreground);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -272,4 +280,133 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* CTA button - 3D pressed style */
+.btn-cta {
+  position: relative;
+  appearance: button;
+  background-color: #5f893a;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  box-sizing: border-box;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  line-height: 20px;
+  margin: 0;
+  outline: none;
+  overflow: visible;
+  padding: 13px 19px;
+  text-align: center;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transform: translateZ(0);
+  transition: filter 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.btn-cta::after {
+  background-clip: padding-box;
+  background-color: #7daf41;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  bottom: -4px;
+  content: "";
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -1;
+}
+
+.btn-cta:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-cta:disabled {
+  cursor: auto;
+}
+
+.btn-cta:active::after {
+  border-width: 0;
+}
+
+.btn-cta:active {
+  padding-bottom: 10px;
+}
+
+/* CTA outline button - white with gray shadow (same 3D style as gecko) */
+.btn-cta-outline {
+  position: relative;
+  appearance: button;
+  background-color: #ffffff !important;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  box-sizing: border-box;
+  color: #3d4236 !important;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  line-height: 20px;
+  margin: 0;
+  outline: none;
+  overflow: visible;
+  padding: 13px 19px;
+  text-align: center;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transform: translateZ(0);
+  transition: filter 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.btn-cta-outline::after {
+  background-clip: padding-box;
+  background-color: #3d4236;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  bottom: -4px;
+  content: "";
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -1;
+}
+
+.btn-cta-outline:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.btn-cta-outline:disabled {
+  cursor: auto;
+}
+
+.btn-cta-outline:active::after {
+  border-width: 0;
+}
+
+.btn-cta-outline:active {
+  padding-bottom: 10px;
 }
