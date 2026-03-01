@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
+import { NotificationsBell } from '@/components/notifications/NotificationsBell';
 import useSWR, { mutate } from 'swr';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -109,7 +110,8 @@ function Header() {
           </div>
           <span className="text-xl font-semibold text-[#3d4236]">Gecko Academy</span>
         </Link>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2">
+          <NotificationsBell />
           <Suspense fallback={<div className="h-9" />}>
             <UserMenu />
           </Suspense>

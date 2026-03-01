@@ -123,6 +123,11 @@ export function PeopleStudentList({
           </div>
 
           <div className="flex items-center gap-2">
+            {isTeacher && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/messages?start=${r.studentId}`}>Message</Link>
+              </Button>
+            )}
             {(isTeacher || isAdmin) && (
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/dashboard/students/${r.studentId}`}>View student</Link>

@@ -658,6 +658,32 @@ export async function getClassroomHeader(classId: string) {
 }
 
 /** Posts for a class, newest first. */
+/** Student and teacher user IDs in class (for notification recipients). */
+export async function getClassNotificationRecipients(classId: string): Promise<{
+  studentUserIds: number[];
+  teacherUserIds: number[];
+}> {
+  const [students, teachers] = await Promise.all([
+    db
+      .selectDistinct({ userId: eduEnrollments.studentUserId })
+      .from(eduEnrollments)
+      .where(
+        and(
+          eq(eduEnrollments.classId, classId),
+          eq(eduEnrollments.status, 'active')
+        )
+      ),
+    db
+      .selectDistinct({ userId: eduClassTeachers.teacherUserId })
+      .from(eduClassTeachers)
+      .where(eq(eduClassTeachers.classId, classId)),
+  ]);
+  return {
+    studentUserIds: students.map((r) => r.userId),
+    teacherUserIds: teachers.map((r) => r.userId),
+  };
+}
+
 export async function listClassroomPosts(classId: string, limit = 50) {
   return db
     .select()

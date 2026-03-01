@@ -17,6 +17,7 @@ import {
   BookOpen,
   CalendarDays,
   User,
+  MessageSquare,
 } from 'lucide-react';
 import type { PlatformRole } from '@/lib/db/schema';
 
@@ -34,6 +35,7 @@ const navGroups: Record<
         { href: '__PRIMARY_CLASS__', icon: BookOpen, label: 'My class' },
         { href: '__PEOPLE__', icon: Users, label: 'People' },
         { href: '/dashboard/student/schedule', icon: CalendarDays, label: 'Schedule' },
+        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
       ],
     },
     {
@@ -52,6 +54,7 @@ const navGroups: Record<
         { href: '/dashboard/teacher', icon: UserCog, label: 'Dashboard' },
         { href: '/dashboard/teacher/students', icon: Users, label: 'Students' },
         { href: '/dashboard/teacher/schedule', icon: CalendarDays, label: 'Schedule' },
+        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
       ],
     },
     {
@@ -73,6 +76,7 @@ const navGroups: Record<
         { href: '/dashboard/school-admin/students', icon: Users, label: 'Students' },
         { href: '/dashboard/school-admin/schedule', icon: CalendarDays, label: 'Schedule' },
         { href: '/dashboard/admin/classes', icon: GraduationCap, label: 'Classes' },
+        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
       ],
     },
     {
@@ -93,6 +97,7 @@ const navGroups: Record<
         { href: '/dashboard/admin', icon: UserCog, label: 'Dashboard' },
         { href: '/dashboard/admin/users', icon: Users, label: 'Users' },
         { href: '/dashboard/admin/classes', icon: GraduationCap, label: 'Classes' },
+        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
       ],
     },
     {
@@ -112,9 +117,15 @@ type DashboardSidebarProps = {
   children: React.ReactNode;
   platformRole: PlatformRole;
   studentPrimaryClassId?: string | null;
+  unreadMessageCount?: number;
 };
 
-export function DashboardSidebar({ children, platformRole, studentPrimaryClassId }: DashboardSidebarProps) {
+export function DashboardSidebar({
+  children,
+  platformRole,
+  studentPrimaryClassId,
+  unreadMessageCount = 0,
+}: DashboardSidebarProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -170,6 +181,8 @@ export function DashboardSidebar({ children, platformRole, studentPrimaryClassId
                   {group.items.map((item) => {
                     const href = resolveItemHref(item);
                     const isActive = pathname === href;
+                    const showMessageBadge =
+                      item.href === '/dashboard/messages' && unreadMessageCount > 0;
                     return (
                       <Link key={`${group.label}-${item.href}`} href={href}>
                         <Button
@@ -181,6 +194,14 @@ export function DashboardSidebar({ children, platformRole, studentPrimaryClassId
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
+                          {showMessageBadge && (
+                            <span
+                              className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-medium text-destructive-foreground"
+                              aria-hidden
+                            >
+                              {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                            </span>
+                          )}
                         </Button>
                       </Link>
                     );

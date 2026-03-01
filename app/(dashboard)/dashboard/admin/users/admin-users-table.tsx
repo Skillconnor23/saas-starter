@@ -254,6 +254,13 @@ export function AdminUsersTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
+                    {(u.platformRole === 'teacher' || u.platformRole === 'school_admin') && (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/dashboard/messages?start=${u.id}`}>
+                          Message
+                        </Link>
+                      </Button>
+                    )}
                     {isStudent && !assigned && (
                       <Button
                         variant="outline"

@@ -9,7 +9,9 @@ import { canPostToClassroom } from '@/lib/auth/classroom';
 import {
   createClassroomPost,
   getClassById,
+  getClassNotificationRecipients,
 } from '@/lib/db/queries/education';
+import { createNotification } from '@/lib/db/queries/notifications';
 import { classroomPostTypeEnum } from '@/lib/db/schema';
 
 const postTypeSchema = z.enum(classroomPostTypeEnum as unknown as [string, ...string[]]);
@@ -77,6 +79,30 @@ export async function createClassroomPostAction(
     fileUrl: parsed.data.fileUrl ?? null,
     linkUrl: parsed.data.linkUrl ?? null,
   });
+
+  const typeLabel =
+    parsed.data.type.charAt(0).toUpperCase() + parsed.data.type.slice(1).replace(/_/g, ' ');
+  const postTitle = parsed.data.title ?? typeLabel;
+  const href = `/classroom/${parsed.data.classId}`;
+
+  const { studentUserIds, teacherUserIds } = await getClassNotificationRecipients(
+    parsed.data.classId
+  );
+  const recipientIds = [
+    ...new Set([...studentUserIds, ...teacherUserIds]),
+  ].filter((id) => id !== user.id);
+
+  for (const recipientId of recipientIds) {
+    await createNotification({
+      userId: recipientId,
+      type: 'classroom_post',
+      title: `New ${typeLabel.toLowerCase()} in ${classExists.name}: ${postTitle}`,
+      body: parsed.data.body ?? null,
+      href,
+      sourceType: 'classroom_post',
+      sourceId: parsed.data.classId,
+    });
+  }
 
   revalidatePath(`/classroom/${parsed.data.classId}`);
   redirect(`/classroom/${parsed.data.classId}`);

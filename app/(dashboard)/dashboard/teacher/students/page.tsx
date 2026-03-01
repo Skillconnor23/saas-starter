@@ -6,6 +6,7 @@ import {
   getStudentsForTeacher,
   getClassesForTeacherWithDetails,
 } from '@/lib/db/queries/education';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -81,6 +82,7 @@ export default async function TeacherStudentsPage({
                     <TableHead>Class</TableHead>
                     <TableHead>Gecko level</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -113,6 +115,13 @@ export default async function TeacherStudentsPage({
                         >
                           {r.enrollmentStatus}
                         </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/dashboard/messages?start=${r.studentId}`}>
+                            Message
+                          </Link>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -36,8 +36,12 @@ export const users = pgTable(
     deletedAt: timestamp('deleted_at'),
     archivedAt: timestamp('archived_at'), // Archive (hide from default listings)
     timezone: text('timezone'), // IANA e.g. America/New_York
+    schoolId: text('school_id'), // School affiliation for school_admin/student scoping
   },
-  (table) => [index('users_platform_role_idx').on(table.platformRole)]
+  (table) => [
+    index('users_platform_role_idx').on(table.platformRole),
+    index('users_school_id_idx').on(table.schoolId),
+  ]
 );
 
 export const teams = pgTable('teams', {
@@ -280,6 +284,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   classesTeaching: many(classes),
   enrollments: many(enrollments),
   assignments: many(assignments),
+  conversationMemberships: many(conversationMembers),
+  sentMessages: many(messages),
+  notifications: many(notifications),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -386,6 +393,121 @@ export const classroomPostsRelations = relations(classroomPosts, ({ one }) => ({
   }),
 }));
 
+// --- Messaging (DM) ---
+
+export const conversations = pgTable('conversations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  type: varchar('type', { length: 20 }).notNull().default('dm'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const conversationMembers = pgTable(
+  'conversation_members',
+  {
+    conversationId: uuid('conversation_id')
+      .notNull()
+      .references(() => conversations.id, { onDelete: 'cascade' }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    uniqueIndex('conversation_members_conversation_user_idx').on(
+      table.conversationId,
+      table.userId
+    ),
+    index('conversation_members_user_idx').on(table.userId),
+  ]
+);
+
+export const messages = pgTable(
+  'messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    conversationId: uuid('conversation_id')
+      .notNull()
+      .references(() => conversations.id, { onDelete: 'cascade' }),
+    senderId: integer('sender_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('messages_conversation_created_idx').on(
+      table.conversationId,
+      table.createdAt
+    ),
+  ]
+);
+
+export const conversationsRelations = relations(conversations, ({ many }) => ({
+  members: many(conversationMembers),
+  messages: many(messages),
+}));
+
+export const conversationMembersRelations = relations(
+  conversationMembers,
+  ({ one }) => ({
+    conversation: one(conversations, {
+      fields: [conversationMembers.conversationId],
+      references: [conversations.id],
+    }),
+    user: one(users, {
+      fields: [conversationMembers.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
+
+// --- Notifications ---
+
+export const notificationTypeEnum = ['message', 'classroom_post'] as const;
+export type NotificationType = (typeof notificationTypeEnum)[number];
+
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: varchar('type', { length: 50 }).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    body: text('body'),
+    href: text('href').notNull(),
+    sourceType: varchar('source_type', { length: 50 }),
+    sourceId: text('source_id'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    seenAt: timestamp('seen_at'),
+  },
+  (table) => [
+    index('notifications_user_created_idx').on(table.userId, table.createdAt),
+    index('notifications_user_seen_idx').on(table.userId, table.seenAt),
+  ]
+);
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -414,6 +536,12 @@ export type EduSession = typeof eduSessions.$inferSelect;
 export type NewEduSession = typeof eduSessions.$inferInsert;
 export type ClassroomPost = typeof classroomPosts.$inferSelect;
 export type NewClassroomPost = typeof classroomPosts.$inferInsert;
+export type Conversation = typeof conversations.$inferSelect;
+export type NewConversation = typeof conversations.$inferInsert;
+export type ConversationMember = typeof conversationMembers.$inferSelect;
+export type NewConversationMember = typeof conversationMembers.$inferInsert;
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;
 
 export const USER_ROLES = ['admin', 'teacher', 'parent', 'student'] as const;
 export type TeamDataWithMembers = Team & {

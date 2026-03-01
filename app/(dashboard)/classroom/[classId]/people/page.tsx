@@ -87,16 +87,26 @@ export default async function PeoplePage({ params }: Props) {
                 {teachersRows.map((r) => (
                   <li
                     key={r.teacherUserId}
-                    className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3"
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-muted/20 p-3"
                   >
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">
-                        {initials(r.teacherName, r.teacherEmail)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">
-                      {isStudent ? firstName(r.teacherName) : r.teacherName ?? r.teacherEmail ?? '—'}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {initials(r.teacherName, r.teacherEmail)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">
+                        {isStudent ? firstName(r.teacherName) : r.teacherName ?? r.teacherEmail ?? '—'}
+                      </span>
+                    </div>
+                    {isStudent && (
+                      <Link
+                        href={`/dashboard/messages?start=${r.teacherUserId}`}
+                        className="text-sm text-muted-foreground hover:text-primary"
+                      >
+                        Message
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

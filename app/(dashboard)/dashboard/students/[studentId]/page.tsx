@@ -84,6 +84,14 @@ export default async function StudentProfilePage({ params }: Props) {
           {student.name ?? student.email}
         </h1>
 
+        {role === 'teacher' && (
+          <Button variant="outline" size="sm" className="mt-4" asChild>
+            <Link href={`/dashboard/messages?start=${student.id}`}>
+              Message student
+            </Link>
+          </Button>
+        )}
+
         <Card className="mt-4">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
