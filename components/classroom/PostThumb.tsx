@@ -4,6 +4,7 @@ import {
   FileCheck,
   Megaphone,
   FileText,
+  ClipboardList,
   type LucideIcon,
 } from 'lucide-react';
 import type { ClassroomPostType } from '@/lib/db/schema';
@@ -14,6 +15,7 @@ const TYPE_ICON_COLORS: Record<ClassroomPostType, string> = {
   announcement: '#7daf41',
   test: '#64748b',
   document: '#64748b',
+  quiz: '#7daf41',
 };
 
 const ICON_MAP: Record<ClassroomPostType, LucideIcon> = {
@@ -22,6 +24,7 @@ const ICON_MAP: Record<ClassroomPostType, LucideIcon> = {
   test: FileCheck,
   announcement: Megaphone,
   document: FileText,
+  quiz: ClipboardList,
 };
 
 export type PostThumbProps = {

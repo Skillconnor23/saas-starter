@@ -247,6 +247,7 @@ export const classroomPostTypeEnum = [
   'recording',
   'announcement',
   'document',
+  'quiz',
 ] as const;
 export type ClassroomPostType = (typeof classroomPostTypeEnum)[number];
 
@@ -265,10 +266,94 @@ export const classroomPosts = pgTable(
     body: text('body'),
     fileUrl: text('file_url'),
     linkUrl: text('link_url'),
+    quizId: uuid('quiz_id').references(() => eduQuizzes.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => [
     index('classroom_posts_class_created_idx').on(table.classId, table.createdAt),
+    index('classroom_posts_quiz_class_idx').on(table.quizId, table.classId),
+  ]
+);
+
+// --- Learning / quizzes ---
+
+export const quizQuestionTypeEnum = ['MCQ', 'TRUE_FALSE', 'FILL_BLANK'] as const;
+export type QuizQuestionType = (typeof quizQuestionTypeEnum)[number];
+
+export const eduQuizzes = pgTable(
+  'edu_quizzes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    createdByUserId: integer('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description'),
+    status: text('status').notNull().default('DRAFT'),
+    publishedAt: timestamp('published_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [index('edu_quizzes_published_at_idx').on(table.publishedAt)]
+);
+
+export const eduQuizClasses = pgTable(
+  'edu_quiz_classes',
+  {
+    quizId: uuid('quiz_id')
+      .notNull()
+      .references(() => eduQuizzes.id, { onDelete: 'cascade' }),
+    classId: uuid('class_id')
+      .notNull()
+      .references(() => eduClasses.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('edu_quiz_classes_quiz_class_idx').on(table.quizId, table.classId),
+    index('edu_quiz_classes_class_idx').on(table.classId),
+  ]
+);
+
+export const eduQuizQuestions = pgTable(
+  'edu_quiz_questions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    quizId: uuid('quiz_id')
+      .notNull()
+      .references(() => eduQuizzes.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(),
+    prompt: text('prompt').notNull(),
+    choices: jsonb('choices'),
+    correctAnswer: jsonb('correct_answer').notNull(),
+    explanation: text('explanation'),
+    order: integer('order').notNull().default(0),
+  },
+  (table) => [index('edu_quiz_questions_quiz_order_idx').on(table.quizId, table.order)]
+);
+
+export const eduQuizSubmissions = pgTable(
+  'edu_quiz_submissions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    quizId: uuid('quiz_id')
+      .notNull()
+      .references(() => eduQuizzes.id, { onDelete: 'cascade' }),
+    studentUserId: integer('student_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    submittedAt: timestamp('submitted_at').notNull().defaultNow(),
+    score: integer('score').notNull(),
+    answers: jsonb('answers').notNull(),
+    attemptNumber: integer('attempt_number').notNull().default(1),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('edu_quiz_submissions_quiz_student_idx').on(
+      table.quizId,
+      table.studentUserId
+    ),
+    index('edu_quiz_submissions_quiz_idx').on(table.quizId),
+    index('edu_quiz_submissions_student_idx').on(table.studentUserId),
   ]
 );
 
@@ -351,6 +436,7 @@ export const eduClassesRelations = relations(eduClasses, ({ many }) => ({
   enrollments: many(eduEnrollments),
   sessions: many(eduSessions),
   classroomPosts: many(classroomPosts),
+  quizClasses: many(eduQuizClasses),
 }));
 
 export const eduClassTeachersRelations = relations(eduClassTeachers, ({ one }) => ({
@@ -392,6 +478,51 @@ export const classroomPostsRelations = relations(classroomPosts, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const eduQuizzesRelations = relations(eduQuizzes, ({ one, many }) => ({
+  createdBy: one(users, {
+    fields: [eduQuizzes.createdByUserId],
+    references: [users.id],
+  }),
+  quizClasses: many(eduQuizClasses),
+  questions: many(eduQuizQuestions),
+  submissions: many(eduQuizSubmissions),
+}));
+
+export const eduQuizClassesRelations = relations(eduQuizClasses, ({ one }) => ({
+  quiz: one(eduQuizzes, {
+    fields: [eduQuizClasses.quizId],
+    references: [eduQuizzes.id],
+  }),
+  class: one(eduClasses, {
+    fields: [eduQuizClasses.classId],
+    references: [eduClasses.id],
+  }),
+}));
+
+export const eduQuizQuestionsRelations = relations(
+  eduQuizQuestions,
+  ({ one }) => ({
+    quiz: one(eduQuizzes, {
+      fields: [eduQuizQuestions.quizId],
+      references: [eduQuizzes.id],
+    }),
+  })
+);
+
+export const eduQuizSubmissionsRelations = relations(
+  eduQuizSubmissions,
+  ({ one }) => ({
+    quiz: one(eduQuizzes, {
+      fields: [eduQuizSubmissions.quizId],
+      references: [eduQuizzes.id],
+    }),
+    student: one(users, {
+      fields: [eduQuizSubmissions.studentUserId],
+      references: [users.id],
+    }),
+  })
+);
 
 // --- Messaging (DM) ---
 
@@ -536,6 +667,14 @@ export type EduSession = typeof eduSessions.$inferSelect;
 export type NewEduSession = typeof eduSessions.$inferInsert;
 export type ClassroomPost = typeof classroomPosts.$inferSelect;
 export type NewClassroomPost = typeof classroomPosts.$inferInsert;
+export type EduQuiz = typeof eduQuizzes.$inferSelect;
+export type NewEduQuiz = typeof eduQuizzes.$inferInsert;
+export type EduQuizClass = typeof eduQuizClasses.$inferSelect;
+export type NewEduQuizClass = typeof eduQuizClasses.$inferInsert;
+export type EduQuizQuestion = typeof eduQuizQuestions.$inferSelect;
+export type NewEduQuizQuestion = typeof eduQuizQuestions.$inferInsert;
+export type EduQuizSubmission = typeof eduQuizSubmissions.$inferSelect;
+export type NewEduQuizSubmission = typeof eduQuizSubmissions.$inferInsert;
 export type Conversation = typeof conversations.$inferSelect;
 export type NewConversation = typeof conversations.$inferInsert;
 export type ConversationMember = typeof conversationMembers.$inferSelect;

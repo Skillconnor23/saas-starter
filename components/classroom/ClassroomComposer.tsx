@@ -106,7 +106,7 @@ export function ClassroomComposer({
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               required
             >
-              {classroomPostTypeEnum.map((t) => (
+              {classroomPostTypeEnum.filter((t) => t !== 'quiz').map((t) => (
                 <option key={t} value={t}>
                   {TYPE_LABELS[t] ?? t}
                 </option>

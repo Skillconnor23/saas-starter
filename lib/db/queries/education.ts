@@ -7,6 +7,8 @@ import {
   eduSessions,
   users,
   classroomPosts,
+  eduQuizClasses,
+  eduQuizzes,
 } from '../schema';
 import type { PlatformRole } from '../schema';
 
@@ -294,6 +296,119 @@ export async function getClassesForTeacherWithDetails(teacherUserId: number) {
   return classes.map((c) => ({
     ...c,
     studentCount: countMap.get(c.id) ?? 0,
+  }));
+}
+
+export type ClassHealthRow = {
+  id: string;
+  name: string;
+  geckoLevel: string | null;
+  scheduleDays: unknown;
+  scheduleStartTime: string | null;
+  scheduleTimezone: string | null;
+  studentCount: number;
+  nextSessionAt: Date | null;
+  quizCount: number;
+  homeworkCount: number;
+};
+
+/** Classes with health/status for teacher Classes page. */
+export async function getClassesWithHealthForTeacher(
+  teacherUserId: number
+): Promise<ClassHealthRow[]> {
+  const classes = await db
+    .select({
+      id: eduClasses.id,
+      name: eduClasses.name,
+      geckoLevel: eduClasses.geckoLevel,
+      scheduleDays: eduClasses.scheduleDays,
+      scheduleStartTime: eduClasses.scheduleStartTime,
+      scheduleTimezone: eduClasses.scheduleTimezone,
+    })
+    .from(eduClassTeachers)
+    .innerJoin(eduClasses, eq(eduClassTeachers.classId, eduClasses.id))
+    .where(eq(eduClassTeachers.teacherUserId, teacherUserId))
+    .orderBy(asc(eduClasses.name));
+
+  if (classes.length === 0) return [];
+
+  const now = new Date();
+  const classIds = classes.map((c) => c.id);
+
+  const [studentCountRows, nextSessionsRows, quizCountRows, homeworkCountRows] =
+    await Promise.all([
+      db
+        .select({
+          classId: eduEnrollments.classId,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(eduEnrollments)
+        .where(
+          and(
+            eq(eduEnrollments.status, 'active'),
+            inArray(eduEnrollments.classId, classIds)
+          )
+        )
+        .groupBy(eduEnrollments.classId),
+      db
+        .select({
+          classId: eduSessions.classId,
+          startsAt: eduSessions.startsAt,
+        })
+        .from(eduSessions)
+        .where(
+          and(
+            inArray(eduSessions.classId, classIds),
+            gte(eduSessions.startsAt, now)
+          )
+        )
+        .orderBy(asc(eduSessions.startsAt)),
+      db
+        .select({
+          classId: eduQuizClasses.classId,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(eduQuizClasses)
+        .innerJoin(eduQuizzes, eq(eduQuizClasses.quizId, eduQuizzes.id))
+        .where(
+          and(
+            eq(eduQuizzes.status, 'PUBLISHED'),
+            inArray(eduQuizClasses.classId, classIds)
+          )
+        )
+        .groupBy(eduQuizClasses.classId),
+      db
+        .select({
+          classId: classroomPosts.classId,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(classroomPosts)
+        .where(
+          and(
+            eq(classroomPosts.type, 'homework'),
+            inArray(classroomPosts.classId, classIds)
+          )
+        )
+        .groupBy(classroomPosts.classId),
+    ]);
+
+  const studentMap = new Map(studentCountRows.map((r) => [r.classId, r.count]));
+  const homeworkMap = new Map(homeworkCountRows.map((r) => [r.classId, r.count]));
+  const quizMap = new Map(quizCountRows.map((r) => [r.classId, r.count]));
+
+  const nextByClass = new Map<string, Date>();
+  for (const row of nextSessionsRows) {
+    if (!nextByClass.has(row.classId)) {
+      nextByClass.set(row.classId, row.startsAt);
+    }
+  }
+
+  return classes.map((c) => ({
+    ...c,
+    studentCount: studentMap.get(c.id) ?? 0,
+    nextSessionAt: nextByClass.get(c.id) ?? null,
+    quizCount: quizMap.get(c.id) ?? 0,
+    homeworkCount: homeworkMap.get(c.id) ?? 0,
   }));
 }
 
@@ -717,6 +832,7 @@ export type CreateClassroomPostData = {
   body?: string | null;
   fileUrl?: string | null;
   linkUrl?: string | null;
+  quizId?: string | null;
 };
 
 export async function createClassroomPost(data: CreateClassroomPostData) {
@@ -730,9 +846,37 @@ export async function createClassroomPost(data: CreateClassroomPostData) {
       body: data.body ?? null,
       fileUrl: data.fileUrl ?? null,
       linkUrl: data.linkUrl ?? null,
+      quizId: data.quizId ?? null,
     })
     .returning();
   return created;
+}
+
+/** Create classroom feed posts for a published quiz (one per assigned class). Skips if already exists. */
+export async function createQuizFeedPosts(
+  quizId: string,
+  title: string,
+  authorUserId: number,
+  classIds: string[]
+) {
+  for (const classId of classIds) {
+    const existing = await db
+      .select({ id: classroomPosts.id })
+      .from(classroomPosts)
+      .where(and(eq(classroomPosts.quizId, quizId), eq(classroomPosts.classId, classId)))
+      .limit(1);
+    if (existing.length > 0) continue;
+    await db.insert(classroomPosts).values({
+      classId,
+      authorUserId,
+      type: 'quiz',
+      title,
+      body: null,
+      fileUrl: null,
+      linkUrl: null,
+      quizId,
+    });
+  }
 }
 
 /** Schedule summary for user: classes enrolled/assigned with schedule fields. */

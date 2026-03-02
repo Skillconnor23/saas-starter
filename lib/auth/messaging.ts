@@ -52,19 +52,13 @@ export async function canMessage(
     );
   }
 
-  // ADMIN ↔ SCHOOL_ADMIN, SCHOOL_ADMIN → ADMIN
-  if (
-    (senderRole === 'admin' && recipientRole === 'school_admin') ||
-    (senderRole === 'school_admin' && recipientRole === 'admin')
-  ) {
+  // SCHOOL_ADMIN → ADMIN (admin → anyone already returned above)
+  if (senderRole === 'school_admin' && recipientRole === 'admin') {
     return true;
   }
 
-  // ADMIN ↔ TEACHER
-  if (
-    (senderRole === 'admin' && recipientRole === 'teacher') ||
-    (senderRole === 'teacher' && recipientRole === 'admin')
-  ) {
+  // TEACHER → ADMIN (admin → anyone already returned above)
+  if (senderRole === 'teacher' && recipientRole === 'admin') {
     return true;
   }
 
