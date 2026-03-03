@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import useSWR, { mutate } from 'swr';
@@ -59,11 +59,14 @@ const fetcher = (url: string) =>
 export function NotificationsBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { data: user } = useSWR('/api/user', fetcher);
   const { data, mutate: mutateNotifications } = useSWR<NotificationsData>(
     user ? '/api/notifications' : null,
     fetcher
   );
+
+  useEffect(() => setMounted(true), []);
 
   async function handleNotificationClick(notification: Notification) {
     if (!notification.seenAt) {
@@ -84,25 +87,33 @@ export function NotificationsBell() {
 
   const unseenCount = data?.unseenCount ?? 0;
 
+  const triggerButton = (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="relative"
+      aria-label="Notifications"
+    >
+      <Bell className="h-5 w-5" />
+      {unseenCount > 0 && (
+        <span
+          className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground"
+          aria-hidden
+        >
+          {unseenCount > 99 ? '99+' : unseenCount}
+        </span>
+      )}
+    </Button>
+  );
+
+  if (!mounted) {
+    return triggerButton;
+  }
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5" />
-          {unseenCount > 0 && (
-            <span
-              className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground"
-              aria-hidden
-            >
-              {unseenCount > 99 ? '99+' : unseenCount}
-            </span>
-          )}
-        </Button>
+        {triggerButton}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between">

@@ -1,11 +1,17 @@
 'use server';
 
 import { z } from 'zod';
+import { PARTICIPATION_MAX } from '@/lib/constants/attendance';
 import { revalidatePath } from 'next/cache';
 import { getUser } from '@/lib/db/queries';
 import { canPostToClassroom } from '@/lib/auth/classroom';
 import { getClassById } from '@/lib/db/queries/education';
-import { getSessionAttendance } from '@/lib/db/queries/attendance';
+import {
+  getSessionAttendance,
+  getStudentAttendanceMonthSummary,
+  getStudentAttendanceMonthSessions,
+} from '@/lib/db/queries/attendance';
+import type { StudentMonthSummary, StudentMonthSessionRow } from '@/lib/db/queries/attendance';
 import { db } from '@/lib/db/drizzle';
 import { attendanceRecords } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -15,7 +21,7 @@ const attendanceStatusSchema = z.enum(['present', 'absent', 'late']);
 const attendanceRowSchema = z.object({
   studentUserId: z.number().int().positive(),
   status: attendanceStatusSchema,
-  participationScore: z.number().int().min(0).max(10).optional().nullable(),
+  participationScore: z.number().int().min(0).max(PARTICIPATION_MAX).optional().nullable(),
   teacherNote: z.string().max(500).optional().nullable(),
 });
 
@@ -99,7 +105,7 @@ export async function saveAttendanceAction(
     const participationScore =
       row.participationScore != null &&
       row.participationScore >= 0 &&
-      row.participationScore <= 10
+      row.participationScore <= PARTICIPATION_MAX
         ? row.participationScore
         : null;
     const teacherNote =
@@ -131,4 +137,30 @@ export async function saveAttendanceAction(
 
   revalidatePath(`/classroom/${classId}/attendance`);
   return { success: true };
+}
+
+export type MonthAttendanceDetails = {
+  summary: StudentMonthSummary;
+  sessions: StudentMonthSessionRow[];
+};
+
+/** Lazy-load attendance details for a given month (student view). User must be the student. */
+export async function getMonthAttendanceDetailsAction(
+  monthKey: string
+): Promise<{ success: true; data: MonthAttendanceDetails } | { success: false; error: string }> {
+  const user = await getUser();
+  if (!user) return { success: false, error: 'Not signed in.' };
+
+  const monthKeyMatch = /^\d{4}-\d{2}$/.exec(monthKey);
+  if (!monthKeyMatch) return { success: false, error: 'Invalid month key.' };
+
+  const [summary, sessions] = await Promise.all([
+    getStudentAttendanceMonthSummary(user.id, monthKey),
+    getStudentAttendanceMonthSessions(user.id, monthKey),
+  ]);
+
+  return {
+    success: true,
+    data: { summary, sessions },
+  };
 }

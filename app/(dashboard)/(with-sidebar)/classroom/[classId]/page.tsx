@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { requireClassroomAccess, canPostToClassroom } from '@/lib/auth/classroom';
 import { listClassroomPosts } from '@/lib/db/queries/education';
 import { getClassroomSidebarData } from '@/lib/db/queries/classroom';
+import { getClassMonthSummary } from '@/lib/db/queries/attendance';
+import { ClassAttendanceMonthCard } from '@/components/attendance/AttendanceMonthSummaryCard';
 import { ClassroomFeed } from './classroom-feed';
 import { ClassScoreCard } from './ClassScoreCard';
 import { TeacherCard } from './TeacherCard';
@@ -18,10 +20,11 @@ export default async function ClassroomPage({ params }: Props) {
   const { classId } = await params;
   const { user, eduClass } = await requireClassroomAccess(classId);
 
-  const [posts, canPost, sidebar] = await Promise.all([
+  const [posts, canPost, sidebar, classMonthSummary] = await Promise.all([
     listClassroomPosts(classId, 50),
     canPostToClassroom(user, classId),
     getClassroomSidebarData(classId),
+    getClassMonthSummary({ classId }),
   ]);
 
   return (
@@ -103,6 +106,15 @@ export default async function ClassroomPage({ params }: Props) {
 
           {/* Right sidebar - sticky on desktop */}
           <div className="space-y-6 lg:col-span-4 lg:sticky lg:top-0 lg:self-start">
+            {canPost && (
+              <ClassAttendanceMonthCard
+                attendanceRate={classMonthSummary.attendanceRate}
+                lateRate={classMonthSummary.lateRate}
+                participationAvg={classMonthSummary.participationAvg}
+                totalSessionsHeld={classMonthSummary.totalSessionsHeld}
+                detailsHref={`/classroom/${classId}/attendance`}
+              />
+            )}
             <ClassScoreCard
               classAverage30d={sidebar.classAverage30d}
               attemptRate30d={sidebar.attemptRate30d}

@@ -277,7 +277,7 @@ export const attendanceRecords = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     status: attendanceStatusEnum('status').notNull(),
-    participationScore: integer('participation_score'), // 0–10, nullable
+    participationScore: integer('participation_score'), // 0–3, nullable
     teacherNote: text('teacher_note'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),

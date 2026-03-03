@@ -6,19 +6,22 @@ import {
   getSchoolAdminClassTable,
   getSchoolAdminNeedsAttention,
 } from '@/lib/db/queries/school-admin-dashboard';
+import { getSchoolMonthSummary } from '@/lib/db/queries/attendance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { GraduationCap, Users, BookOpen, AlertTriangle } from 'lucide-react';
+import { SchoolAttendanceMonthCard } from '@/components/attendance/AttendanceMonthSummaryCard';
 import { SchoolAdminClassTable } from './SchoolAdminClassTable';
 
 export default async function SchoolAdminDashboardPage() {
   await requireRole(['school_admin']);
 
-  const [kpis, classRows, needsAttention] = await Promise.all([
+  const [kpis, classRows, needsAttention, schoolAttendanceSummary] = await Promise.all([
     getSchoolAdminKpis(),
     getSchoolAdminClassTable(),
     getSchoolAdminNeedsAttention(),
+    getSchoolMonthSummary(),
   ]);
 
   return (
@@ -29,6 +32,16 @@ export default async function SchoolAdminDashboardPage() {
       <p className="text-sm text-muted-foreground mb-6">
         How are classes doing right now?
       </p>
+
+      {/* Attendance This Month */}
+      <div className="mb-6 sm:mb-8">
+        <SchoolAttendanceMonthCard
+          attendanceRate={schoolAttendanceSummary.attendanceRate}
+          lateRate={schoolAttendanceSummary.lateRate}
+          participationAvg={schoolAttendanceSummary.participationAvg}
+          atRiskCount={schoolAttendanceSummary.atRiskCount}
+        />
+      </div>
 
       {/* KPI cards - mobile: slim horizontal; desktop: full cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 mb-6 sm:mb-8">
