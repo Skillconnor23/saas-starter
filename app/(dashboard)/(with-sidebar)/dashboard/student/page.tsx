@@ -462,7 +462,7 @@ export default async function StudentDashboardPage({
                       </p>
                     )}
                     <Button asChild variant="outline" size="sm" className="mt-3 rounded-full w-full">
-                      <Link href="/learning">
+                      <Link href="/dashboard/student/learning">
                         <BookOpen className="mr-2 h-4 w-4" />
                         Open learning
                       </Link>

@@ -18,7 +18,10 @@ export default async function QuizTakePage({ params }: Props) {
   return (
     <section className="flex-1">
       <Button variant="ghost" size="sm" asChild className="mb-4 -ml-1">
-        <Link href="/learning" className="flex items-center gap-1 text-muted-foreground">
+        <Link
+          href="/dashboard/student/learning?tab=quizzes"
+          className="flex items-center gap-1 text-muted-foreground"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Learning
         </Link>

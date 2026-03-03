@@ -435,6 +435,107 @@ export const eduQuizSubmissions = pgTable(
   ]
 );
 
+export const flashcardDeckScopeEnum = pgEnum('flashcard_deck_scope', [
+  'class',
+  'global',
+]);
+export type FlashcardDeckScope = (typeof flashcardDeckScopeEnum.enumValues)[number];
+
+export const flashcardStudyResultEnum = pgEnum('flashcard_study_result', [
+  'correct',
+  'incorrect',
+]);
+export type FlashcardStudyResult = (typeof flashcardStudyResultEnum.enumValues)[number];
+
+export const flashcardDecks = pgTable(
+  'flashcard_decks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: text('title').notNull(),
+    description: text('description'),
+    createdByUserId: integer('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    scope: flashcardDeckScopeEnum('scope').notNull().default('class'),
+    classId: uuid('class_id').references(() => eduClasses.id, {
+      onDelete: 'cascade',
+    }),
+    isPublished: boolean('is_published').notNull().default(false),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('flashcard_decks_creator_idx').on(table.createdByUserId),
+    index('flashcard_decks_scope_class_idx').on(table.scope, table.classId),
+    index('flashcard_decks_published_idx').on(table.isPublished),
+  ]
+);
+
+export const flashcardCards = pgTable(
+  'flashcard_cards',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    deckId: uuid('deck_id')
+      .notNull()
+      .references(() => flashcardDecks.id, { onDelete: 'cascade' }),
+    front: text('front').notNull(),
+    back: text('back').notNull(),
+    example: text('example'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('flashcard_cards_deck_sort_idx').on(table.deckId, table.sortOrder),
+  ]
+);
+
+export const flashcardSaves = pgTable(
+  'flashcard_saves',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentUserId: integer('student_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    cardId: uuid('card_id')
+      .notNull()
+      .references(() => flashcardCards.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('flashcard_saves_student_card_idx').on(
+      table.studentUserId,
+      table.cardId
+    ),
+    index('flashcard_saves_student_idx').on(table.studentUserId),
+  ]
+);
+
+export const flashcardStudyEvents = pgTable(
+  'flashcard_study_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentUserId: integer('student_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    deckId: uuid('deck_id')
+      .notNull()
+      .references(() => flashcardDecks.id, { onDelete: 'cascade' }),
+    cardId: uuid('card_id')
+      .notNull()
+      .references(() => flashcardCards.id, { onDelete: 'cascade' }),
+    result: flashcardStudyResultEnum('result').notNull(),
+    studiedAt: timestamp('studied_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('flashcard_study_events_student_studied_idx').on(
+      table.studentUserId,
+      table.studiedAt
+    ),
+    index('flashcard_study_events_deck_idx').on(table.deckId),
+    index('flashcard_study_events_card_idx').on(table.cardId),
+  ]
+);
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
@@ -450,6 +551,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   conversationMemberships: many(conversationMembers),
   sentMessages: many(messages),
   notifications: many(notifications),
+  flashcardDecksCreated: many(flashcardDecks),
+  flashcardSaves: many(flashcardSaves),
+  flashcardStudyEvents: many(flashcardStudyEvents),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -516,6 +620,7 @@ export const eduClassesRelations = relations(eduClasses, ({ many }) => ({
   classSessions: many(classSessions),
   classroomPosts: many(classroomPosts),
   quizClasses: many(eduQuizClasses),
+  flashcardDecks: many(flashcardDecks),
 }));
 
 export const eduClassTeachersRelations = relations(eduClassTeachers, ({ one }) => ({
@@ -599,6 +704,63 @@ export const eduQuizSubmissionsRelations = relations(
     student: one(users, {
       fields: [eduQuizSubmissions.studentUserId],
       references: [users.id],
+    }),
+  })
+);
+
+export const flashcardDecksRelations = relations(
+  flashcardDecks,
+  ({ one, many }) => ({
+    createdBy: one(users, {
+      fields: [flashcardDecks.createdByUserId],
+      references: [users.id],
+    }),
+    class: one(eduClasses, {
+      fields: [flashcardDecks.classId],
+      references: [eduClasses.id],
+    }),
+    cards: many(flashcardCards),
+    studyEvents: many(flashcardStudyEvents),
+  })
+);
+
+export const flashcardCardsRelations = relations(
+  flashcardCards,
+  ({ one, many }) => ({
+    deck: one(flashcardDecks, {
+      fields: [flashcardCards.deckId],
+      references: [flashcardDecks.id],
+    }),
+    saves: many(flashcardSaves),
+    studyEvents: many(flashcardStudyEvents),
+  })
+);
+
+export const flashcardSavesRelations = relations(flashcardSaves, ({ one }) => ({
+  student: one(users, {
+    fields: [flashcardSaves.studentUserId],
+    references: [users.id],
+  }),
+  card: one(flashcardCards, {
+    fields: [flashcardSaves.cardId],
+    references: [flashcardCards.id],
+  }),
+}));
+
+export const flashcardStudyEventsRelations = relations(
+  flashcardStudyEvents,
+  ({ one }) => ({
+    student: one(users, {
+      fields: [flashcardStudyEvents.studentUserId],
+      references: [users.id],
+    }),
+    deck: one(flashcardDecks, {
+      fields: [flashcardStudyEvents.deckId],
+      references: [flashcardDecks.id],
+    }),
+    card: one(flashcardCards, {
+      fields: [flashcardStudyEvents.cardId],
+      references: [flashcardCards.id],
     }),
   })
 );
@@ -754,6 +916,14 @@ export type EduQuizQuestion = typeof eduQuizQuestions.$inferSelect;
 export type NewEduQuizQuestion = typeof eduQuizQuestions.$inferInsert;
 export type EduQuizSubmission = typeof eduQuizSubmissions.$inferSelect;
 export type NewEduQuizSubmission = typeof eduQuizSubmissions.$inferInsert;
+export type FlashcardDeck = typeof flashcardDecks.$inferSelect;
+export type NewFlashcardDeck = typeof flashcardDecks.$inferInsert;
+export type FlashcardCard = typeof flashcardCards.$inferSelect;
+export type NewFlashcardCard = typeof flashcardCards.$inferInsert;
+export type FlashcardSave = typeof flashcardSaves.$inferSelect;
+export type NewFlashcardSave = typeof flashcardSaves.$inferInsert;
+export type FlashcardStudyEvent = typeof flashcardStudyEvents.$inferSelect;
+export type NewFlashcardStudyEvent = typeof flashcardStudyEvents.$inferInsert;
 export type Conversation = typeof conversations.$inferSelect;
 export type NewConversation = typeof conversations.$inferInsert;
 export type ConversationMember = typeof conversationMembers.$inferSelect;

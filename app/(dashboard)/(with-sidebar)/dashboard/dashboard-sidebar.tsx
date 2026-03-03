@@ -15,6 +15,7 @@ import {
   Building2,
   LogIn,
   BookOpen,
+  BookMarked,
   CalendarDays,
   User,
   MessageSquare,
@@ -34,7 +35,7 @@ const navGroups: Record<
       label: 'Main',
       items: [
         { href: '/dashboard/student', icon: GraduationCap, label: 'Dashboard' },
-        { href: '/learning', icon: BookOpen, label: 'Learning' },
+        { href: '/dashboard/student/learning', icon: BookOpen, label: 'Learning' },
         { href: '__PRIMARY_CLASS__', icon: BookOpen, label: 'My class' },
         { href: '__PEOPLE__', icon: Users, label: 'People' },
         { href: '/dashboard/student/schedule', icon: CalendarDays, label: 'Schedule' },
@@ -57,6 +58,11 @@ const navGroups: Record<
         { href: '/dashboard/teacher', icon: UserCog, label: 'Dashboard' },
         { href: '/teacher/classes', icon: GraduationCap, label: 'Classes' },
         { href: '/teacher/quizzes', icon: BookOpen, label: 'Quizzes' },
+        {
+          href: '/dashboard/teacher/learning/flashcards',
+          icon: BookMarked,
+          label: 'Flashcards',
+        },
         { href: '/dashboard/teacher/students', icon: Users, label: 'Students' },
         { href: '/dashboard/teacher/schedule', icon: CalendarDays, label: 'Schedule' },
         { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
@@ -198,8 +204,13 @@ export function DashboardSidebar({
                 const href = resolveItemHref(item);
                 const isActive =
                   pathname === href ||
-                  (item.href === '/learning' && pathname?.startsWith('/learning')) ||
-                  (item.href === '/teacher/classes' && pathname?.startsWith('/teacher/classes'));
+                  (item.href === '/dashboard/student/learning' &&
+                    (pathname?.startsWith('/dashboard/student/learning') ||
+                      pathname?.startsWith('/learning'))) ||
+                  (item.href === '/teacher/classes' && pathname?.startsWith('/teacher/classes')) ||
+                  (item.href === '/teacher/quizzes' && pathname?.startsWith('/teacher/quizzes')) ||
+                  (item.href === '/dashboard/teacher/learning/flashcards' &&
+                    pathname?.startsWith('/dashboard/teacher/learning/flashcards'));
                 const showMessageBadge =
                   item.href === '/dashboard/messages' && unreadMessageCount > 0;
                 return (
