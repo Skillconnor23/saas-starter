@@ -1,10 +1,11 @@
 'use server';
 
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { put } from '@vercel/blob';
 import { getUser } from '@/lib/db/queries';
+import { r2 } from '@/lib/r2';
 import { canPostToClassroom } from '@/lib/auth/classroom';
 import {
   createClassroomPost,
@@ -29,6 +30,8 @@ const createPostSchema = z
     (data) => {
       const hasFile = !!data.fileUrl;
       const hasLink = !!data.linkUrl;
+      // Announcements can be text-only (no file or link required)
+      if (data.type === 'announcement') return true;
       return (hasFile && !hasLink) || (hasLink && !hasFile);
     },
     { message: 'Provide either a file (upload) or a link, not both and not neither.' }
@@ -108,14 +111,13 @@ export async function createClassroomPostAction(
   redirect(`/classroom/${parsed.data.classId}`);
 }
 
-/** Allowed MIME types for document uploads. */
+/** Allowed MIME types: images and PDFs only. */
 const ALLOWED_TYPES = [
   'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'image/png',
   'image/jpeg',
   'image/jpg',
-];
+] as const;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -137,20 +139,37 @@ export async function uploadClassroomFileAction(
   if (file.size > MAX_FILE_SIZE) {
     return { success: false, error: 'File too large (max 10 MB).' };
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
+  if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
     return {
       success: false,
-      error: 'Invalid file type. Use PDF, DOCX, or PNG/JPG.',
+      error: 'Invalid file type. Allowed: images (PNG, JPG) and PDF only.',
     };
   }
 
+  const bucket = process.env.R2_BUCKET_NAME;
+  if (!bucket) {
+    return { success: false, error: 'Storage not configured.' };
+  }
+
   try {
-    const blob = await put(
-      `classroom/${file.name}-${Date.now()}`,
-      file,
-      { access: 'public' }
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const key = `uploads/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const baseUrl = process.env.R2_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      return { success: false, error: 'R2_PUBLIC_BASE_URL not configured.' };
+    }
+
+    await r2.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type,
+      })
     );
-    return { success: true, url: blob.url };
+
+    const publicUrl = `${baseUrl}/${key}`;
+    return { success: true, url: publicUrl };
   } catch (err) {
     console.error('Upload error:', err);
     return {

@@ -30,7 +30,9 @@ export function ClassroomComposer({
   const [type, setType] = useState(defaultType);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [mode, setMode] = useState<'link' | 'upload'>(defaultType === 'recording' ? 'link' : 'upload');
+  const [mode, setMode] = useState<'link' | 'upload' | 'text'>(
+    defaultType === 'announcement' ? 'text' : defaultType === 'recording' ? 'link' : 'upload'
+  );
   const [linkUrl, setLinkUrl] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,16 @@ export function ClassroomComposer({
           return;
         }
         fileUrl = uploadResult.url;
+      }
+      if (mode === 'text' && type !== 'announcement') {
+        setError('Text-only posts are only allowed for announcements.');
+        setPending(false);
+        return;
+      }
+      if (mode === 'text' && !title.trim() && !body.trim()) {
+        setError('Please add a title or note.');
+        setPending(false);
+        return;
       }
 
       const postForm = new FormData();
@@ -88,7 +100,9 @@ export function ClassroomComposer({
       <CardHeader>
         <CardTitle className="text-base">Add to feed</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Upload a document or add a recording link.
+          {type === 'announcement'
+            ? 'Announcements can be text-only, or include a file or link.'
+            : 'Upload a document or add a recording link.'}
         </p>
       </CardHeader>
       <CardContent>
@@ -102,6 +116,7 @@ export function ClassroomComposer({
                 const v = e.target.value;
                 setType(v);
                 if (v === 'recording') setMode('link');
+                else if (v === 'announcement') setMode('text');
               }}
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               required
@@ -136,7 +151,19 @@ export function ClassroomComposer({
             />
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
+            {type === 'announcement' && (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="mode"
+                  checked={mode === 'text'}
+                  onChange={() => setMode('text')}
+                  className="rounded-full border-input"
+                />
+                <span className="text-sm">Text only</span>
+              </label>
+            )}
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
@@ -161,11 +188,11 @@ export function ClassroomComposer({
 
           {mode === 'upload' && (
             <div className="space-y-2">
-              <Label htmlFor="file">File (PDF, DOCX, PNG, JPG — max 10 MB)</Label>
+              <Label htmlFor="file">File (PDF, PNG, JPG — max 10 MB)</Label>
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.docx,image/png,image/jpeg,image/jpg"
+                accept=".pdf,image/png,image/jpeg,image/jpg"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
             </div>
