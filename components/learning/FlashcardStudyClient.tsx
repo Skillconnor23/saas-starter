@@ -29,7 +29,7 @@ export function FlashcardStudyClient({
   emptyMessage,
 }: Props) {
   const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [attempted, setAttempted] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -57,22 +57,12 @@ export function FlashcardStudyClient({
 
     setAttempted((value) => value + 1);
     if (result === 'correct') setCorrect((value) => value + 1);
-    setFlipped(false);
+    setRevealed(false);
     setIndex((value) => value + 1);
 
     startTransition(async () => {
       await saveFlashcardResultAction({ deckId, cardId, result });
     });
-  }
-
-  function handleWrong(e: React.MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-    handleGrade('incorrect');
-  }
-
-  function handleCorrect(e: React.MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-    handleGrade('correct');
   }
 
   return (
@@ -101,7 +91,7 @@ export function FlashcardStudyClient({
               type="button"
               onClick={() => {
                 setIndex(0);
-                setFlipped(false);
+                setRevealed(false);
                 setAttempted(0);
                 setCorrect(0);
               }}
@@ -120,10 +110,9 @@ export function FlashcardStudyClient({
           word={current.front}
           definition={current.back}
           example={current.example}
-          flipped={flipped}
-          onFlip={() => setFlipped((v) => !v)}
-          onCorrect={handleCorrect}
-          onWrong={handleWrong}
+          revealed={revealed}
+          onToggle={() => setRevealed((v) => !v)}
+          onAnswer={(isCorrect) => handleGrade(isCorrect ? 'correct' : 'incorrect')}
           disabled={isPending}
         />
       ) : null}
@@ -135,10 +124,9 @@ type FlashcardProps = {
   word: string;
   definition: string;
   example?: string | null;
-  flipped: boolean;
-  onFlip: () => void;
-  onCorrect: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onWrong: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  revealed: boolean;
+  onToggle: () => void;
+  onAnswer: (correct: boolean) => void;
   disabled?: boolean;
 };
 
@@ -146,120 +134,73 @@ function Flashcard({
   word,
   definition,
   example,
-  flipped,
-  onFlip,
-  onCorrect,
-  onWrong,
+  revealed,
+  onToggle,
+  onAnswer,
   disabled = false,
 }: FlashcardProps) {
   return (
-    <div className="w-full flex justify-center">
-      <div className="w-full max-w-2xl" style={{ perspective: '1200px' }}>
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => {
-            if (!disabled) onFlip();
-          }}
-          onKeyDown={(e) => {
-            if (disabled) return;
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onFlip();
-            }
-          }}
-          className="relative h-[360px] w-full cursor-pointer select-none transition-transform duration-300 hover:scale-[1.01]"
-        >
-          <div
-            className="relative h-full w-full transition-transform duration-500 ease-out"
-            style={{
-              transformStyle: 'preserve-3d',
-              transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+    <div className="w-full max-w-3xl mx-auto px-6 py-10">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => {
+          if (!disabled) onToggle();
+        }}
+        onKeyDown={(e) => {
+          if (disabled) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        className="w-full min-h-[380px] rounded-3xl shadow-xl transition-all duration-300 flex items-center justify-center text-center cursor-pointer px-10 py-14"
+        style={{
+          backgroundColor: revealed ? '#429ead' : '#7daf41',
+        }}
+      >
+        {!revealed ? (
+          <h2 className="text-5xl font-semibold text-white tracking-tight break-words">{word}</h2>
+        ) : (
+          <div className="space-y-6 text-white max-w-2xl">
+            <p className="text-3xl font-medium leading-snug break-words">{definition}</p>
+            {example && <p className="text-base opacity-90">{example}</p>}
+          </div>
+        )}
+      </div>
+
+      {revealed && (
+        <div className="flex justify-center gap-8 mt-8">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAnswer(false);
             }}
+            className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition hover:scale-110 disabled:opacity-60"
+            style={{ backgroundColor: '#b64b29' }}
+            aria-label="Wrong"
           >
-            <div
-              className="absolute inset-0 rounded-3xl shadow-2xl bg-gradient-to-br from-emerald-500 to-green-600"
-              style={{ backfaceVisibility: 'hidden' }}
-            >
-              <FaceContent text={word} onWrong={onWrong} onCorrect={onCorrect} />
-            </div>
+            <X className="w-7 h-7 text-white" />
+          </button>
 
-            <div
-              className="absolute inset-0 rounded-3xl shadow-2xl bg-gradient-to-br from-blue-500 to-indigo-600"
-              style={{
-                transform: 'rotateY(180deg)',
-                transformStyle: 'preserve-3d',
-                backfaceVisibility: 'hidden',
-              }}
-            >
-              <FaceContent
-                text={definition}
-                example={example}
-                onWrong={onWrong}
-                onCorrect={onCorrect}
-              />
-            </div>
-          </div>
-
-          <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
-            Click card to flip
-          </div>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAnswer(true);
+            }}
+            className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition hover:scale-110 disabled:opacity-60"
+            style={{ backgroundColor: '#7daf41' }}
+            aria-label="Correct"
+          >
+            <Check className="w-7 h-7 text-white" />
+          </button>
         </div>
-      </div>
+      )}
     </div>
-  );
-}
-
-function FaceContent({
-  text,
-  example,
-  onWrong,
-  onCorrect,
-}: {
-  text: string;
-  example?: string | null;
-  onWrong: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onCorrect: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}) {
-  return (
-    <div className="relative h-full w-full flex items-center justify-center px-10">
-      <div className="text-center">
-        <div className="text-white text-3xl md:text-4xl font-semibold leading-tight break-words">
-          {text}
-        </div>
-        {example && <p className="mt-3 text-white/90 text-base">{example}</p>}
-      </div>
-
-      <div className="absolute bottom-5 right-5 flex gap-3">
-        <IconButton ariaLabel="Wrong" onClick={onWrong}>
-          <X size={22} className="text-white" />
-        </IconButton>
-        <IconButton ariaLabel="Correct" onClick={onCorrect}>
-          <Check size={22} className="text-white" />
-        </IconButton>
-      </div>
-    </div>
-  );
-}
-
-function IconButton({
-  children,
-  onClick,
-  ariaLabel,
-}: {
-  children: React.ReactNode;
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  ariaLabel: string;
-}) {
-  return (
-    <button
-      aria-label={ariaLabel}
-      onClick={onClick}
-      className="h-11 w-11 rounded-full bg-white/15 backdrop-blur border border-white/20 shadow-lg flex items-center justify-center transition hover:bg-white/25 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50"
-      type="button"
-    >
-      {children}
-    </button>
   );
 }
 
