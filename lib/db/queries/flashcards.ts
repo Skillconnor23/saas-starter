@@ -706,6 +706,8 @@ export async function getStudentLearningOverview(
 ): Promise<StudentLearningOverview> {
   const monthRange = options?.monthRange ?? getThisMonthRange();
   const { start, end } = monthRange;
+  const startIso = start.toISOString();
+  const endIso = end.toISOString();
 
   const [quizzes, quizAggregate, lastQuiz] = await Promise.all([
     getQuizzesForStudentClasses(studentUserId),
@@ -775,8 +777,8 @@ export async function getStudentLearningOverview(
             .select({
               deckId: flashcardStudyEvents.deckId,
               lastStudiedAt: sql<Date | null>`max(${flashcardStudyEvents.studiedAt})`,
-              monthTotal: sql<number>`sum(case when ${flashcardStudyEvents.studiedAt} >= ${start} and ${flashcardStudyEvents.studiedAt} < ${end} then 1 else 0 end)::int`,
-              monthCorrect: sql<number>`sum(case when ${flashcardStudyEvents.studiedAt} >= ${start} and ${flashcardStudyEvents.studiedAt} < ${end} and ${flashcardStudyEvents.result} = 'correct' then 1 else 0 end)::int`,
+              monthTotal: sql<number>`sum(case when ${flashcardStudyEvents.studiedAt} >= ${startIso} and ${flashcardStudyEvents.studiedAt} < ${endIso} then 1 else 0 end)::int`,
+              monthCorrect: sql<number>`sum(case when ${flashcardStudyEvents.studiedAt} >= ${startIso} and ${flashcardStudyEvents.studiedAt} < ${endIso} and ${flashcardStudyEvents.result} = 'correct' then 1 else 0 end)::int`,
             })
             .from(flashcardStudyEvents)
             .where(
