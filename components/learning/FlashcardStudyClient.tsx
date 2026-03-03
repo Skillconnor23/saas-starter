@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
-import { Bookmark, BookmarkCheck, RotateCcw } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Check, RotateCcw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   removeFlashcardFromMyWordsAction,
@@ -141,83 +141,89 @@ export function FlashcardStudyClient({
         </div>
       ) : current ? (
         <>
-          <div className="min-h-[280px] rounded-2xl border border-[#e5e7eb] bg-white p-5">
-            {!revealed ? (
-              <div className="flex h-full min-h-[240px] flex-col justify-between">
-                <div className="text-center pt-6">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
-                  <p className="mt-3 text-3xl font-semibold text-[#1f2937] break-words">
+          <div className="mx-auto w-full max-w-2xl">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                if (!revealed) setRevealed(true);
+              }}
+              onKeyDown={(event) => {
+                if (revealed) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setRevealed(true);
+                }
+              }}
+              className={`relative flex min-h-[360px] cursor-pointer select-none flex-col items-center justify-center overflow-hidden rounded-3xl px-6 py-10 text-center shadow-[0_18px_45px_rgba(0,0,0,0.2)] transition-all duration-500 ease-out hover:scale-[1.01] ${
+                revealed
+                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+                  : 'bg-gradient-to-br from-emerald-500 to-green-600 text-white'
+              }`}
+              aria-label={revealed ? 'Flashcard revealed' : 'Flashcard front. Press Enter or Space to reveal.'}
+            >
+              {revealed && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleSaveToggle();
+                  }}
+                  disabled={isSavingWord}
+                  aria-label={currentIsSaved ? 'Remove from saved words' : 'Save to my words'}
+                  className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-[#1f2937] shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-70"
+                >
+                  {currentIsSaved ? (
+                    <BookmarkCheck className="h-5 w-5 text-[#7daf41]" />
+                  ) : (
+                    <Bookmark className="h-5 w-5 text-[#b64b29]" />
+                  )}
+                </button>
+              )}
+
+              {!revealed ? (
+                <>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/85">Vocabulary</p>
+                  <p className="mt-5 text-4xl font-bold leading-tight sm:text-5xl break-words">
                     {current.front}
                   </p>
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => setRevealed(true)}
-                  className="mt-4 rounded-full bg-[#429ead] text-white hover:bg-[#36899a]"
-                >
-                  Reveal answer
-                </Button>
-              </div>
-            ) : (
-              <div className="flex h-full min-h-[240px] flex-col justify-between">
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
-                    <p className="mt-2 text-2xl font-semibold text-[#1f2937] break-words">
-                      {current.back}
-                    </p>
-                  </div>
+                </>
+              ) : (
+                <div className="max-w-xl space-y-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/85">Definition</p>
+                  <p className="text-3xl font-semibold leading-snug sm:text-4xl break-words">
+                    {current.back}
+                  </p>
                   {current.example && (
-                    <div className="rounded-xl border border-[#e5e7eb] p-3">
-                      <p className="text-xs text-muted-foreground">Example</p>
-                      <p className="mt-1 text-sm text-[#1f2937]">{current.example}</p>
-                    </div>
+                    <p className="mx-auto max-w-lg text-base text-white/95 sm:text-lg">
+                      {current.example}
+                    </p>
                   )}
                 </div>
-                <div className="mt-4 flex justify-center">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="rounded-full"
-                    onClick={handleSaveToggle}
-                    disabled={isSavingWord}
-                  >
-                    {currentIsSaved ? (
-                      <>
-                        <BookmarkCheck className="mr-2 h-4 w-4 text-[#7daf41]" />
-                        Saved to My Words
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="mr-2 h-4 w-4 text-[#b64b29]" />
-                        Save to My Words
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {revealed && (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Button
+            <div className="flex items-center justify-center gap-5 pt-1">
+              <button
                 type="button"
                 onClick={() => handleGrade('correct')}
                 disabled={isPending}
-                className="rounded-full bg-[#7daf41] text-white hover:bg-[#6b9a39]"
+                aria-label="Mark correct"
+                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#7daf41] shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-60"
               >
-                I knew it
-              </Button>
-              <Button
+                <Check className="h-7 w-7" />
+              </button>
+              <button
                 type="button"
                 onClick={() => handleGrade('incorrect')}
                 disabled={isPending}
-                className="rounded-full"
-                style={{ backgroundColor: 'var(--accent-brown, #b64b29)', color: '#ffffff' }}
+                aria-label="Mark wrong"
+                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#b64b29] shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-60"
               >
-                I didn't
-              </Button>
+                <X className="h-7 w-7" />
+              </button>
             </div>
           )}
         </>
