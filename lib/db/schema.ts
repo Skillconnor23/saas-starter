@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgEnum,
   serial,
   varchar,
   text,
@@ -37,6 +38,7 @@ export const users = pgTable(
     archivedAt: timestamp('archived_at'), // Archive (hide from default listings)
     timezone: text('timezone'), // IANA e.g. America/New_York
     schoolId: text('school_id'), // School affiliation for school_admin/student scoping
+    avatarUrl: text('avatar_url'), // R2 public URL for profile picture
   },
   (table) => [
     index('users_platform_role_idx').on(table.platformRole),
@@ -241,6 +243,82 @@ export const eduSessions = pgTable(
   (table) => [index('edu_sessions_class_starts_idx').on(table.classId, table.startsAt)]
 );
 
+// --- Attendance (per-class-session tracking) ---
+export const attendanceStatusEnum = pgEnum('attendance_status', [
+  'present',
+  'absent',
+  'late',
+]);
+export type AttendanceStatus = (typeof attendanceStatusEnum.enumValues)[number];
+
+export const classSessions = pgTable(
+  'class_sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    classId: uuid('class_id')
+      .notNull()
+      .references(() => eduClasses.id, { onDelete: 'cascade' }),
+    startsAt: timestamp('starts_at').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('class_sessions_class_starts_idx').on(table.classId, table.startsAt),
+  ]
+);
+
+export const attendanceRecords = pgTable(
+  'attendance_records',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => classSessions.id, { onDelete: 'cascade' }),
+    studentUserId: integer('student_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: attendanceStatusEnum('status').notNull(),
+    participationScore: integer('participation_score'), // 0–10, nullable
+    teacherNote: text('teacher_note'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('attendance_records_session_student_idx').on(
+      table.sessionId,
+      table.studentUserId
+    ),
+    index('attendance_records_session_idx').on(table.sessionId),
+  ]
+);
+
+export const classSessionsRelations = relations(classSessions, ({ one, many }) => ({
+  class: one(eduClasses, {
+    fields: [classSessions.classId],
+    references: [eduClasses.id],
+  }),
+  attendanceRecords: many(attendanceRecords),
+}));
+
+export const attendanceRecordsRelations = relations(
+  attendanceRecords,
+  ({ one }) => ({
+    session: one(classSessions, {
+      fields: [attendanceRecords.sessionId],
+      references: [classSessions.id],
+    }),
+    student: one(users, {
+      fields: [attendanceRecords.studentUserId],
+      references: [users.id],
+    }),
+  })
+);
+
+export type ClassSession = typeof classSessions.$inferSelect;
+export type NewClassSession = typeof classSessions.$inferInsert;
+export type AttendanceRecord = typeof attendanceRecords.$inferSelect;
+export type NewAttendanceRecord = typeof attendanceRecords.$inferInsert;
+
+// --- Classroom posts ---
 export const classroomPostTypeEnum = [
   'homework',
   'test',
@@ -435,6 +513,7 @@ export const eduClassesRelations = relations(eduClasses, ({ many }) => ({
   classTeachers: many(eduClassTeachers),
   enrollments: many(eduEnrollments),
   sessions: many(eduSessions),
+  classSessions: many(classSessions),
   classroomPosts: many(classroomPosts),
   quizClasses: many(eduQuizClasses),
 }));

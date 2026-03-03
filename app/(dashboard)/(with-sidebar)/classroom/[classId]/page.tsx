@@ -9,7 +9,7 @@ import { ClassScoreCard } from './ClassScoreCard';
 import { TeacherCard } from './TeacherCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, ClipboardList } from 'lucide-react';
 import { AddPostMenu } from '@/components/classroom/AddPostMenu';
 
 type Props = { params: Promise<{ classId: string }> };
@@ -58,6 +58,17 @@ export default async function ClassroomPage({ params }: Props) {
                 People
               </Link>
             </Button>
+            {canPost && (
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/classroom/${classId}/attendance`}
+                  className="flex items-center gap-1.5"
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  Attendance
+                </Link>
+              </Button>
+            )}
             {canPost && <AddPostMenu classId={classId} />}
           </div>
         </div>
