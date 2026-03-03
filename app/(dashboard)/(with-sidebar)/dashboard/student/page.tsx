@@ -7,6 +7,8 @@ import {
   getStudentDashboardStats,
   getStudentNeedsAttention,
 } from '@/lib/db/queries/student-dashboard';
+import { getStudentMonthSummary } from '@/lib/db/queries/attendance';
+import { StudentAttendanceMonthCard } from '@/components/attendance/AttendanceMonthSummaryCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +22,8 @@ import {
   Video,
   ArrowRight,
 } from 'lucide-react';
+import { PercentRing } from '@/components/dashboard/PercentRing';
+import { ProgressBar } from '@/components/dashboard/ProgressBar';
 
 function ScoreRing({
   score,
@@ -93,10 +97,11 @@ export default async function StudentDashboardPage({
   const user = await requireRole(['student']);
   const params = await searchParams;
 
-  const [data, stats, needsAttention] = await Promise.all([
+  const [data, stats, needsAttention, attendanceSummary] = await Promise.all([
     getStudentDashboardData(user.id),
     getStudentDashboardStats(user.id),
     getStudentNeedsAttention(user.id),
+    getStudentMonthSummary({ studentUserId: user.id }),
   ]);
 
   const hasNeedsAttention =
@@ -154,62 +159,82 @@ export default async function StudentDashboardPage({
         </Card>
       ) : (
         <>
-          {/* 1. Top Stats Row - mobile: slim horizontal cards; desktop: full cards */}
+          {/* 1. Top Stats Row — compact, mobile-friendly */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 mb-6 sm:mb-8">
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-0">
-              <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground sm:mb-1">
-                <TrendingUp className="h-4 w-4 shrink-0 sm:h-4" />
-                <span>Avg score (30d)</span>
+            {/* Avg score (30d) — label + % left, donut right (blue accent) */}
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-5 sm:py-3">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Avg score (30d)
+                </span>
+                <p className="text-xl font-semibold text-[#1f2937] sm:text-2xl">
+                  {stats.avgScore30d != null ? `${stats.avgScore30d}%` : '—'}
+                </p>
               </div>
-              <p className="text-xl font-semibold text-[#1f2937] shrink-0 sm:text-2xl">
-                {stats.avgScore30d != null ? `${stats.avgScore30d}%` : '—'}
-              </p>
+              <PercentRing
+                value={stats.avgScore30d}
+                size={48}
+                strokeWidth={5}
+                fillColor="#429ead"
+                className="shrink-0"
+                aria-label={
+                  stats.avgScore30d != null
+                    ? `Average score: ${stats.avgScore30d} percent`
+                    : 'Average score not available'
+                }
+              />
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-0">
-              <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground sm:mb-1">
-                <Calendar className="h-4 w-4 shrink-0 sm:h-4" />
-                <span>Attendance rate (30d)</span>
+            {/* Attendance rate (30d) — label + % on top, progress bar at bottom */}
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-5 sm:py-3">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Attendance rate (30d)
+                </span>
+                <p className="text-xl font-semibold text-[#1f2937] sm:text-2xl">
+                  {attendanceRate30d}%
+                </p>
               </div>
-              <p className="text-xl font-semibold text-[#1f2937] shrink-0 sm:text-2xl">
-                {attendanceRate30d}%
-              </p>
+              <ProgressBar
+                value={attendanceRate30d}
+                aria-label={`Attendance rate: ${attendanceRate30d} percent`}
+              />
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-0">
-              <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground sm:mb-1">
-                <CheckCircle2 className="h-4 w-4 shrink-0 sm:h-4" />
-                <span>Quizzes completed</span>
-              </div>
-              <p className="text-xl font-semibold text-[#1f2937] shrink-0 sm:text-2xl">
+            {/* Quizzes completed — label left, number right (reddish-brown accent) */}
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-5 sm:py-3">
+              <span className="text-sm font-medium text-muted-foreground min-w-0">
+                Quizzes completed
+              </span>
+              <p className="text-xl font-bold text-[#b64b29] shrink-0 sm:text-2xl" aria-label={`${stats.quizzesCompleted} quizzes completed`}>
                 {stats.quizzesCompleted}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* 2. Next Class (primary focus) */}
+            {/* 2. Next Class (primary focus) — blue card, white text */}
             <div className="lg:col-span-2">
-              <Card className="mb-6 rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Video className="h-5 w-5 text-[#429ead]" aria-hidden />
+              <Card className="mb-6 rounded-2xl border-transparent bg-[#429ead] shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Video className="h-5 w-5 text-white/90" aria-hidden />
                     Next class
                     {data.nextSessions.length > 0 &&
                       isToday(new Date(data.nextSessions[0].session.startsAt)) && (
-                        <span className="inline-flex rounded-full bg-[#7daf41] px-2.5 py-0.5 text-xs font-medium text-white">
+                        <span className="inline-flex rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium text-white">
                           Today
                         </span>
                       )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 text-white">
                   {data.nextSessions.length === 0 ? (
                     <>
-                      <p className="text-sm text-muted-foreground py-2">
+                      <p className="text-sm text-white/90 py-2">
                         No upcoming sessions. Check back later or ask your teacher.
                       </p>
                       <Link
                         href={`/classroom/${data.primaryClass.id}`}
-                        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#429ead] transition-colors"
+                        className="inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white transition-colors"
                       >
                         <BookOpen className="h-4 w-4" />
                         Open classroom
@@ -220,14 +245,14 @@ export default async function StudentDashboardPage({
                     <>
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                          <p className="font-medium text-[#1f2937]">
+                          <p className="font-medium text-white">
                             {data.nextSessions[0].session.title ??
                               data.nextSessions[0].className}
                           </p>
-                          <p className="text-sm text-muted-foreground mt-0.5">
+                          <p className="text-sm text-white/85 mt-0.5">
                             {data.nextSessions[0].className}
                           </p>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm text-white/85 mt-1">
                             {new Date(
                               data.nextSessions[0].session.startsAt
                             ).toLocaleString('en-US', {
@@ -248,9 +273,8 @@ export default async function StudentDashboardPage({
                         </div>
                         {data.nextSessions[0].session.meetingUrl ? (
                           <Button
-                            variant="primary"
                             size="lg"
-                            className="rounded-full shrink-0"
+                            className="rounded-full shrink-0 bg-white text-[#429ead] hover:bg-white/90 hover:text-[#388694] border-0"
                             asChild
                           >
                             <a
@@ -264,9 +288,8 @@ export default async function StudentDashboardPage({
                           </Button>
                         ) : (
                           <Button
-                            variant="secondary"
                             size="lg"
-                            className="rounded-full shrink-0"
+                            className="rounded-full shrink-0 bg-white/20 text-white border border-white/40 cursor-not-allowed"
                             disabled
                           >
                             Join meeting
@@ -275,7 +298,7 @@ export default async function StudentDashboardPage({
                       </div>
                       <Link
                         href={`/classroom/${data.primaryClass.id}`}
-                        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#429ead] transition-colors"
+                        className="inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white transition-colors"
                       >
                         <BookOpen className="h-4 w-4" />
                         Open classroom
@@ -333,6 +356,15 @@ export default async function StudentDashboardPage({
 
             {/* 3. My Progress + 4. Needs Attention + What to do next */}
             <div className="space-y-6">
+              {/* Attendance — This month */}
+              <StudentAttendanceMonthCard
+                attendanceRate={attendanceSummary.attendanceRate}
+                presentCount={attendanceSummary.presentCount}
+                lateCount={attendanceSummary.lateCount}
+                absentCount={attendanceSummary.absentCount}
+                participationAvg={attendanceSummary.participationAvg}
+              />
+
               {/* What to do next */}
               <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
                 <CardHeader>
