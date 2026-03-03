@@ -1,14 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState, useTransition } from 'react';
-import { Bookmark, BookmarkCheck, Check, RotateCcw, X } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { Check, RotateCcw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  removeFlashcardFromMyWordsAction,
-  saveFlashcardResultAction,
-  saveFlashcardToMyWordsAction,
-} from '@/lib/actions/learning/flashcards';
+import { saveFlashcardResultAction } from '@/lib/actions/learning/flashcards';
 
 export type FlashcardStudyItem = {
   id: string;
@@ -33,24 +29,15 @@ export function FlashcardStudyClient({
   emptyMessage,
 }: Props) {
   const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
+  const [flipped, setFlipped] = useState(false);
   const [attempted, setAttempted] = useState(0);
   const [correct, setCorrect] = useState(0);
-  const [savedCardIds, setSavedCardIds] = useState(
-    () => new Set(cards.filter((card) => card.isSaved).map((card) => card.id))
-  );
   const [isPending, startTransition] = useTransition();
-  const [isSavingWord, startSavingWord] = useTransition();
 
   const current = cards[index] ?? null;
   const finished = cards.length > 0 && index >= cards.length;
   const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : null;
   const progressLabel = `${Math.min(index + 1, cards.length)} of ${cards.length}`;
-
-  const currentIsSaved = useMemo(
-    () => (current ? savedCardIds.has(current.id) : false),
-    [current, savedCardIds]
-  );
 
   if (cards.length === 0) {
     return (
@@ -63,27 +50,6 @@ export function FlashcardStudyClient({
     );
   }
 
-  async function handleSaveToggle() {
-    if (!current) return;
-    const cardId = current.id;
-    const shouldSave = !savedCardIds.has(cardId);
-
-    setSavedCardIds((prev) => {
-      const next = new Set(prev);
-      if (shouldSave) next.add(cardId);
-      else next.delete(cardId);
-      return next;
-    });
-
-    startSavingWord(async () => {
-      if (shouldSave) {
-        await saveFlashcardToMyWordsAction({ cardId });
-      } else {
-        await removeFlashcardFromMyWordsAction({ cardId });
-      }
-    });
-  }
-
   function handleGrade(result: 'correct' | 'incorrect') {
     if (!current) return;
     const cardId = current.id;
@@ -91,12 +57,22 @@ export function FlashcardStudyClient({
 
     setAttempted((value) => value + 1);
     if (result === 'correct') setCorrect((value) => value + 1);
-    setRevealed(false);
+    setFlipped(false);
     setIndex((value) => value + 1);
 
     startTransition(async () => {
       await saveFlashcardResultAction({ deckId, cardId, result });
     });
+  }
+
+  function handleWrong(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    handleGrade('incorrect');
+  }
+
+  function handleCorrect(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    handleGrade('correct');
   }
 
   return (
@@ -125,7 +101,7 @@ export function FlashcardStudyClient({
               type="button"
               onClick={() => {
                 setIndex(0);
-                setRevealed(false);
+                setFlipped(false);
                 setAttempted(0);
                 setCorrect(0);
               }}
@@ -140,95 +116,150 @@ export function FlashcardStudyClient({
           </div>
         </div>
       ) : current ? (
-        <>
-          <div className="mx-auto w-full max-w-2xl">
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => {
-                if (!revealed) setRevealed(true);
-              }}
-              onKeyDown={(event) => {
-                if (revealed) return;
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  setRevealed(true);
-                }
-              }}
-              className={`relative flex min-h-[360px] cursor-pointer select-none flex-col items-center justify-center overflow-hidden rounded-3xl px-6 py-10 text-center shadow-[0_18px_45px_rgba(0,0,0,0.2)] transition-all duration-500 ease-out hover:scale-[1.01] ${
-                revealed
-                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
-                  : 'bg-gradient-to-br from-emerald-500 to-green-600 text-white'
-              }`}
-              aria-label={revealed ? 'Flashcard revealed' : 'Flashcard front. Press Enter or Space to reveal.'}
-            >
-              {revealed && (
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void handleSaveToggle();
-                  }}
-                  disabled={isSavingWord}
-                  aria-label={currentIsSaved ? 'Remove from saved words' : 'Save to my words'}
-                  className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-[#1f2937] shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-70"
-                >
-                  {currentIsSaved ? (
-                    <BookmarkCheck className="h-5 w-5 text-[#7daf41]" />
-                  ) : (
-                    <Bookmark className="h-5 w-5 text-[#b64b29]" />
-                  )}
-                </button>
-              )}
+        <Flashcard
+          word={current.front}
+          definition={current.back}
+          example={current.example}
+          flipped={flipped}
+          onFlip={() => setFlipped((v) => !v)}
+          onCorrect={handleCorrect}
+          onWrong={handleWrong}
+          disabled={isPending}
+        />
+      ) : null}
+    </div>
+  );
+}
 
-              {!revealed ? (
-                <>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/85">Vocabulary</p>
-                  <p className="mt-5 text-4xl font-bold leading-tight sm:text-5xl break-words">
-                    {current.front}
-                  </p>
-                </>
-              ) : (
-                <div className="max-w-xl space-y-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/85">Definition</p>
-                  <p className="text-3xl font-semibold leading-snug sm:text-4xl break-words">
-                    {current.back}
-                  </p>
-                  {current.example && (
-                    <p className="mx-auto max-w-lg text-base text-white/95 sm:text-lg">
-                      {current.example}
-                    </p>
-                  )}
-                </div>
-              )}
+type FlashcardProps = {
+  word: string;
+  definition: string;
+  example?: string | null;
+  flipped: boolean;
+  onFlip: () => void;
+  onCorrect: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onWrong: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+};
+
+function Flashcard({
+  word,
+  definition,
+  example,
+  flipped,
+  onFlip,
+  onCorrect,
+  onWrong,
+  disabled = false,
+}: FlashcardProps) {
+  return (
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-2xl" style={{ perspective: '1200px' }}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            if (!disabled) onFlip();
+          }}
+          onKeyDown={(e) => {
+            if (disabled) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onFlip();
+            }
+          }}
+          className="relative h-[360px] w-full cursor-pointer select-none transition-transform duration-300 hover:scale-[1.01]"
+        >
+          <div
+            className="relative h-full w-full transition-transform duration-500 ease-out"
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            }}
+          >
+            <div
+              className="absolute inset-0 rounded-3xl shadow-2xl bg-gradient-to-br from-emerald-500 to-green-600"
+              style={{ backfaceVisibility: 'hidden' }}
+            >
+              <FaceContent text={word} onWrong={onWrong} onCorrect={onCorrect} />
+            </div>
+
+            <div
+              className="absolute inset-0 rounded-3xl shadow-2xl bg-gradient-to-br from-blue-500 to-indigo-600"
+              style={{
+                transform: 'rotateY(180deg)',
+                transformStyle: 'preserve-3d',
+                backfaceVisibility: 'hidden',
+              }}
+            >
+              <FaceContent
+                text={definition}
+                example={example}
+                onWrong={onWrong}
+                onCorrect={onCorrect}
+              />
             </div>
           </div>
 
-          {revealed && (
-            <div className="flex items-center justify-center gap-5 pt-1">
-              <button
-                type="button"
-                onClick={() => handleGrade('correct')}
-                disabled={isPending}
-                aria-label="Mark correct"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#7daf41] shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-60"
-              >
-                <Check className="h-7 w-7" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleGrade('incorrect')}
-                disabled={isPending}
-                aria-label="Mark wrong"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#b64b29] shadow-[0_8px_24px_rgba(0,0,0,0.15)] transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-60"
-              >
-                <X className="h-7 w-7" />
-              </button>
-            </div>
-          )}
-        </>
-      ) : null}
+          <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+            Click card to flip
+          </div>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function FaceContent({
+  text,
+  example,
+  onWrong,
+  onCorrect,
+}: {
+  text: string;
+  example?: string | null;
+  onWrong: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCorrect: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return (
+    <div className="relative h-full w-full flex items-center justify-center px-10">
+      <div className="text-center">
+        <div className="text-white text-3xl md:text-4xl font-semibold leading-tight break-words">
+          {text}
+        </div>
+        {example && <p className="mt-3 text-white/90 text-base">{example}</p>}
+      </div>
+
+      <div className="absolute bottom-5 right-5 flex gap-3">
+        <IconButton ariaLabel="Wrong" onClick={onWrong}>
+          <X size={22} className="text-white" />
+        </IconButton>
+        <IconButton ariaLabel="Correct" onClick={onCorrect}>
+          <Check size={22} className="text-white" />
+        </IconButton>
+      </div>
+    </div>
+  );
+}
+
+function IconButton({
+  children,
+  onClick,
+  ariaLabel,
+}: {
+  children: React.ReactNode;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <button
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className="h-11 w-11 rounded-full bg-white/15 backdrop-blur border border-white/20 shadow-lg flex items-center justify-center transition hover:bg-white/25 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50"
+      type="button"
+    >
+      {children}
+    </button>
   );
 }
 
