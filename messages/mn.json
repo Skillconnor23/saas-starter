@@ -1,0 +1,778 @@
+{
+  "nav": {
+    "brand": "Гэко Академи",
+    "students": "Сурагчид",
+    "schools": "Сургууль",
+    "schoolPricing": "Сургуулийн үнэ",
+    "pricing": "Үнийн санал",
+    "contact": "Холбоо барих",
+    "login": "Нэвтрэх",
+    "logout": "Гарах",
+    "dashboard": "Хяналтын самбар",
+    "bookDemo": "Демо захиалах",
+    "startTrial": "Туршилт эхлүүлэх",
+    "mobileMenu": "Цэс",
+    "openMenu": "Цэс нээх",
+    "closeMenu": "Цэс хаах",
+    "account": "Данс",
+    "accountShort": "Данс",
+    "roleUser": "Хэрэглэгч",
+    "roleSchoolAdmin": "Сургуулийн админ"
+  },
+  "common": {
+    "language": {
+      "english": "Англи",
+      "mongolian": "Монгол",
+      "short": {
+        "en": "EN",
+        "mn": "MN"
+      },
+      "switchLabel": "Хэл"
+    },
+    "cta": {
+      "startTrial": "Туршилт эхлүүлэх",
+      "bookDemo": "Демо захиалах",
+      "contactUs": "Бидэнтэй холбогдох"
+    },
+    "loading": "Ачааллаж байна...",
+    "backToHome": "Нүүр хуудас руу буцах",
+    "pageNotFoundTitle": "Хуудас олдсонгүй",
+    "pageNotFoundBody": "Таны хайсан хуудас устгагдсан, нэр нь өөрчлөгдсөн эсвэл түр хугацаанд ашиглах боломжгүй байж болзошгүй.",
+    "participationAvg": "Оролцооны дундаж: {value}",
+    "thisMonth": "Энэ сар",
+    "attendanceThisMonth": "Ирц — {title}",
+    "viewDetails": "Дэлгэрэнгүй"
+  },
+  "marketing": {
+    "home": {
+      "heroTitle": "Жинхэнэ багш нартай англи хэл сураарай.",
+      "heroSubtitle": "Жижиг бүлгийн шууд хичээл + танай хэл дээрх платформ + бүтцтэй даалгавар.",
+      "heroPrimary": "Туршилт эхлүүлэх",
+      "heroSecondary": "Хэрхэн ажилладгийг үзэх",
+      "trust": {
+        "teachersSpeakYourLanguage": "Багш нар танай хэлээр ярьдаг",
+        "smallGroups": "Жижиг бүлэг (8–12)",
+        "homeworkRecordings": "Даалгавар + бичлэг"
+      },
+      "howItWorks": {
+        "title": "Хэрхэн ажилладаг вэ",
+        "stepLabel": "Алхам {step}",
+        "step1": "Түвшний богино шалгалт өгөх",
+        "step2": "Жижиг шууд хичээлд нэгдэх",
+        "step3": "Даалгавар, бичлэгээр давтах"
+      },
+      "whatYouGet": {
+        "title": "Та юу авах вэ",
+        "liveSpeakingClasses": {
+          "title": "Ярианы шууд хичээл"
+        },
+        "platformInYourLanguage": {
+          "title": "Танай хэл дээрх платформ"
+        },
+        "homeworkAssignments": {
+          "title": "Даалгавар"
+        },
+        "lessonRecordings": {
+          "title": "Хичээлийн бичлэг"
+        },
+        "vocabTrainer": {
+          "title": "Үгийн сангийн дасгал"
+        },
+        "progressTracking": {
+          "title": "Ахицын хяналт"
+        }
+      },
+      "teachers": {
+        "title": "Багш нартай танилц",
+        "card": {
+          "credentials": "Гэрчилгээтэй \u2022 Хоёр хэлтэй \u2022 ESL туршлагатай",
+          "languages": "Англи + Монгол"
+        }
+      },
+      "results": {
+        "title": "Сурагчдын үр дүн"
+      },
+      "finalCta": {
+        "title": "Жинхэнэ англи хичээлийг туршиж үзэхэд бэлэн үү?",
+        "studentPricing": "Сурагчдын үнийг харах"
+      },
+      "heroImageAlt": "Гэко Академийн сурагчийн самбар",
+      "platformImageAlt": "Гэко Академи платформ"
+    },
+    "schools": {
+      "heroTitle": "Сургуулиудад зориулсан англи хэлний бүтэц.",
+      "heroSubtitle": "Gecko платформыг сурагчдын суудлаар лицензлэж, шууд хичээл заах гэрчилгээтэй багш нэмээрэй.",
+      "heroPrimary": "Демо захиалах",
+      "heroSecondary": "Платформыг харах",
+      "trust": {
+        "localizedPlatform": "Орон нутагшсан платформ",
+        "certifiedTeachers": "Гэрчилгээтэй багш нар",
+        "structuredCurriculum": "Бүтцтэй хөтөлбөр + даалгавар"
+      },
+      "problem": {
+        "title": "Асуудал",
+        "lead": "Олон сургууль англи хэлний боловсролтой холбоотой бэрхшээлтэй тулгардаг:",
+        "bullet1": "Ярианы дасгал хязгаартай",
+        "bullet2": "Хөтөлбөр тогтворгүй",
+        "bullet3": "Чадвартай багш дутагдалтай",
+        "bullet4": "Цифр сургалтын хэрэгсэл байхгүй"
+      },
+      "solution": {
+        "title": "Шийдэл",
+        "lead": "Gecko-оос дараахыг санал болгоно:",
+        "bullet1": "Англи хэл сургалтын платформ",
+        "bullet2": "Бүтцтэй хөтөлбөр",
+        "bullet3": "Даалгавар ба ахицын хяналт",
+        "bullet4": "Орон нутгийн хэлээр ярьдаг гэрчилгээтэй багш нар"
+      },
+      "howItWorks": {
+        "title": "Хэрхэн ажилладаг вэ",
+        "stepLabel": "Алхам {step}",
+        "step1": "Сургууль платформын суудлыг лицензлэнэ",
+        "step2": "Зөвхөн платформ эсвэл платформ + багшийг сонгоно",
+        "step3": "Сурагчид хичээл эхлүүлнэ"
+      },
+      "platformFeatures": {
+        "title": "Платформын боломжууд",
+        "localLanguageUi": {
+          "title": "Орон нутгийн хэлний интерфейс",
+          "desc": "Сурагчдын эх хэл дээрх платформ"
+        },
+        "curriculumLibrary": {
+          "title": "Хөтөлбөрийн сан",
+          "desc": "Бүтцтэй хичээл, материал"
+        },
+        "homework": {
+          "title": "Даалгавар + илгээлт",
+          "desc": "Даалгавар өгөж, хянах"
+        },
+        "progress": {
+          "title": "Ахицын хяналт",
+          "desc": "Оноо, идэвх, тайлан"
+        },
+        "classManagement": {
+          "title": "Ангийн удирдлага",
+          "desc": "Жагсаалт, цагийн хуваарь, бүлэг"
+        },
+        "dashboard": {
+          "title": "Багш/админы самбар",
+          "desc": "Бүрэн хяналт, харагдац"
+        }
+      },
+      "teacherAddon": {
+        "title": "Gecko багшийг нэмэх (сонголтоор)",
+        "subtitle": "Орон нутгийн хэлээр ярьдаг, шууд хичээл заадаг, Gecko хөтөлбөрийг дагадаг гэрчилгээтэй багш нар.",
+        "card": {
+          "credentials": "Гэрчилгээтэй • Хоёр хэлтэй • ESL туршлагатай",
+          "languages": "Англи + Монгол"
+        }
+      },
+      "footerCta": {
+        "title": "Gecko-г танай сургуульд нэвтрүүлэхэд бэлэн үү?"
+      },
+      "platformImageAlt": "Гэко Академи платформ",
+      "platformFeaturesImageAlt": "Гэко сургуулийн самбарын картууд"
+    },
+    "trial": {
+      "heroTitle": "Үнэгүй англи хичээлийг туршиж үзээрэй",
+      "heroSubtitle": "Америк багштай шууд онлайн хичээлд орж Gecko Academy-г мэдэр.",
+      "heroPrimary": "Үнэгүй туршилт захиалах",
+      "levelTitle": "Түвшнээ сонгоно уу",
+      "level": {
+        "beginner": "Анхан",
+        "intermediate": "Дунд / Ахисан"
+      },
+      "bookingTitle": "Үнэгүй туршилтаа захиалах",
+      "bookingSubtitle": "Доорх цагаас сонгон бүртгүүлнэ үү.",
+      "faqTitle": "Түгээмэл асуултууд",
+      "faq": {
+        "q1": "Туршилт үнэгүй юу?",
+        "a1": "Тийм. Туршилтын хичээл бүрэн үнэгүй, үргэлжлүүлэх үүрэггүй.",
+        "q2": "Сурагчид юу бэлтгэх хэрэгтэй вэ?",
+        "a2": "Ямар ч бэлтгэл хэрэггүй. Зүгээр хичээлд орж оролцоорой.",
+        "q3": "Туршилтын дараа юу болох вэ?",
+        "a3": "Таалагдвал ижил түвшний бусад сурагчидтай долоо хоногийн ангид нэгдэж болно."
+      }
+    }
+  },
+  "pricingStudents": {
+    "heroTitle": "Gecko Academy — Үнийн санал",
+    "heroSubtitle": "Native түвшний багштай шууд англи хичээл, амралтын өдрүүдэд таарах хуваарь, жинхэнэ ахиц гаргах платформ.",
+    "heroPrimary": "Туршилт эхлүүлэх",
+    "heroSecondary": "Сургуульд уу? GeckoTeach үнийг харах",
+    "billingToggleLabel": "Төлбөр",
+    "compareTitle": "Төлөвлөгөөг харьцуулах",
+    "addOnsTitle": "Нэмэлт үйлчилгээ",
+    "addOnsSubtitle": "Суралцахаа гүнзгийрүүлэх нэмэлт сонголтууд. (Одоогоор худалдаж авах боломжгүй — Stripe-тэй ирнэ.)",
+    "faqTitle": "Түгээмэл асуултууд",
+    "faq": {
+      "q1": "Хуваарь ямар байдаг вэ?",
+      "a1": "Хичээлүүд ажлын өдрийн орой болон амралтын өдрүүдэд тохируулдаг тул сургууль, ажилтай зөрчилддөггүй. Амралтын өдрүүдэд тохирсон сонголтууд байдаг.",
+      "q2": "Үнэгүй туршилт хэрхэн ажилладаг вэ?",
+      "a2": "Багштай танилцаж, платформыг туршихад богино үнэгүй туршилтаар эхэлнэ. Урьдчилан төлбөр хийх шаардлагагүй. Таалагвал төлөвлөгөө сонгож үргэлжлүүлж болно.",
+      "q3": "Цуцлах эсвэл төлөвлөгөө солих боломжтой юу?",
+      "a3": "Тийм. Өсгөх, бууруулах эсвэл хүссэн үедээ цуцлаж болно. Шаардлагатай тохиолдолд пропорциональ буцаан олгоно.",
+      "q4": "Түвшинд минийг хэрхэн тохируулдаг вэ?",
+      "a4": "Богино байршуулалтын үйл явц (заримдаа багштай товч ярилцалт) ашиглан түвшин, зорилгод тань тохирох бүлэгт оруулна."
+    },
+    "finalCta": {
+      "headline": "Гэко Академиар суралцаж эхлэхэд бэлэн үү?",
+      "subline": "Жижиг бүлэгт нэгдэж, шууд санал авч, хуваарьтаа тохируулж ашиглана уу.",
+      "primary": "Туршилт эхлүүлэх",
+      "secondary": "Бидэнтэй холбогдох"
+    }
+  },
+  "pricingSchools": {
+    "heroTitle": "GeckoTeach — Сургуулийн үнийн санал",
+    "heroSubtitle": "Танай сургуульд зориулсан платформ ба native багш нар. Зөвхөн платформоос бүрэн хөтөлбөр хүртэл.",
+    "heroPrimary": "Демо захиалах",
+    "heroSecondary": "Сурагчдын үнэ хэрэгтэй юу? Gecko Academy үнийг харах",
+    "compareTitle": "Төлөвлөгөөг харьцуулах",
+    "faqTitle": "Түгээмэл асуултууд",
+    "faq": {
+      "q1": "Native англи багш өгдөг үү?",
+      "a1": "Тийм. GeckoTeach нь сурагчидтайгаа манай платформ дээр ажилладаг native англи багшийг сонголтоор багтаасан. Платформ болон заах дэмжлэг — хөтөлбөр, хичээл, хяналтыг нэг дороос авах боломжтой.",
+      "q2": "Хэрхэн тусгай үнэ авах вэ?",
+      "a2": "Демо захиалаад платформыг үзүүлж, сурагчийн тоо, зорилго яриад, тохирсон үнэ өгнө. Үнэ суудлын тоо, Gecko багш нэмэх эсэхээс хамаарна.",
+      "q3": "Зөвхөн платформыг өөрийн багштай ашиглаж болох уу?",
+      "a3": "Тийм. Зөвхөн платформ шатлал нь GeckoTeach платформыг бүрэн өгнө — байршуулалтын шалгалт, ангийн удирдлага, багшийн самбар, бичлэг, аналитик — өөрийн багш нар ашиглана.",
+      "q4": "Багшийн сургалт багтсан уу?",
+      "a4": "Бүрэн хөтөлбөрийн түнш төлөвлөгөөнд багшийн сургалт, академик тайлан багтсан. Платформ + багш болон зөвхөн платформ нь сургалтыг нэмэлт үйлчилгээгээр нэмж болно. Демо дээр асууна уу."
+    },
+    "finalCta": {
+      "headline": "Гэко-г танай сургуульд нэвтрүүлэхэд бэлэн үү?",
+      "subline": "Демо захиалаад платформыг үзэж, сурагчдад зориулсан үнийг аваарай.",
+      "primary": "Демо захиалах",
+      "secondary": "Бидэнтэй холбогдох"
+    }
+  },
+  "classroom": {
+    "composer": {
+      "fileLabel": "Файл (PDF, PNG, JPG — дээд тал нь 10 MB)",
+      "urlLabel": "Холбоос",
+      "urlPlaceholder": "https://..."
+    },
+    "backToDashboard": "Самбар руу буцах",
+    "people": "Хүмүүс",
+    "attendance": "Ирц",
+    "nextClass": "Дараагийн хичээл",
+    "todo": "Хийх зүйлс",
+    "none": "Байхгүй",
+    "pendingCount": "{count} хүлээгдэж байна",
+    "viewDetails": "Дэлгэрэнгүй"
+  },
+  "schedule": {
+    "weekdays": {
+      "short": {
+        "sun": "Ня",
+        "mon": "Да",
+        "tue": "Мя",
+        "wed": "Лх",
+        "thu": "Пү",
+        "fri": "Ба",
+        "sat": "Бя"
+      }
+    },
+    "yourTimezone": "Таны цагийн бүс: {tz}",
+    "classesOn": "Энэ өдрийн хичээлүүд",
+    "close": "Хаах",
+    "join": "Нэгдэх",
+    "openClassroom": "Анги нээх",
+    "classTimezone": "Ангийн цагийн бүс: {tz}"
+  },
+  "homework": {
+    "noDueDate": "Дуусах огноо байхгүй",
+    "notSubmitted": "Илгээгдээгүй",
+    "submittedOn": "Илгээсэн: {date}",
+    "backToHomework": "← Даалгавар руу буцах",
+    "instructions": "Зааварчилгаа",
+    "downloadWorksheet": "Даалгавар татах",
+    "yourSubmission": "Таны илгээлт",
+    "note": "Тэмдэглэл",
+    "files": "Файлууд",
+    "teacherFeedback": "Багшийн санал",
+    "scoreLabel": "Оноо: {score}%",
+    "resubmit": "Дахин илгээх",
+    "submitHomework": "Даалгавар илгээх",
+    "uploadHint": "Зургууд (JPG, PNG, WebP) эсвэл дуу (MP3, M4A, WAV). Файл бүр дээд тал 20 MB.",
+    "filesLabel": "Файлууд",
+    "dragDrop": "Файлаа чирж энд хая эсвэл сонгоно уу",
+    "browse": "Сонгох",
+    "remove": "Устгах",
+    "optionalNote": "Нэмэлт тэмдэглэл",
+    "notePlaceholder": "Багшинд тэмдэглэл үлдээнэ үү...",
+    "submit": "Илгээх",
+    "noHomeworkYet": "Одоогоор даалгавар байхгүй. Дараа дахин шалгана уу.",
+    "viewAndSubmit": "Даалгавраа харах, илгээх",
+    "open": "Нээх",
+    "due": "Дуусах:"
+  },
+  "learning": {
+    "title": "Суралцах",
+    "subtitle": "Шалгалт болон эхлэгчдэд зориулсан картуудаар суралцана.",
+    "quizzes": "Шалгалтууд",
+    "flashcards": "Цаг хугацааны карт",
+    "thisMonth": "Энэ сар",
+    "previousMonths": "Өмнөх сарууд",
+    "studied": "Судалсан",
+    "accuracy": "Зөв байдал",
+    "savedWords": "Хадгалсан үгс",
+    "mySavedWords": "Миний хадгалсан үгс",
+    "mySavedWordsDesc": "Зөвхөн та тэмдэглэсэн картуудыг давтана.",
+    "study": "Сурах",
+    "assignedDecks": "Өгсөн тавцангууд",
+    "cardsCount": "{count} карт",
+    "lastStudied": "Сүүлд судалсан: {date}",
+    "notStartedYet": "Хараахан эхлээгүй",
+    "thisMonthPct": "Энэ сард {percent}%",
+    "noDecksAssigned": "Ангид одоогоор картын тавцан өгөгдөөгүй.",
+    "flashcardsSettingUp": "Картыг тохируулж байна",
+    "flashcardsNotReady": "Картын хадгалалт одоогоор бэлэн биш. Өгөгдлийн сангийн шинэчлэлт хийгээд дахин нээнэ үү.",
+    "quizSnapshot": "Шалгалтын товч",
+    "assigned": "Өгсөн",
+    "completion": "Дуусгасан",
+    "avgThisMonth": "Энэ сарын дундаж",
+    "mySavedWordsPageSubtitle": "Тэмдэглэсэн картуудаа цаг үе бүрт давтана.",
+    "deckSubtitle": "Эргэж, өөрөө үнэлж, чухал үгсээ хадгална.",
+    "emptySaved": "Та хараахан үг хадгалаагүй. Тавцан нээгээд ар тал дээр хадгалах товч дарна уу.",
+    "emptyDeck": "Энэ тавцанд одоогоор карт байхгүй.",
+    "back": "Буцах",
+    "cardOf": "Карт {current} / {total}",
+    "sessionComplete": "Дууслаа",
+    "correctOutOf": "{correct} зөв / {attempted}",
+    "studyAgain": "Дахин сурах",
+    "done": "Дуусгах",
+    "wrongAria": "Буруу",
+    "correctAria": "Зөв"
+  },
+  "quizzes": {
+    "addQuestion": {
+      "title": "Асуулт нэмэх",
+      "promptPlaceholder": "Асуултаа бичнэ үү...",
+      "promptLabel": "Асуултын текст",
+      "optionsLabel": "Сонголтууд (хамгийн багадаа 2)",
+      "optionPlaceholder": "Сонголт {letter}",
+      "correctLabel": "Зөв",
+      "cancel": "Цуцлах",
+      "saveQuestion": "Асуулт хадгалах",
+      "saving": "Хадгалж байна..."
+    },
+    "thisWeek": "Энэ долоо хоног",
+    "review": "Дахин харах",
+    "startQuiz": "Шалгалт эхлүүлэх",
+    "allQuizzes": "Бүх шалгалтууд",
+    "noQuizzesYet": "Одоогоор шалгалт байхгүй",
+    "noQuizzesYetDesc": "Багш долоо хоног бүрийн шалгалт энд оруулна.",
+    "showingCount": "{count} шалгалт харуулж байна",
+    "showingCountPlural": "{count} шалгалт харуулж байна",
+    "weeklyQuizzes": "Ангийн долоо хоногийн шалгалтууд.",
+    "lastQuiz": "Сүүлийн шалгалт",
+    "completion": "Дуусгасан",
+    "avgScore30d": "Дундаж оноо (30 хоног)"
+  },
+  "join": {
+    "backToDashboard": "Самбар руу буцах",
+    "joinAClass": "Ангид нэгдэх",
+    "enterClassCode": "Ангийн код оруулах",
+    "enterClassCodeDesc": "Багж эсвэл сургуулиасаа ангийн кодыг асуугаад доор оруулбал ангид нэгдэж, ойрын хичээлүүдийг харна.",
+    "classCode": "Ангийн код",
+    "classCodePlaceholder": "жишээ нь ABC123",
+    "joining": "Нэгдэж байна...",
+    "joinClass": "Ангид нэгдэх"
+  },
+  "auth": {
+    "login": {
+      "title": {
+        "signin": "Дахин тавтай морил",
+        "signup": "Бүртгэл үүсгэх"
+      },
+      "subtitle": {
+        "signin": "Gecko Academy дээрх хичээлээ үргэлжлүүлэхийн тулд нэвтэрнэ үү.",
+        "signup": "Gecko Academy дээрх бүртгэлээ хэдхэн алхмаар тохируул."
+      },
+      "badge": "Аюулгүй, тайван сургалт",
+      "emailLabel": "И-мэйл",
+      "emailPlaceholder": "ta@example.com",
+      "passwordLabel": "Нууц үг",
+      "passwordPlaceholder": "••••••••",
+      "submit": {
+        "signin": "Нэвтрэх",
+        "signup": "Бүртгүүлэх"
+      },
+      "loading": "Ачааллаж байна...",
+      "switchToSignup": "Бүртгэл байхгүй юу?",
+      "switchToSignupCta": "Энд бүртгүүлнэ үү",
+      "switchToSignin": "Өмнө нь бүртгүүлсэн үү?",
+      "switchToSigninCta": "Энд нэвтрэнэ үү"
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "student": {
+        "main": "Үндсэн",
+        "settings": "Тохиргоо",
+        "dashboard": "Хяналтын самбар",
+        "learning": "Суралцах",
+        "myClass": "Миний анги",
+        "people": "Хүмүүс",
+        "schedule": "Хуваарь",
+        "homework": "Даалгавар",
+        "messages": "Мессеж",
+        "joinClass": "Ангид нэгдэх",
+        "profile": "Профайл",
+        "activity": "Идэвх"
+      },
+      "teacher": {
+        "main": "Үндсэн",
+        "settings": "Тохиргоо",
+        "dashboard": "Хяналтын самбар",
+        "classes": "Ангиуд",
+        "quizzes": "Шалгалтууд",
+        "flashcards": "Цаг хугацааны карт",
+        "students": "Сурагчид",
+        "schedule": "Хуваарь",
+        "homework": "Даалгавар",
+        "messages": "Мессеж",
+        "team": "Баги",
+        "general": "Ерөнхий",
+        "security": "Аюулгүй байдал"
+      },
+      "schoolAdmin": {
+        "main": "Үндсэн",
+        "settings": "Тохиргоо",
+        "dashboard": "Хяналтын самбар",
+        "students": "Сурагчид",
+        "schedule": "Хуваарь",
+        "classes": "Ангиуд",
+        "homework": "Даалгавар",
+        "messages": "Мессеж",
+        "profile": "Профайл",
+        "team": "Баги",
+        "general": "Ерөнхий",
+        "activity": "Идэвх",
+        "security": "Аюулгүй байдал"
+      },
+      "admin": {
+        "main": "Үндсэн",
+        "settings": "Тохиргоо",
+        "dashboard": "Хяналтын самбар",
+        "users": "Хэрэглэгчид",
+        "classes": "Ангиуд",
+        "homework": "Даалгавар",
+        "messages": "Мессеж",
+        "profile": "Профайл",
+        "team": "Баги",
+        "general": "Ерөнхий",
+        "activity": "Идэвх",
+        "security": "Аюулгүй байдал"
+      }
+    },
+    "student": {
+      "welcomeWithName": "Дахин тавтай морил, {name}",
+      "welcome": "Дахин тавтай морил",
+      "subtitle": "Таны ахиц ба ойрын хичээлүүд",
+      "classCard": {
+        "title": "Таны анги",
+        "body": "Багшаасаа авсан ангийн кодоор нэгдээрэй эсвэл дэмжлэгтэй холбогдоорой.",
+        "cta": "Ангийн кодоор нэгдэх"
+      },
+      "avgScoreAria": "Дундаж оноо: {percent} хувь",
+      "avgScoreNotAvailable": "Дундаж оноо байхгүй",
+      "attendanceAria": "Ирцийн хувь: {percent} хувь",
+      "quizzesCompletedAria": "{count} шалгалт дуусгасан",
+      "joinedBanner": "Ангид амжилттай нэгдлээ. Ойрын хичээлүүд доор харагдана.",
+      "avgScoreTitle": "Дундаж оноо (30 хоног)",
+      "attendanceTitle": "Ирцийн хувь (30 хоног)",
+      "quizzesCompletedTitle": "Дуусгасан шалгалт",
+      "nextClassTitle": "Дараагийн хичээл",
+      "nextClassToday": "Өнөөдөр",
+      "nextClassEmpty": "Ойрын хичээл байхгүй. Дараа дахин шалгана уу эсвэл багшаасаа асууна уу.",
+      "nextClassOpenClassroom": "Анги нээх",
+      "nextClassJoinMeeting": "Хичээлд нэгдэх",
+      "nextClassJoinMeetingDisabled": "Хичээлд нэгдэх",
+      "upcomingSessionsTitle": "Ойрын хичээлүүд",
+      "whatToDoNextTitle": "Дараа юу хийх вэ",
+      "whatToDoNextCompleteQuiz": "{quizTitle} дуусгах",
+      "whatToDoNextJoinNextClass": "Дараагийн хичээлдээ {date} нэгдэнэ үү.",
+      "whatToDoNextAllCaughtUp": "Бүгдийг хийж дууслаа. Шинэ хичээлийг хүлээнэ үү.",
+      "myProgressTitle": "Миний ахиц",
+      "myProgress30d": "30 хоногийн дундаж",
+      "myProgressGoalAway": "80%-ийн зорилгоос {percent}% хол байна.",
+      "myProgressGoalReached": "80%-ийн зорилгоо хүрлээ.",
+      "myProgressViewScores": "Бүх оноо харах",
+      "needsAttentionTitle": "Анхаарал шаардлагатай",
+      "needsAttentionIncompleteQuiz": "Та {quizTitle} дуусгаагүй байна",
+      "needsAttentionPrefix": "Та дуусгаагүй байна: ",
+      "needsAttentionNoActivity": "7 хоногийн турш идэвхгүй. Тэгвэлдээ шалгалт өгөөрэй.",
+      "needsAttentionOpenLearning": "Суралцах нээх",
+      "status": {
+        "startTakingQuizzes": "Шалгалт өгч ахицаа харна",
+        "onTrack": "Зөв чиглэлд",
+        "keepImproving": "Үргэлжлүүлэн сайжруул",
+        "needsAttention": "Анхаарал шаардлагатай"
+      }
+    }
+  },
+  "schoolAdmin": {
+    "dashboard": {
+      "title": "Сургуулийн админы самбар",
+      "subtitle": "Ангиуд одоо хэрхэн явж байна вэ?",
+      "activeStudents": "Идэвхтэй сурагчид",
+      "activeClasses": "Идэвхтэй ангиуд",
+      "avgQuizScoreLabel": "Дундаж шалгалтын оноо (7 хоног / 30 хоног)",
+      "completionRate30d": "Дуусгасан хувь (30 хоног)",
+      "classes": "Ангиуд",
+      "clickToSort": "Эрэмбэлэхийн тулд баганы гарчгийг дарна уу.",
+      "noClassesYet": "Одоогоор анги байхгүй.",
+      "needsAttention": "Анхаарал шаардлагатай",
+      "lowScoreClasses": "Дундаж оноо 70%-аас бага ангиуд",
+      "inactiveStudents14d": "14 хоногт 0 оролдлого хийсэн сурагчид",
+      "lowAttemptQuizzes": "50%-аас бага оролдсон шалгалтууд",
+      "nothingNeedsAttention": "Одоогоор юу ч анхаарал шаардахгүй.",
+      "manageClasses": "Ангиуд удирдах"
+    },
+    "classTable": {
+      "class": "Анги",
+      "teacher": "Багш",
+      "students": "Сурагчид",
+      "avgScore30d": "Дундаж оноо (30 хоног)",
+      "attemptRate30d": "Оролдлогын хувь (30 хоног)",
+      "lastActivity": "Сүүлийн идэвх",
+      "status": "Төлөв",
+      "onTrackTitle": "Зөв чиглэлд",
+      "onTrackAria": "Зөв чиглэлд",
+      "needsAttentionTitle": "Анхаарал шаардлагатай: бага идэвх эсвэл шалгалтын оролдлого",
+      "needsAttentionAria": "Анхаарал шаардлагатай: бага идэвх эсвэл шалгалтын оролдлого"
+    },
+    "students": {
+      "title": "Сурагчид",
+      "myClasses": "Миний ангиуд",
+      "myClassesDesc": "Бүх ангиуд. Жагсаалт харах эсвэл анги нээх.",
+      "noClassesYet": "Одоогоор анги байхгүй.",
+      "studentsCount": "{count} сурагч",
+      "studentsCount_other": "{count} сурагч",
+      "roster": "Жагсаалт",
+      "classroom": "Анги",
+      "studentsAcrossClasses": "Ангиудаар сурагчид",
+      "studentsAcrossDesc": "Ангид бүртгэлтэй сурагчдыг харах.",
+      "noStudentsMatch": "Шүүлтэнд тохирох сурагч олдсонгүй.",
+      "tableStudent": "Сурагч",
+      "tableClass": "Анги",
+      "geckoLevel": "Гекко түвшин",
+      "tableStatus": "Төлөв",
+      "statusActive": "идэвхтэй",
+      "statusPaused": "зогссон"
+    },
+    "filters": {
+      "searchPlaceholder": "Нэр эсвэл и-мэйлээр хайх",
+      "searchSrOnly": "Хайх",
+      "allClasses": "Бүх ангиуд",
+      "apply": "Хэрэгжүүлэх"
+    },
+    "schedule": {
+      "title": "Хуваарь"
+    },
+    "people": {
+      "title": "Хүмүүс",
+      "classRosters": "Ангийн жагсаалтууд",
+      "classRostersDesc": "Анги бүрийн багш, сурагчдыг харах.",
+      "noClassesYet": "Одоогоор анги байхгүй."
+    },
+    "calendar": {
+      "title": "Хуанли",
+      "upcomingClasses": "Ойрын хичээлүүд",
+      "nextDaysTimezone": "Дараагийн {days} хоног · таны цагийн бүс: {timezone}",
+      "nextDaysLabel": "Дараагийн {days} хоног",
+      "filterClass": "Анги",
+      "filterDays": "Хоног",
+      "filterAllClasses": "Бүх ангиуд",
+      "days14": "14 хоног",
+      "days30": "30 хоног",
+      "emptyRange": "Энэ хугацаанд хичээл төлөвлөгдөөгүй."
+    },
+    "attendance": {
+      "titleThisMonth": "Ирц — Энэ сар",
+      "overall": "Нийт",
+      "lateRate": "Хоцорсон хувь",
+      "avgParticipation": "Дундаж оролцоо",
+      "atRiskStudents": "Эрсдэлтэй сурагчид"
+    }
+  },
+  "teacher": {
+    "dashboard": {
+      "title": "Багшийн самбар",
+      "subtitle": "Өнөөдөр юу заах вэ? Сурагчид явцтай байна уу? Хаана арга хэмжээ авах вэ?",
+      "nextSession": "Дараагийн хичээл",
+      "noUpcomingSessions": "Ойрын хичээл байхгүй.",
+      "join": "Нэгдэх",
+      "avgQuizScore30d": "Дундаж шалгалтын оноо (30 хоног)",
+      "attemptRate30d": "Оролдлогын хувь (30 хоног)",
+      "inactiveStudents": "Идэвхгүй сурагчид",
+      "needsAttention": "Анхаарал шаардлагатай",
+      "nothingNeedsAttention": "Одоогоор юу ч анхаарал шаардахгүй.",
+      "inactiveStudentLabel": "14 хоногт 0 шалгалтын оролдлого",
+      "lowCompletionLabel": "{className} · {percent}% оролдсон",
+      "viewAll": "Бүгдийг харах"
+    },
+    "myClasses": {
+      "title": "Миний ангиуд",
+      "desc": "Таны зааж буй ангиуд. Жагсаалт харах эсвэл анги нээх.",
+      "noClassesYet": "Одоогоор танд анги оноогдоогүй байна.",
+      "studentsCount": "{count} сурагч",
+      "studentsCount_other": "{count} сурагч",
+      "roster": "Жагсаалт",
+      "classroom": "Анги",
+      "days30": "30 хоног"
+    },
+    "students": {
+      "title": "Сурагчид",
+      "studentsAcrossClasses": "Таны ангиудаар сурагчид",
+      "studentsAcrossDesc": "Таны зааж буй ангид бүртгэлтэй сурагчдыг харах.",
+      "noStudentsMatch": "Шүүлтэнд тохирох сурагч олдсонгүй.",
+      "tableStudent": "Сурагч",
+      "tableClass": "Анги",
+      "geckoLevel": "Гекко түвшин",
+      "tableStatus": "Төлөв",
+      "statusActive": "идэвхтэй",
+      "statusPaused": "зогссон",
+      "actions": "Үйлдлүүд",
+      "message": "Мессеж"
+    },
+    "filters": {
+      "searchPlaceholder": "Нэр эсвэл и-мэйлээр хайх",
+      "searchSrOnly": "Хайх",
+      "allClasses": "Бүх ангиуд",
+      "apply": "Хэрэгжүүлэх"
+    },
+    "schedule": { "title": "Хуваарь" },
+    "people": {
+      "title": "Хүмүүс",
+      "classRosters": "Ангийн жагсаалтууд",
+      "classRostersDesc": "Анги бүрийн багш, сурагчдыг харах.",
+      "noClassesYet": "Одоогоор танд анги оноогдоогүй байна."
+    },
+    "calendar": {
+      "title": "Хуанли",
+      "upcomingClasses": "Ойрын хичээлүүд",
+      "nextDaysTimezone": "Дараагийн {days} хоног · таны цагийн бүс: {timezone}",
+      "nextDaysLabel": "Дараагийн {days} хоног",
+      "filterClass": "Анги",
+      "filterDays": "Хоног",
+      "filterAllClasses": "Бүх ангиуд",
+      "days14": "14 хоног",
+      "days30": "30 хоног",
+      "emptyRange": "Энэ хугацаанд хичээл төлөвлөгдөөгүй."
+    },
+    "flashcards": {
+      "title": "Цаг хугацааны карт",
+      "subtitle": "Тавцан үүсгэж, карт нэмж, сурагчдад нийтлэнэ.",
+      "createNewDeck": "Шинэ тавцан үүсгэх",
+      "titleLabel": "Гарчиг",
+      "descriptionLabel": "Тайлбар",
+      "scopeLabel": "Хамрах хүрээ",
+      "scopeClass": "Анги",
+      "classLabel": "Анги (ангийн хүрээнд)",
+      "selectClass": "Анги сонгох",
+      "createDeck": "Тавцан үүсгэх",
+      "yourDecks": "Таны тавцанууд",
+      "noDecksYet": "Одоогоор тавцан байхгүй.",
+      "cardsCount": "{count} карт",
+      "global": "Дэлхий",
+      "classDeck": "Ангийн тавцан",
+      "published": "Нийтлэгдсэн",
+      "draft": "Ноорог",
+      "manage": "Удирдах",
+      "publish": "Нийтлэх",
+      "unpublish": "Нийтлэл цуцлах",
+      "backToFlashcards": "Цаг хугацааны карт руу буцах",
+      "cardsInDeck": "Энэ тавцанд {count} карт байна.",
+      "deckDetails": "Тавцны дэлгэрэнгүй",
+      "saveDeck": "Тавцан хадгалах",
+      "addCard": "Карт нэмэх",
+      "frontLabel": "Урд тал",
+      "backLabel": "Ард тал",
+      "exampleLabel": "Жишээ",
+      "frontPlaceholder": "Англи үг эсвэл хэллэг",
+      "backPlaceholder": "Утга эсвэл тодорхойлолт",
+      "examplePlaceholder": "Заавал биш өгүүлбэрийн жишээ",
+      "addCardButton": "Карт нэмэх",
+      "cards": "Картууд",
+      "noCardsYet": "Одоогоор карт байхгүй.",
+      "saveCard": "Карт хадгалах",
+      "remove": "Устгах",
+      "titlePlaceholder": "жишээ нь 5-р долоо хоногийн үгсийн сан",
+      "descriptionPlaceholder": "Сурагчдад зориулсан заавал биш тэмдэглэл."
+    },
+    "classes": {
+      "title": "Ангиуд",
+      "subtitle": "Ангийн эрүүл мэнд, төлөв. Материал оруулах, анги удирдахын тулд анги нээнэ үү.",
+      "noClassesYet": "Одоогоор танд анги оноогдоогүй байна.",
+      "filterAll": "Бүгд",
+      "filterNeedsAttention": "Анхаарал шаардлагатай",
+      "filterActiveToday": "Өнөөдөр идэвхтэй",
+      "ofClasses": "{filtered} / {total} анги",
+      "roster": "Жагсаалт",
+      "openClassroom": "Анги нээх",
+      "noUpcomingSession": "Ойрын хичээл байхгүй",
+      "today": "Өнөөдөр",
+      "tomorrow": "Маргааш",
+      "student": "{count} сурагч",
+      "student_other": "{count} сурагч",
+      "quiz": "{count} шалгалт",
+      "quiz_other": "{count} шалгалт",
+      "homework": "{count} даалгавар",
+      "noClassesMatchFilter": "Энэ шүүлтэнд тохирох анги байхгүй."
+    },
+    "quizzes": {
+      "title": "Шалгалтууд",
+      "subtitle": "Ангийн долоо хоногийн шалгалтууд үүсгэж, удирна.",
+      "newQuiz": "Шинэ шалгалт",
+      "drafts": "Ноорогууд",
+      "published": "Нийтлэгдсэн",
+      "noDraftsYet": "Одоогоор ноорог шалгалт байхгүй.",
+      "noPublishedYet": "Одоогоор нийтлэгдсэн шалгалт байхгүй.",
+      "edit": "Засах",
+      "results": "Үр дүн",
+      "backToQuizzes": "Шалгалтууд руу буцах",
+      "newQuizTitle": "Шинэ шалгалт",
+      "newQuizSubtitle": "Шалгалт үүсгэж нэг эсвэл хэд хэдэн ангид онооно.",
+      "quizDetails": "Шалгалтын дэлгэрэнгүй",
+      "titleLabel": "Гарчиг",
+      "titlePlaceholder": "жишээ нь 3-р долоо хоногийн үгсийн шалгалт",
+      "descriptionOptional": "Тайлбар (заавал биш)",
+      "descriptionPlaceholder": "Энэ шалгалтын тухай товч тэмдэглэл.",
+      "assignToClasses": "Ангид оноох",
+      "selectAtLeastOne": "Хамгийн багадаа нэг анги сонгоно уу",
+      "saveQuiz": "Шалгалт хадгалах",
+      "editQuizTitle": "Шалгалт засах",
+      "publishedOrDraft": "Нийтлэгдсэн",
+      "publishedOrDraftDraft": "Ноорог",
+      "publishQuiz": "Шалгалт нийтлэх",
+      "questions": "Асуултууд",
+      "addOneToPublish": "Нийтлэхийн тулд хамгийн багадаа нэг асуулт нэмнэ үү.",
+      "questionsCount": "{count} асуулт",
+      "noQuestionsYet": "Одоогоор асуулт байхгүй.",
+      "questionNumber": "Асуулт {number}",
+      "correct": "(зөв)",
+      "remove": "Устгах",
+      "addQuestion": "Асуулт нэмэх",
+      "resultsTitle": "Шалгалтын үр дүн",
+      "submissions": "Илгээсэн",
+      "averageScore": "Дундаж оноо",
+      "studentScores": "Сурагчийн оноо",
+      "noSubmissionsYet": "Одоогоор илгээлт байхгүй.",
+      "student": "Сурагч",
+      "submitted": "Илгээсэн огноо",
+      "score": "Оноо"
+    }
+  },
+  "errors": {
+    "generic": "Алдаа гарлаа. Дахин оролдоно уу.",
+    "auth": {
+      "invalidCredentials": "И-мэйл эсвэл нууц үг буруу байна. Дахин оролдоно уу.",
+      "createUserFailed": "Хэрэглэгч үүсгэж чадсангүй. Дахин оролдоно уу.",
+      "createTeamFailed": "Багийг үүсгэж чадсангүй. Дахин оролдоно уу.",
+      "invalidOrExpiredInvitation": "Буруу эсвэл хугацаа дуссан урилга."
+    }
+  }
+}

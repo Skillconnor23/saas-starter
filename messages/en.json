@@ -1,0 +1,805 @@
+{
+  "nav": {
+    "brand": "Gecko Academy",
+    "students": "Students",
+    "schools": "Schools",
+    "schoolPricing": "School Pricing",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Log in",
+    "logout": "Sign out",
+    "dashboard": "Dashboard",
+    "bookDemo": "Book a Demo",
+    "startTrial": "Start Free Trial",
+    "mobileMenu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "account": "Account",
+    "accountShort": "Account",
+    "roleUser": "User",
+    "roleSchoolAdmin": "School Admin"
+  },
+  "common": {
+    "language": {
+      "english": "English",
+      "mongolian": "Mongolian",
+      "short": {
+        "en": "EN",
+        "mn": "MN"
+      },
+      "switchLabel": "Language"
+    },
+    "cta": {
+      "startTrial": "Start Free Trial",
+      "bookDemo": "Book a Demo",
+      "contactUs": "Contact us"
+    },
+    "loading": "Loading...",
+    "backToHome": "Back to Home",
+    "pageNotFoundTitle": "Page Not Found",
+    "pageNotFoundBody": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+    "participationAvg": "Participation avg: {value}",
+    "thisMonth": "This month",
+    "attendanceThisMonth": "Attendance — {title}",
+    "viewDetails": "View details"
+  },
+  "marketing": {
+    "home": {
+      "heroTitle": "Learn English with real teachers.",
+      "heroSubtitle": "Small live classes + a learning platform in your language + structured homework.",
+      "heroPrimary": "Start Free Trial",
+      "heroSecondary": "See How It Works",
+      "trust": {
+        "teachersSpeakYourLanguage": "Teachers speak your language",
+        "smallGroups": "Small groups (8–12)",
+        "homeworkRecordings": "Homework + recordings"
+      },
+      "howItWorks": {
+        "title": "How It Works",
+        "stepLabel": "Step {step}",
+        "step1": "Take a quick level check",
+        "step2": "Join a small live class",
+        "step3": "Practice with homework + recordings"
+      },
+      "whatYouGet": {
+        "title": "What You Get",
+        "liveSpeakingClasses": {
+          "title": "Live speaking classes",
+          "desc": "Small groups with real conversation"
+        },
+        "platformInYourLanguage": {
+          "title": "Platform in your language",
+          "desc": "UI and support in your native language"
+        },
+        "homeworkAssignments": {
+          "title": "Homework assignments",
+          "desc": "Structured practice between classes"
+        },
+        "lessonRecordings": {
+          "title": "Lesson recordings",
+          "desc": "Review and catch up anytime"
+        },
+        "vocabTrainer": {
+          "title": "Vocabulary trainer",
+          "desc": "Build and reinforce vocabulary"
+        },
+        "progressTracking": {
+          "title": "Progress tracking",
+          "desc": "See your improvement over time"
+        }
+      },
+      "teachers": {
+        "title": "Meet your teachers",
+        "subtitle": "Certified teachers who speak your language and help you speak with confidence.",
+        "card": {
+          "credentials": "Certified \u2022 Bilingual \u2022 ESL Experience",
+          "languages": "English + Mongolian"
+        }
+      },
+      "results": {
+        "title": "Student Results",
+        "speakConfidently": {
+          "title": "Speak more confidently",
+          "desc": "Real conversation practice in every class"
+        },
+        "buildVocab": {
+          "title": "Build real vocabulary",
+          "desc": "Words you'll use, not just memorize"
+        },
+        "clearStructure": {
+          "title": "Clear weekly structure",
+          "desc": "Classes, homework, and progress you can count on"
+        }
+      },
+      "finalCta": {
+        "title": "Ready to try a real English class?",
+        "studentPricing": "See student pricing"
+      },
+      "heroImageAlt": "Gecko Academy student dashboard",
+      "platformImageAlt": "Gecko Academy platform"
+    },
+    "schools": {
+      "heroTitle": "English infrastructure for schools.",
+      "heroSubtitle": "License the Gecko platform by student seats. Add certified Gecko teachers to run live classes.",
+      "heroPrimary": "Book a Demo",
+      "heroSecondary": "See the Platform",
+      "trust": {
+        "localizedPlatform": "Localized platform",
+        "certifiedTeachers": "Certified teachers",
+        "structuredCurriculum": "Structured curriculum + homework"
+      },
+      "problem": {
+        "title": "Problem",
+        "lead": "Many schools struggle with English education:",
+        "bullet1": "Limited speaking practice",
+        "bullet2": "Inconsistent curriculum",
+        "bullet3": "Lack of fluent teachers",
+        "bullet4": "No digital learning tools"
+      },
+      "solution": {
+        "title": "Solution",
+        "lead": "Gecko provides:",
+        "bullet1": "English learning platform",
+        "bullet2": "Structured curriculum",
+        "bullet3": "Homework and progress tracking",
+        "bullet4": "Certified teachers who speak the local language"
+      },
+      "howItWorks": {
+        "title": "How It Works",
+        "stepLabel": "Step {step}",
+        "step1": "School licenses platform seats",
+        "step2": "Choose platform only or platform + teacher",
+        "step3": "Students begin classes"
+      },
+      "platformFeatures": {
+        "title": "Platform Features",
+        "localLanguageUi": {
+          "title": "Local language UI",
+          "desc": "Platform in students' native language"
+        },
+        "curriculumLibrary": {
+          "title": "Curriculum library",
+          "desc": "Structured lessons and materials"
+        },
+        "homework": {
+          "title": "Homework + submissions",
+          "desc": "Assign and track assignments"
+        },
+        "progress": {
+          "title": "Progress tracking",
+          "desc": "Scores, activity, and reports"
+        },
+        "classManagement": {
+          "title": "Class management",
+          "desc": "Rosters, scheduling, and groups"
+        },
+        "dashboard": {
+          "title": "Teacher/admin dashboard",
+          "desc": "Full control and visibility"
+        }
+      },
+      "teacherAddon": {
+        "title": "Add Gecko Teachers (Optional)",
+        "subtitle": "Certified teachers who speak the local language, teach live classes, and follow Gecko curriculum.",
+        "card": {
+          "credentials": "Certified • Bilingual • ESL Experience",
+          "languages": "English + Mongolian"
+        }
+      },
+      "footerCta": {
+        "title": "Ready to bring Gecko to your school?"
+      },
+      "platformImageAlt": "Gecko Academy platform",
+      "platformFeaturesImageAlt": "Gecko school dashboard cards"
+    },
+    "trial": {
+      "heroTitle": "Try a Free English Class",
+      "heroSubtitle": "Join a live online class with a real American teacher and see how Gecko Academy works.",
+      "heroBullet1": "50-minute live class",
+      "heroBullet2": "Small groups (8–12 students)",
+      "heroBullet3": "Real speaking practice",
+      "heroBullet4": "No payment required",
+      "heroPrimary": "Book Free Trial",
+      "levelTitle": "Choose Your Level",
+      "level": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate / Advanced"
+      },
+      "bookingTitle": "Book Your Free Trial",
+      "bookingSubtitle": "Choose a time below to reserve your spot.",
+      "faqTitle": "Common Questions",
+      "faq": {
+        "q1": "Is the trial really free?",
+        "a1": "Yes. The trial class is completely free and there is no obligation to continue.",
+        "q2": "Do students need to prepare anything?",
+        "a2": "No preparation is needed. Just join the class and participate.",
+        "q3": "What happens after the trial?",
+        "a3": "If you enjoy the class, you can join a weekly class group with other students at the same level."
+      }
+    }
+  },
+  "pricingStudents": {
+    "heroTitle": "Gecko Academy — Pricing",
+    "heroSubtitle": "Live English classes with native-level teachers, weekend-friendly schedules, and a platform built for real progress.",
+    "heroPrimary": "Start Free Trial",
+    "heroSecondary": "For schools? View GeckoTeach pricing",
+    "heroSecondaryHref": "/schools/pricing",
+    "billingToggleLabel": "Billing",
+    "compareTitle": "Compare plans",
+    "addOnsTitle": "Add-ons",
+    "addOnsSubtitle": "Optional extras to deepen your learning. (Not yet available for purchase — coming with Stripe.)",
+    "faqTitle": "Frequently asked questions",
+    "faq": {
+      "q1": "What does the schedule look like?",
+      "a1": "Classes are scheduled on weekday evenings and weekends so they work around school and work. We offer weekend-friendly options so you can learn without missing other commitments.",
+      "q2": "How does the free trial work?",
+      "a2": "Start with a short free trial to meet your teacher and try the platform. No payment is required upfront. If you like it, you can choose a plan and continue.",
+      "q3": "Can I cancel or change plans?",
+      "a3": "Yes. You can upgrade, downgrade, or cancel your plan at any time. We'll prorate or refund as needed so you're never overcharged.",
+      "q4": "How do you place me in the right level?",
+      "a4": "We use a short placement process (and sometimes a quick conversation with a teacher) to put you in a group that matches your level and goals."
+    },
+    "finalCta": {
+      "headline": "Start learning with Gecko Academy",
+      "subline": "Join a small group, get live feedback, and use the platform on your schedule.",
+      "primary": "Start Free Trial",
+      "secondary": "Contact us"
+    }
+  },
+  "pricingSchools": {
+    "heroTitle": "GeckoTeach — Pricing for Schools",
+    "heroSubtitle": "Native English teachers and a full platform for your school. Scale from platform-only to a full program partnership.",
+    "heroPrimary": "Book a Demo",
+    "heroSecondary": "For students? View Gecko Academy pricing",
+    "heroSecondaryHref": "/pricing",
+    "compareTitle": "Compare plans",
+    "faqTitle": "Frequently asked questions",
+    "faq": {
+      "q1": "Do you provide native English teachers?",
+      "a1": "Yes. GeckoTeach includes optional native English teachers who work with your students on our platform. You get both the platform and teaching support — curriculum, classes, and tracking in one place.",
+      "q2": "How do I get a custom quote?",
+      "a2": "Book a demo and we'll walk you through the platform, discuss your student count and goals, and provide a tailored quote. Pricing depends on seats and whether you add Gecko teachers.",
+      "q3": "Can we use only the platform with our own teachers?",
+      "a3": "Yes. The Platform Only tier gives you the full GeckoTeach platform — placement tests, classroom management, teacher dashboard, recordings, and analytics — for your own teachers to use.",
+      "q4": "Is teacher training included?",
+      "a4": "Full Program Partner plans include teacher training and academic reporting. Platform + Teachers and Platform Only can add training as an optional service. Ask during your demo."
+    },
+    "finalCta": {
+      "headline": "Ready to bring Gecko to your school?",
+      "subline": "Book a demo to see the platform and get a custom quote for your students.",
+      "primary": "Book a Demo",
+      "secondary": "Contact us"
+    }
+  },
+  "trial": {},
+  "classroom": {
+    "composer": {
+      "fileLabel": "File (PDF, PNG, JPG — max 10 MB)",
+      "urlLabel": "URL",
+      "urlPlaceholder": "https://..."
+    },
+    "backToDashboard": "Back to dashboard",
+    "people": "People",
+    "attendance": "Attendance",
+    "nextClass": "Next class",
+    "todo": "To-do",
+    "none": "None",
+    "pendingCount": "{count} pending",
+    "viewDetails": "View details"
+  },
+  "schedule": {
+    "weekdays": {
+      "short": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
+    "yourTimezone": "Your timezone: {tz}",
+    "classesOn": "Classes on",
+    "close": "Close",
+    "join": "Join",
+    "openClassroom": "Open classroom",
+    "classTimezone": "Class timezone: {tz}"
+  },
+  "homework": {
+    "noDueDate": "No due date",
+    "notSubmitted": "Not submitted",
+    "submittedOn": "Submitted {date}",
+    "backToHomework": "← Back to homework",
+    "instructions": "Instructions",
+    "downloadWorksheet": "Download worksheet",
+    "yourSubmission": "Your submission",
+    "note": "Note",
+    "files": "Files",
+    "teacherFeedback": "Teacher feedback",
+    "scoreLabel": "Score: {score}%",
+    "resubmit": "Resubmit",
+    "submitHomework": "Submit homework",
+    "uploadHint": "Upload images (JPG, PNG, WebP) or audio (MP3, M4A, WAV). Max 20 MB per file.",
+    "filesLabel": "Files",
+    "dragDrop": "Drag and drop files, or browse",
+    "browse": "Browse",
+    "remove": "Remove",
+    "optionalNote": "Optional note",
+    "notePlaceholder": "Add a note for your teacher...",
+    "submit": "Submit",
+    "noHomeworkYet": "No homework assignments yet. Check back later.",
+    "viewAndSubmit": "View and submit your homework assignments",
+    "open": "Open",
+    "due": "Due:"
+  },
+  "learning": {
+    "title": "Learning",
+    "subtitle": "Study with quizzes and beginner-friendly flashcards.",
+    "quizzes": "Quizzes",
+    "flashcards": "Flashcards",
+    "thisMonth": "This month",
+    "previousMonths": "Previous months",
+    "studied": "Studied",
+    "accuracy": "Accuracy",
+    "savedWords": "Saved Words",
+    "mySavedWords": "My Saved Words",
+    "mySavedWordsDesc": "Review only the cards you bookmarked.",
+    "study": "Study",
+    "assignedDecks": "Assigned decks",
+    "cardsCount": "{count} cards",
+    "lastStudied": "Last studied {date}",
+    "notStartedYet": "Not started yet",
+    "thisMonthPct": "{percent}% this month",
+    "noDecksAssigned": "No flashcard decks are assigned to your classes yet.",
+    "flashcardsSettingUp": "Flashcards are being set up",
+    "flashcardsNotReady": "Flashcard storage is not ready in this environment yet. Run database migrations and refresh this page shortly.",
+    "quizSnapshot": "Quiz snapshot",
+    "assigned": "Assigned",
+    "completion": "Completion",
+    "avgThisMonth": "Avg this month",
+    "mySavedWordsPageSubtitle": "Practice your bookmarked cards anytime.",
+    "deckSubtitle": "Flip, self-grade, and save important words as you study.",
+    "emptySaved": "You have not saved any words yet. Open a deck and tap save on the back side.",
+    "emptyDeck": "This deck has no cards yet.",
+    "back": "Back",
+    "cardOf": "Card {current} of {total}",
+    "sessionComplete": "Session complete",
+    "correctOutOf": "{correct} correct out of {attempted}",
+    "studyAgain": "Study again",
+    "done": "Done",
+    "wrongAria": "Wrong",
+    "correctAria": "Correct"
+  },
+  "quizzes": {
+    "addQuestion": {
+      "title": "Add question",
+      "promptPlaceholder": "Enter your question...",
+      "promptLabel": "Question prompt",
+      "optionsLabel": "Options (minimum 2)",
+      "optionPlaceholder": "Option {letter}",
+      "correctLabel": "Correct",
+      "cancel": "Cancel",
+      "saveQuestion": "Save question",
+      "saving": "Saving..."
+    },
+    "thisWeek": "This week",
+    "review": "Review",
+    "startQuiz": "Start quiz",
+    "allQuizzes": "All quizzes",
+    "noQuizzesYet": "No quizzes yet",
+    "noQuizzesYetDesc": "Your teacher will post weekly quizzes here.",
+    "showingCount": "Showing {count} quiz",
+    "showingCountPlural": "Showing {count} quizzes",
+    "weeklyQuizzes": "Weekly quizzes from your class.",
+    "lastQuiz": "Last quiz",
+    "completion": "Completion",
+    "avgScore30d": "Avg score (30d)"
+  },
+  "join": {
+    "backToDashboard": "Back to dashboard",
+    "joinAClass": "Join a class",
+    "enterClassCode": "Enter class code",
+    "enterClassCodeDesc": "Ask your teacher or school for the class code. Enter it below to join the class and see upcoming sessions.",
+    "classCode": "Class code",
+    "classCodePlaceholder": "e.g. ABC123",
+    "joining": "Joining...",
+    "joinClass": "Join class"
+  },
+  "auth": {
+    "login": {
+      "title": {
+        "signin": "Welcome back",
+        "signup": "Create your account"
+      },
+      "subtitle": {
+        "signin": "Sign in to continue learning with Gecko Academy.",
+        "signup": "Set up your Gecko Academy account in a few steps."
+      },
+      "badge": "Safe, calm learning",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": {
+        "signin": "Sign in",
+        "signup": "Sign up"
+      },
+      "loading": "Loading...",
+      "switchToSignup": "Don't have an account?",
+      "switchToSignupCta": "Sign up here",
+      "switchToSignin": "Already have an account?",
+      "switchToSigninCta": "Sign in here"
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "student": {
+        "main": "Main",
+        "settings": "Settings",
+        "dashboard": "Dashboard",
+        "learning": "Learning",
+        "myClass": "My class",
+        "people": "People",
+        "schedule": "Schedule",
+        "homework": "Homework",
+        "messages": "Messages",
+        "joinClass": "Join class",
+        "profile": "Profile",
+        "activity": "Activity"
+      },
+      "teacher": {
+        "main": "Main",
+        "settings": "Settings",
+        "dashboard": "Dashboard",
+        "classes": "Classes",
+        "quizzes": "Quizzes",
+        "flashcards": "Flashcards",
+        "students": "Students",
+        "schedule": "Schedule",
+        "homework": "Homework",
+        "messages": "Messages",
+        "team": "Team",
+        "general": "General",
+        "security": "Security"
+      },
+      "schoolAdmin": {
+        "main": "Main",
+        "settings": "Settings",
+        "dashboard": "Dashboard",
+        "students": "Students",
+        "schedule": "Schedule",
+        "classes": "Classes",
+        "homework": "Homework",
+        "messages": "Messages"
+      },
+      "admin": {
+        "main": "Main",
+        "settings": "Settings",
+        "dashboard": "Dashboard",
+        "users": "Users",
+        "classes": "Classes",
+        "homework": "Homework",
+        "messages": "Messages"
+      }
+    },
+    "student": {
+      "welcomeWithName": "Welcome back, {name}",
+      "welcome": "Welcome back",
+      "subtitle": "Your progress and upcoming sessions",
+      "joinedBanner": "You joined the class successfully. Your upcoming sessions appear below.",
+      "classCard": {
+        "title": "Your class",
+        "body": "Use a class code from your teacher to join, or contact support.",
+        "cta": "Join with class code"
+      },
+      "avgScoreTitle": "Avg score (30d)",
+      "attendanceTitle": "Attendance rate (30d)",
+      "quizzesCompletedTitle": "Quizzes completed",
+      "nextClassTitle": "Next class",
+      "nextClassToday": "Today",
+      "nextClassEmpty": "No upcoming sessions. Check back later or ask your teacher.",
+      "nextClassOpenClassroom": "Open classroom",
+      "nextClassJoinMeeting": "Join meeting",
+      "nextClassJoinMeetingDisabled": "Join meeting",
+      "upcomingSessionsTitle": "Upcoming sessions",
+      "whatToDoNextTitle": "What to do next",
+      "whatToDoNextCompleteQuiz": "Complete {quizTitle}",
+      "whatToDoNextJoinNextClass": "Join your next class {date}.",
+      "whatToDoNextAllCaughtUp": "You're all caught up. Check back later for new sessions.",
+      "myProgressTitle": "My progress",
+      "myProgress30d": "30-day average",
+      "myProgressGoalAway": "You are {percent}% away from your 80% goal.",
+      "myProgressGoalReached": "You've reached your 80% goal.",
+      "myProgressViewScores": "View all scores",
+      "needsAttentionTitle": "Needs attention",
+      "needsAttentionIncompleteQuiz": "You have not completed {quizTitle}",
+      "needsAttentionPrefix": "You have not completed ",
+      "needsAttentionNoActivity": "No activity in 7 days. Complete a quiz to stay on track.",
+      "needsAttentionOpenLearning": "Open learning",
+      "avgScoreAria": "Average score: {percent} percent",
+      "avgScoreNotAvailable": "Average score not available",
+      "attendanceAria": "Attendance rate: {percent} percent",
+      "quizzesCompletedAria": "{count} quizzes completed",
+      "status": {
+        "startTakingQuizzes": "Start taking quizzes to see your progress",
+        "onTrack": "On track",
+        "keepImproving": "Keep improving",
+        "needsAttention": "Needs attention"
+      }
+    }
+  },
+  "schoolAdmin": {
+    "dashboard": {
+      "title": "School Admin Dashboard",
+      "subtitle": "How are classes doing right now?",
+      "activeStudents": "Active students",
+      "activeClasses": "Active classes",
+      "avgQuizScoreLabel": "Avg quiz score (7d / 30d)",
+      "completionRate30d": "Completion rate (30d)",
+      "classes": "Classes",
+      "clickToSort": "Click column headers to sort.",
+      "noClassesYet": "No classes yet.",
+      "needsAttention": "Needs attention",
+      "lowScoreClasses": "Classes with avg score < 70%",
+      "inactiveStudents14d": "Students with 0 attempts in 14 days",
+      "lowAttemptQuizzes": "Quizzes < 50% attempted",
+      "nothingNeedsAttention": "Nothing needs attention right now.",
+      "manageClasses": "Manage classes"
+    },
+    "classTable": {
+      "class": "Class",
+      "teacher": "Teacher",
+      "students": "Students",
+      "avgScore30d": "Avg score (30d)",
+      "attemptRate30d": "Attempt rate (30d)",
+      "lastActivity": "Last activity",
+      "status": "Status",
+      "onTrackTitle": "On track",
+      "onTrackAria": "On track",
+      "needsAttentionTitle": "Needs attention: low activity or quiz attempts",
+      "needsAttentionAria": "Needs attention: low activity or quiz attempts"
+    },
+    "students": {
+      "title": "Students",
+      "myClasses": "My Classes",
+      "myClassesDesc": "All classes. View roster or open classroom.",
+      "noClassesYet": "No classes yet.",
+      "studentsCount": "{count} student",
+      "studentsCount_other": "{count} students",
+      "roster": "Roster",
+      "classroom": "Classroom",
+      "studentsAcrossClasses": "Students across classes",
+      "studentsAcrossDesc": "View students enrolled in classes.",
+      "noStudentsMatch": "No students match your filters.",
+      "tableStudent": "Student",
+      "tableClass": "Class",
+      "geckoLevel": "Gecko level",
+      "tableStatus": "Status",
+      "statusActive": "active",
+      "statusPaused": "paused"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name or email",
+      "searchSrOnly": "Search",
+      "allClasses": "All classes",
+      "apply": "Apply"
+    },
+    "schedule": {
+      "title": "Schedule"
+    },
+    "people": {
+      "title": "People",
+      "classRosters": "Class rosters",
+      "classRostersDesc": "View teachers and students for each class.",
+      "noClassesYet": "No classes yet."
+    },
+    "calendar": {
+      "title": "Calendar",
+      "upcomingClasses": "Upcoming classes",
+      "nextDaysTimezone": "Next {days} days · your timezone: {timezone}",
+      "nextDaysLabel": "Next {days} days",
+      "filterClass": "Class",
+      "filterDays": "Days",
+      "filterAllClasses": "All classes",
+      "days14": "14 days",
+      "days30": "30 days",
+      "emptyRange": "No classes scheduled in this range."
+    },
+    "attendance": {
+      "titleThisMonth": "Attendance — This month",
+      "overall": "Overall",
+      "lateRate": "Late rate",
+      "avgParticipation": "Avg participation",
+      "atRiskStudents": "At-risk students"
+    }
+  },
+  "teacher": {
+    "dashboard": {
+      "title": "Teacher Dashboard",
+      "subtitle": "What do I teach today? Are my students keeping up? Where do I need to act?",
+      "nextSession": "Next session",
+      "noUpcomingSessions": "No upcoming sessions.",
+      "join": "Join",
+      "avgQuizScore30d": "Avg quiz score (30d)",
+      "attemptRate30d": "Attempt rate (30d)",
+      "inactiveStudents": "Inactive students",
+      "needsAttention": "Needs attention",
+      "nothingNeedsAttention": "Nothing needs attention right now.",
+      "inactiveStudentLabel": "0 quiz attempts in 14 days",
+      "lowCompletionLabel": "{className} · {percent}% attempted",
+      "viewAll": "View all"
+    },
+    "myClasses": {
+      "title": "My Classes",
+      "desc": "Classes you teach. View roster or open classroom.",
+      "noClassesYet": "You are not assigned to any classes yet.",
+      "studentsCount": "{count} student",
+      "studentsCount_other": "{count} students",
+      "roster": "Roster",
+      "classroom": "Classroom",
+      "days30": "30 Days"
+    },
+    "students": {
+      "title": "Students",
+      "studentsAcrossClasses": "Students across your classes",
+      "studentsAcrossDesc": "View students enrolled in classes you teach.",
+      "noStudentsMatch": "No students match your filters.",
+      "tableStudent": "Student",
+      "tableClass": "Class",
+      "geckoLevel": "Gecko level",
+      "tableStatus": "Status",
+      "statusActive": "active",
+      "statusPaused": "paused",
+      "actions": "Actions",
+      "message": "Message"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name or email",
+      "searchSrOnly": "Search",
+      "allClasses": "All classes",
+      "apply": "Apply"
+    },
+    "schedule": { "title": "Schedule" },
+    "people": {
+      "title": "People",
+      "classRosters": "Class rosters",
+      "classRostersDesc": "View teachers and students for each of your classes.",
+      "noClassesYet": "You are not assigned to any classes yet."
+    },
+    "calendar": {
+      "title": "Calendar",
+      "upcomingClasses": "Upcoming classes",
+      "nextDaysTimezone": "Next {days} days · your timezone: {timezone}",
+      "nextDaysLabel": "Next {days} days",
+      "filterClass": "Class",
+      "filterDays": "Days",
+      "filterAllClasses": "All classes",
+      "days14": "14 days",
+      "days30": "30 days",
+      "emptyRange": "No classes scheduled in this range."
+    },
+    "flashcards": {
+      "title": "Flashcards",
+      "subtitle": "Create decks, add cards, and publish them to students.",
+      "createNewDeck": "Create new deck",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description",
+      "scopeLabel": "Scope",
+      "scopeClass": "Class",
+      "classLabel": "Class (for class scope)",
+      "selectClass": "Select class",
+      "createDeck": "Create deck",
+      "yourDecks": "Your decks",
+      "noDecksYet": "No decks yet.",
+      "cardsCount": "{count} cards",
+      "global": "Global",
+      "classDeck": "Class deck",
+      "published": "Published",
+      "draft": "Draft",
+      "manage": "Manage",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "backToFlashcards": "Back to Flashcards",
+      "cardsInDeck": "{count} cards in this deck.",
+      "deckDetails": "Deck details",
+      "saveDeck": "Save deck",
+      "addCard": "Add card",
+      "frontLabel": "Front",
+      "backLabel": "Back",
+      "exampleLabel": "Example",
+      "frontPlaceholder": "English word or phrase",
+      "backPlaceholder": "Meaning or simple definition",
+      "examplePlaceholder": "Optional sentence example",
+      "addCardButton": "Add card",
+      "cards": "Cards",
+      "noCardsYet": "No cards yet.",
+      "saveCard": "Save card",
+      "remove": "Remove",
+      "titlePlaceholder": "e.g. Week 5 Vocabulary",
+      "descriptionPlaceholder": "Optional note for students."
+    },
+    "classes": {
+      "title": "Classes",
+      "subtitle": "Overview of class health and status. Open a classroom to post materials and manage your class.",
+      "noClassesYet": "You are not assigned to any classes yet.",
+      "filterAll": "All",
+      "filterNeedsAttention": "Needs attention",
+      "filterActiveToday": "Active today",
+      "ofClasses": "{filtered} of {total} classes",
+      "roster": "Roster",
+      "openClassroom": "Open classroom",
+      "noUpcomingSession": "No upcoming session",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "student": "{count} student",
+      "student_other": "{count} students",
+      "quiz": "{count} quiz",
+      "quiz_other": "{count} quizzes",
+      "homework": "{count} homework",
+      "noClassesMatchFilter": "No classes match this filter."
+    },
+    "quizzes": {
+      "title": "Quizzes",
+      "subtitle": "Create and manage weekly quizzes for your classes.",
+      "newQuiz": "New quiz",
+      "drafts": "Drafts",
+      "published": "Published",
+      "noDraftsYet": "No draft quizzes yet.",
+      "noPublishedYet": "No published quizzes yet.",
+      "edit": "Edit",
+      "results": "Results",
+      "backToQuizzes": "Back to Quizzes",
+      "newQuizTitle": "New quiz",
+      "newQuizSubtitle": "Create a quiz and assign it to one or more classes.",
+      "quizDetails": "Quiz details",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. Week 3 vocabulary quiz",
+      "descriptionOptional": "Description (optional)",
+      "descriptionPlaceholder": "Short note about this quiz.",
+      "assignToClasses": "Assign to classes",
+      "selectAtLeastOne": "Select at least one class",
+      "saveQuiz": "Save quiz",
+      "editQuizTitle": "Edit quiz",
+      "publishedOrDraft": "Published",
+      "publishedOrDraftDraft": "Draft",
+      "publishQuiz": "Publish quiz",
+      "questions": "Questions",
+      "addOneToPublish": "Add at least one question to publish.",
+      "questionsCount": "{count} question(s)",
+      "noQuestionsYet": "No questions yet.",
+      "questionNumber": "Question {number}",
+      "correct": "(correct)",
+      "remove": "Remove",
+      "addQuestion": "Add question",
+      "resultsTitle": "Quiz results",
+      "submissions": "Submissions",
+      "averageScore": "Average score",
+      "studentScores": "Student scores",
+      "noSubmissionsYet": "No submissions yet.",
+      "student": "Student",
+      "submitted": "Submitted",
+      "score": "Score"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "auth": {
+      "invalidCredentials": "Invalid email or password. Please try again.",
+      "createUserFailed": "Failed to create user. Please try again.",
+      "createTeamFailed": "Failed to create team. Please try again.",
+      "invalidOrExpiredInvitation": "Invalid or expired invitation.",
+      "updatePassword": {
+        "incorrect": "Current password is incorrect.",
+        "sameAsCurrent": "New password must be different from the current password.",
+        "mismatch": "New password and confirmation password do not match."
+      },
+      "deleteAccount": {
+        "incorrectPassword": "Incorrect password. Account deletion failed."
+      },
+      "userNotInTeam": "User is not part of a team",
+      "alreadyTeamMember": "User is already a member of this team",
+      "invitationExists": "An invitation has already been sent to this email"
+    }
+  }
+}
