@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { BookOpen, UsersRound } from 'lucide-react';
 import type { ClassHealthRow } from '@/lib/db/queries/education';
@@ -23,18 +24,22 @@ function formatScheduleSummary(c: ClassHealthRow): string {
   return parts.join(' · ') || '—';
 }
 
-function formatNextSession(at: Date | null): string {
-  if (!at) return 'No upcoming session';
+function formatNextSession(
+  at: Date | null,
+  t: (key: string, values?: Record<string, string | number>) => string
+): string {
+  if (!at) return t('noUpcomingSession');
   const d = new Date(at);
   const today = new Date();
   const isToday = d.toDateString() === today.toDateString();
+  const timeStr = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
   if (isToday) {
-    return `Today ${d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+    return `${t('today')} ${timeStr}`;
   }
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   if (d.toDateString() === tomorrow.toDateString()) {
-    return `Tomorrow ${d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+    return `${t('tomorrow')} ${timeStr}`;
   }
   return d.toLocaleDateString(undefined, {
     weekday: 'short',
@@ -59,6 +64,7 @@ function needsAttention(c: ClassHealthRow): boolean {
 type Filter = 'all' | 'needs_attention' | 'active_today';
 
 export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
+  const t = useTranslations('teacher.classes');
   const [filter, setFilter] = useState<Filter>('all');
 
   const filtered = useMemo(() => {
@@ -71,7 +77,7 @@ export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
   if (classes.length === 0) {
     return (
       <p className="py-12 text-center text-sm text-muted-foreground">
-        You are not assigned to any classes yet.
+        {t('noClassesYet')}
       </p>
     );
   }
@@ -82,11 +88,11 @@ export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
       <div className="flex flex-wrap gap-2">
         {(
           [
-            { value: 'all' as const, label: 'All' },
-            { value: 'needs_attention' as const, label: 'Needs attention' },
-            { value: 'active_today' as const, label: 'Active today' },
+            { value: 'all' as const, labelKey: 'filterAll' as const },
+            { value: 'needs_attention' as const, labelKey: 'filterNeedsAttention' as const },
+            { value: 'active_today' as const, labelKey: 'filterActiveToday' as const },
           ] as const
-        ).map(({ value, label }) => (
+        ).map(({ value, labelKey }) => (
           <button
             key={value}
             onClick={() => setFilter(value)}
@@ -96,11 +102,11 @@ export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
                 : 'bg-gray-100 text-muted-foreground hover:bg-gray-200'
             }`}
           >
-            {label}
+            {t(labelKey)}
           </button>
         ))}
         <span className="ml-2 self-center text-xs text-muted-foreground">
-          {filtered.length} of {classes.length} classes
+          {t('ofClasses', { filtered: filtered.length, total: classes.length })}
         </span>
       </div>
 
@@ -125,15 +131,15 @@ export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
 
             {/* Status indicators */}
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <span>{c.studentCount} student{c.studentCount !== 1 ? 's' : ''}</span>
-              <span>{formatNextSession(c.nextSessionAt)}</span>
+              <span>{t('student', { count: c.studentCount })}</span>
+              <span>{formatNextSession(c.nextSessionAt, t)}</span>
               {(c.quizCount > 0 || c.homeworkCount > 0) && (
                 <span>
-                  {[c.quizCount > 0 && `${c.quizCount} quiz${c.quizCount !== 1 ? 'zes' : ''}`]
+                  {[c.quizCount > 0 && t('quiz', { count: c.quizCount })]
                     .filter(Boolean)
                     .concat(
                       c.homeworkCount > 0
-                        ? [`${c.homeworkCount} homework`]
+                        ? [t('homework', { count: c.homeworkCount })]
                         : []
                     )
                     .join(' · ')}
@@ -145,13 +151,13 @@ export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
               <Button variant="outline" size="sm" asChild className="rounded-full">
                 <Link href={`/classroom/${c.id}/people`}>
                   <UsersRound className="mr-1.5 h-4 w-4" />
-                  Roster
+                  {t('roster')}
                 </Link>
               </Button>
               <Button variant="primary" size="sm" asChild className="rounded-full bg-[#7daf41] hover:bg-[#6c9b38]">
                 <Link href={`/classroom/${c.id}`}>
                   <BookOpen className="mr-1.5 h-4 w-4" />
-                  Open classroom
+                  {t('openClassroom')}
                 </Link>
               </Button>
             </div>
@@ -161,7 +167,7 @@ export function ClassHealthCards({ classes }: { classes: ClassHealthRow[] }) {
 
       {filtered.length === 0 && filter !== 'all' && (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          No classes match this filter.
+          {t('noClassesMatchFilter')}
         </p>
       )}
     </div>

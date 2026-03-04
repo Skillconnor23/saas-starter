@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { getTranslations, getLocale } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import {
   getSchoolAdminKpis,
@@ -16,6 +17,10 @@ import { SchoolAdminClassTable } from './SchoolAdminClassTable';
 
 export default async function SchoolAdminDashboardPage() {
   await requireRole(['school_admin']);
+  const locale = await getLocale();
+  const t = await getTranslations('schoolAdmin.dashboard');
+  const tAttendance = await getTranslations('schoolAdmin.attendance');
+  const tCommon = await getTranslations('common');
 
   const [kpis, classRows, needsAttention, schoolAttendanceSummary] = await Promise.all([
     getSchoolAdminKpis(),
@@ -30,10 +35,10 @@ export default async function SchoolAdminDashboardPage() {
   return (
     <section className="flex-1">
       <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] mb-2 tracking-tight">
-        School Admin Dashboard
+        {t('title')}
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        How are classes doing right now?
+        {t('subtitle')}
       </p>
 
       {/* Attendance This Month */}
@@ -43,6 +48,12 @@ export default async function SchoolAdminDashboardPage() {
           lateRate={schoolAttendanceSummary.lateRate}
           participationAvg={schoolAttendanceSummary.participationAvg}
           atRiskCount={schoolAttendanceSummary.atRiskCount}
+          title={tAttendance('titleThisMonth')}
+          overallLabel={tAttendance('overall')}
+          lateRateLabel={tAttendance('lateRate')}
+          avgParticipationLabel={tAttendance('avgParticipation')}
+          atRiskLabel={tAttendance('atRiskStudents')}
+          viewDetailsLabel={tCommon('viewDetails')}
         />
       </div>
 
@@ -51,7 +62,7 @@ export default async function SchoolAdminDashboardPage() {
         <div className="flex items-center justify-between gap-3 rounded-xl bg-[#429ead] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
           <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#ffffff] sm:mb-1">
             <Users className="h-4 w-4 shrink-0 text-[#ffffff]" />
-            <span>Active students</span>
+            <span>{t('activeStudents')}</span>
           </div>
           <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
             {kpis.activeStudents}
@@ -60,7 +71,7 @@ export default async function SchoolAdminDashboardPage() {
         <div className="flex items-center justify-between gap-3 rounded-xl bg-[#7daf41] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
           <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#ffffff] sm:mb-1">
             <GraduationCap className="h-4 w-4 shrink-0 text-[#ffffff]" />
-            <span>Active classes</span>
+            <span>{t('activeClasses')}</span>
           </div>
           <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
             {kpis.activeClasses}
@@ -68,7 +79,7 @@ export default async function SchoolAdminDashboardPage() {
         </div>
         <div className="flex items-center justify-between gap-3 rounded-xl bg-[#b64b29] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
           <div className="text-sm font-medium text-[#ffffff] sm:mb-1">
-            Avg quiz score (7d / 30d)
+            {t('avgQuizScoreLabel')}
           </div>
           <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
             {kpis.avgQuizScore7d != null ? `${kpis.avgQuizScore7d}%` : '—'}
@@ -79,7 +90,7 @@ export default async function SchoolAdminDashboardPage() {
         <div className="flex items-center justify-between gap-4 rounded-xl bg-[#ffaa00] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-3">
           <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#ffffff] sm:mb-1">
             <BookOpen className="h-4 w-4 shrink-0 text-[#ffffff]" />
-            <span>Completion rate (30d)</span>
+            <span>{t('completionRate30d')}</span>
           </div>
           <div className="flex items-center gap-3 sm:justify-between">
             <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
@@ -105,15 +116,15 @@ export default async function SchoolAdminDashboardPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Classes</CardTitle>
+              <CardTitle>{t('classes')}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Click column headers to sort.
+                {t('clickToSort')}
               </p>
             </CardHeader>
             <CardContent>
               {classRows.length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">
-                  No classes yet.
+                  {t('noClassesYet')}
                 </p>
               ) : (
                 <SchoolAdminClassTable rows={classRows} />
@@ -128,14 +139,14 @@ export default async function SchoolAdminDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
-                Needs attention
+                {t('needsAttention')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {needsAttention.lowScoreClasses.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">
-                    Classes with avg score &lt; 70%
+                    {t('lowScoreClasses')}
                   </p>
                   <ul className="space-y-1">
                     {needsAttention.lowScoreClasses.map((c) => (
@@ -157,7 +168,7 @@ export default async function SchoolAdminDashboardPage() {
               {needsAttention.inactiveStudents.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">
-                    Students with 0 attempts in 14 days
+                    {t('inactiveStudents14d')}
                   </p>
                   <ul className="space-y-1">
                     {needsAttention.inactiveStudents.map((s) => (
@@ -176,7 +187,7 @@ export default async function SchoolAdminDashboardPage() {
               {needsAttention.lowAttemptQuizzes.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">
-                    Quizzes &lt; 50% attempted
+                    {t('lowAttemptQuizzes')}
                   </p>
                   <ul className="space-y-1">
                     {needsAttention.lowAttemptQuizzes.map((q) => (
@@ -194,16 +205,16 @@ export default async function SchoolAdminDashboardPage() {
                 needsAttention.inactiveStudents.length === 0 &&
                 needsAttention.lowAttemptQuizzes.length === 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Nothing needs attention right now.
+                    {t('nothingNeedsAttention')}
                   </p>
                 )}
             </CardContent>
           </Card>
 
           <Button asChild className="mt-4 w-full rounded-full bg-[#429ead] text-white hover:bg-[#36899a]">
-            <Link href="/dashboard/admin/classes">
+            <Link href={`/${locale}/dashboard/admin/classes`}>
               <GraduationCap className="mr-2 h-4 w-4" />
-              Manage classes
+              {t('manageClasses')}
             </Link>
           </Button>
         </div>

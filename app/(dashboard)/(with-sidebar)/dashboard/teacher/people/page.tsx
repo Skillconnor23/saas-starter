@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getScheduleSummaryForUser } from '@/lib/db/queries/education';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Users, ChevronRight } from 'lucide-react';
 
 export default async function TeacherPeoplePage() {
   const user = await requireRole(['teacher']);
+  const t = await getTranslations('teacher.people');
   const classes = await getScheduleSummaryForUser(user.id, 'teacher');
 
   return (
@@ -16,19 +18,19 @@ export default async function TeacherPeoplePage() {
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="text-lg lg:text-2xl font-medium mb-6 flex items-center gap-2">
           <Users className="h-6 w-6" />
-          People
+          {t('title')}
         </h1>
         <Card>
           <CardHeader>
-            <CardTitle>Class rosters</CardTitle>
+            <CardTitle>{t('classRosters')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              View teachers and students for each of your classes.
+              {t('classRostersDesc')}
             </p>
           </CardHeader>
           <CardContent>
             {classes.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4">
-                You are not assigned to any classes yet.
+                {t('noClassesYet')}
               </p>
             ) : (
               <ul className="space-y-2">

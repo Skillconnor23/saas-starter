@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, CalendarDays, ChevronDown } from "lucide-react";
 import type { CalendarEventClient } from "@/lib/schedule/calendar-events";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,6 @@ type DayCell = {
   date: Date;
   inCurrentMonth: boolean;
 };
-
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function startOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -149,6 +148,7 @@ export function MonthCalendar({
   initialEvents,
   viewerTimezone,
 }: Props) {
+  const tSchedule = useTranslations('schedule');
   const initialMonthDate = startOfMonth(new Date(initialMonthStart));
   const initialMonthEndDate = endOfMonth(initialMonthDate);
   const today = new Date();
@@ -276,7 +276,15 @@ export function MonthCalendar({
 
       {/* Weekday labels */}
       <div className="hidden sm:grid grid-cols-7 text-center text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-        {WEEKDAY_LABELS.map((label) => (
+        {[
+          tSchedule('weekdays.short.sun'),
+          tSchedule('weekdays.short.mon'),
+          tSchedule('weekdays.short.tue'),
+          tSchedule('weekdays.short.wed'),
+          tSchedule('weekdays.short.thu'),
+          tSchedule('weekdays.short.fri'),
+          tSchedule('weekdays.short.sat'),
+        ].map((label) => (
           <div key={label} className="py-1">
             {label}
           </div>

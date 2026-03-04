@@ -1,26 +1,42 @@
+import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { locales, defaultLocale, localeCookieName } from './lib/i18n/config';
 import { signToken, verifyToken } from '@/lib/auth/session';
 
-const protectedRoutePrefixes = ['/dashboard', '/onboarding', '/classroom'];
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'always',
+  // Use the same cookie name everywhere so manual setting in the language
+  // switcher keeps redirects consistent.
+  localeCookie: { name: localeCookieName, sameSite: 'lax' as const }
+});
 
+const protectedRoutePrefixes = ['/dashboard', '/onboarding', '/classroom'];
 const legacyMarketingPaths = ['/home', '/landing', '/marketing', '/site'];
 
-export async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
-  const isProtectedRoute = protectedRoutePrefixes.some((p) => pathname.startsWith(p));
+  // Strip locale prefix so /en/dashboard and /mn/dashboard both match
+  const pathWithoutLocale = pathname.replace(/^\/(en|mn)/, '') || '/';
+  const isProtectedRoute = protectedRoutePrefixes.some((p) => pathWithoutLocale.startsWith(p));
 
-  // Redirect old starter landing routes to default landing (/academy)
-  if (legacyMarketingPaths.includes(pathname)) {
+  // Redirect old starter landing routes to default marketing entry (locale-agnostic).
+  if (legacyMarketingPaths.includes(pathWithoutLocale) || legacyMarketingPaths.includes(pathname)) {
     return NextResponse.redirect(new URL('/academy', request.url));
   }
 
+  // If route is protected and no session, send to sign-in (preserve locale if present).
   if (isProtectedRoute && !sessionCookie) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+    const localeSegment = pathname.startsWith('/en') ? '/en' : pathname.startsWith('/mn') ? '/mn' : '';
+    const signInPath = localeSegment ? `${localeSegment}/sign-in` : '/sign-in';
+    return NextResponse.redirect(new URL(signInPath, request.url));
   }
 
-  let res = NextResponse.next();
+  // First run next-intl middleware to handle locale detection & routing.
+  let res = intlMiddleware(request);
 
   if (sessionCookie && request.method === 'GET') {
     try {
@@ -51,6 +67,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-  runtime: 'nodejs'
+  matcher: [
+    // Apply middleware to everything except API routes, Next internals, and static files.
+    '/((?!api|_next|.*\\..*).*)'
+  ]
 };

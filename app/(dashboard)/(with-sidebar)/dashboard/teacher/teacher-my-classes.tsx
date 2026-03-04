@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, UsersRound } from 'lucide-react';
@@ -46,11 +47,13 @@ function ScoreRing({
   size,
   strokeWidth,
   textClass = 'text-sm',
+  days30Label = '30 Days',
 }: {
   score: number | null;
   size: number;
   strokeWidth: number;
   textClass?: string;
+  days30Label?: string;
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -94,27 +97,28 @@ function ScoreRing({
           {score != null ? `${score}%` : '—'}
         </div>
       </div>
-      <span className="text-[10px] text-muted-foreground mt-1">30 Days</span>
+      <span className="text-[10px] text-muted-foreground mt-1">{days30Label}</span>
     </div>
   );
 }
 
-export function TeacherMyClasses({ classes }: Props) {
+export async function TeacherMyClasses({ classes }: Props) {
+  const t = await getTranslations('teacher.myClasses');
   return (
     <Card className="mb-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-[#7daf41]" aria-hidden />
-          My Classes
+          {t('title')}
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          Classes you teach. View roster or open classroom.
+          {t('desc')}
         </p>
       </CardHeader>
       <CardContent>
         {classes.length === 0 ? (
           <p className="py-6 text-sm text-muted-foreground">
-            You are not assigned to any classes yet.
+            {t('noClassesYet')}
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,29 +148,29 @@ export function TeacherMyClasses({ classes }: Props) {
                     {formatScheduleSummary(c)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {c.studentCount} student{c.studentCount !== 1 ? 's' : ''}
+                    {t('studentsCount', { count: c.studentCount })}
                   </p>
                   <div className="mt-4 flex flex-nowrap gap-2">
                   <Button variant="primary" size="sm" asChild>
                     <Link href={`/classroom/${c.id}/people`}>
                       <UsersRound className="mr-1.5 h-4 w-4" />
-                      Roster
+                      {t('roster')}
                     </Link>
                   </Button>
                   <Button variant="primary" size="sm" asChild>
                     <Link href={`/classroom/${c.id}`}>
                       <BookOpen className="mr-1.5 h-4 w-4" />
-                      Classroom
+                      {t('classroom')}
                     </Link>
                   </Button>
                 </div>
                 </div>
                 <div className="flex shrink-0 items-center md:items-start justify-end md:justify-start ml-0 md:ml-3">
                   <div className="md:hidden">
-                    <ScoreRing score={c.avgScore30d} size={68} strokeWidth={6} textClass="text-sm" />
+                    <ScoreRing score={c.avgScore30d} size={68} strokeWidth={6} textClass="text-sm" days30Label={t('days30')} />
                   </div>
                   <div className="hidden md:block">
-                    <ScoreRing score={c.avgScore30d} size={80} strokeWidth={7} textClass="text-base" />
+                    <ScoreRing score={c.avgScore30d} size={80} strokeWidth={7} textClass="text-base" days30Label={t('days30')} />
                   </div>
                 </div>
               </div>

@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClipboardCheck } from 'lucide-react';
 import { PARTICIPATION_MAX } from '@/lib/constants/attendance';
@@ -32,13 +35,14 @@ export function StudentAttendanceMonthCard({
   detailsHref = '/dashboard/attendance',
   title,
 }: StudentSummaryCardProps) {
-  const heading = title ?? 'This month';
+  const t = useTranslations('common');
+  const heading = title ?? t('thisMonth');
   return (
     <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <ClipboardCheck className="h-5 w-5 text-[#429ead]" aria-hidden />
-          Attendance — {heading}
+          {t('attendanceThisMonth', { title: heading })}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -53,14 +57,14 @@ export function StudentAttendanceMonthCard({
           className="h-16"
         />
         <p className="text-sm text-muted-foreground">
-          Participation avg: {formatAvg(participationAvg)}
+          {t('participationAvg', { value: formatAvg(participationAvg) })}
         </p>
         {detailsHref && (
           <Link
             href={detailsHref}
             className="inline-flex text-sm text-primary hover:underline"
           >
-            View details
+            {t('viewDetails')}
           </Link>
         )}
       </CardContent>
@@ -123,6 +127,13 @@ type SchoolSummaryCardProps = {
   participationAvg: number | null;
   atRiskCount: number;
   detailsHref?: string;
+  /** Optional translated labels (from schoolAdmin.attendance) */
+  title?: string;
+  overallLabel?: string;
+  lateRateLabel?: string;
+  avgParticipationLabel?: string;
+  atRiskLabel?: string;
+  viewDetailsLabel?: string;
 };
 
 export function SchoolAttendanceMonthCard({
@@ -131,33 +142,39 @@ export function SchoolAttendanceMonthCard({
   participationAvg,
   atRiskCount,
   detailsHref = '/dashboard/attendance',
+  title = 'Attendance — This month',
+  overallLabel = 'Overall',
+  lateRateLabel = 'Late rate',
+  avgParticipationLabel = 'Avg participation',
+  atRiskLabel = 'At-risk students',
+  viewDetailsLabel = 'View details',
 }: SchoolSummaryCardProps) {
   return (
     <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <ClipboardCheck className="h-5 w-5 text-[#429ead]" aria-hidden />
-          Attendance — This month
+          {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-lg font-semibold text-[#1f2937]">
-          Overall: {formatPct(attendanceRate)}
+          {overallLabel}: {formatPct(attendanceRate)}
         </p>
         <p className="text-sm text-muted-foreground">
-          Late rate: {formatPct(lateRate)}
+          {lateRateLabel}: {formatPct(lateRate)}
         </p>
         <p className="text-sm text-muted-foreground">
-          Avg participation: {formatAvg(participationAvg)}
+          {avgParticipationLabel}: {formatAvg(participationAvg)}
         </p>
         <p className="text-sm text-muted-foreground">
-          At-risk students: {atRiskCount}
+          {atRiskLabel}: {atRiskCount}
         </p>
         <Link
           href={detailsHref}
           className="inline-flex text-sm text-primary hover:underline"
         >
-          View details
+          {viewDetailsLabel}
         </Link>
       </CardContent>
     </Card>

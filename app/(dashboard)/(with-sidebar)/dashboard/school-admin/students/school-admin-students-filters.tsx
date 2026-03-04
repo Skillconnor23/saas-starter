@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
@@ -17,6 +19,8 @@ export function SchoolAdminStudentsFilters({
   currentParams,
 }: Props) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('schoolAdmin.filters');
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,7 +30,7 @@ export function SchoolAdminStudentsFilters({
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (classId && classId !== 'all') params.set('classId', classId);
-    router.push(`/dashboard/school-admin/students?${params.toString()}`);
+    router.push(`/${locale}/dashboard/school-admin/students?${params.toString()}`);
   }
 
   return (
@@ -37,13 +41,13 @@ export function SchoolAdminStudentsFilters({
       <div className="flex items-center gap-2">
         <Input
           name="search"
-          placeholder="Search by name or email"
+          placeholder={t('searchPlaceholder')}
           defaultValue={currentParams.search}
           className="w-48"
         />
         <Button type="submit" variant="outline" size="icon">
           <Search className="h-4 w-4" />
-          <span className="sr-only">Search</span>
+          <span className="sr-only">{t('searchSrOnly')}</span>
         </Button>
       </div>
       <select
@@ -51,7 +55,7 @@ export function SchoolAdminStudentsFilters({
         defaultValue={currentParams.classId ?? 'all'}
         className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
       >
-        <option value="all">All classes</option>
+        <option value="all">{t('allClasses')}</option>
         {classes.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
@@ -59,7 +63,7 @@ export function SchoolAdminStudentsFilters({
         ))}
       </select>
       <Button type="submit" size="sm">
-        Apply
+        {t('apply')}
       </Button>
     </form>
   );

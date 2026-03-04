@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import {
   getStudentsForTeacher,
@@ -36,6 +37,7 @@ export default async function TeacherStudentsPage({
 }) {
   const user = await requireRole(['teacher']);
   const params = await searchParams;
+  const t = await getTranslations('teacher.students');
 
   const [rows, classesWithDetails] = await Promise.all([
     getStudentsForTeacher(user.id, {
@@ -55,14 +57,14 @@ export default async function TeacherStudentsPage({
       <div className="mx-auto w-full max-w-5xl">
         <h1 className="mb-6 flex items-center gap-2 text-lg font-medium lg:text-2xl">
           <Users className="h-6 w-6" />
-          Students
+          {t('title')}
         </h1>
 
         <Card>
           <CardHeader>
-            <CardTitle>Students across your classes</CardTitle>
+            <CardTitle>{t('studentsAcrossClasses')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              View students enrolled in classes you teach.
+              {t('studentsAcrossDesc')}
             </p>
             <TeacherStudentsFilters
               classes={classesForFilter}
@@ -72,17 +74,17 @@ export default async function TeacherStudentsPage({
           <CardContent>
             {rows.length === 0 ? (
               <p className="py-6 text-sm text-muted-foreground">
-                No students match your filters.
+                {t('noStudentsMatch')}
               </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Gecko level</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('tableStudent')}</TableHead>
+                    <TableHead>{t('tableClass')}</TableHead>
+                    <TableHead>{t('geckoLevel')}</TableHead>
+                    <TableHead>{t('tableStatus')}</TableHead>
+                    <TableHead className="text-right">{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -113,13 +115,13 @@ export default async function TeacherStudentsPage({
                                 : 'bg-muted text-muted-foreground'
                           }`}
                         >
-                          {r.enrollmentStatus}
+                          {r.enrollmentStatus === 'active' ? t('statusActive') : r.enrollmentStatus === 'paused' ? t('statusPaused') : r.enrollmentStatus}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/dashboard/messages?start=${r.studentId}`}>
-                            Message
+                            {t('message')}
                           </Link>
                         </Button>
                       </TableCell>

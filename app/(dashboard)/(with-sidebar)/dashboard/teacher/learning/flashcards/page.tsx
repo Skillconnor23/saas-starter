@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import {
   createFlashcardDeckAction,
@@ -21,6 +22,7 @@ type Props = {
 
 export default async function TeacherFlashcardsPage({ searchParams }: Props) {
   const user = await requireRole(['teacher', 'admin', 'school_admin']);
+  const t = await getTranslations('teacher.flashcards');
   const { error } = await searchParams;
 
   const [classes, decks] = await Promise.all([
@@ -33,10 +35,10 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
       <div className="mx-auto w-full max-w-4xl space-y-6">
         <div>
           <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] tracking-tight">
-            Flashcards
+            {t('title')}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create decks, add cards, and publish them to students.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -48,7 +50,7 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
 
         <Card className="rounded-2xl border border-[#e5e7eb]">
           <CardHeader>
-            <CardTitle>Create new deck</CardTitle>
+            <CardTitle>{t('createNewDeck')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -71,46 +73,46 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
             >
               <div>
                 <label className="text-sm font-medium text-[#1f2937]">
-                  Title <span className="text-[#b64b29]">*</span>
+                  {t('titleLabel')} <span className="text-[#b64b29]">*</span>
                 </label>
                 <input
                   type="text"
                   name="title"
                   required
                   className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
-                  placeholder="e.g. Week 5 Vocabulary"
+                  placeholder={t('titlePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[#1f2937]">Description</label>
+                <label className="text-sm font-medium text-[#1f2937]">{t('descriptionLabel')}</label>
                 <textarea
                   name="description"
                   rows={3}
                   className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
-                  placeholder="Optional note for students."
+                  placeholder={t('descriptionPlaceholder')}
                 />
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-[#1f2937]">Scope</label>
+                  <label className="text-sm font-medium text-[#1f2937]">{t('scopeLabel')}</label>
                   <select
                     name="scope"
                     defaultValue="class"
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm"
                   >
-                    <option value="class">Class</option>
-                    <option value="global">Global</option>
+                    <option value="class">{t('scopeClass')}</option>
+                    <option value="global">{t('global')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#1f2937]">Class (for class scope)</label>
+                  <label className="text-sm font-medium text-[#1f2937]">{t('classLabel')}</label>
                   <select
                     name="classId"
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm"
                   >
-                    <option value="">Select class</option>
+                    <option value="">{t('selectClass')}</option>
                     {classes.map((row) => (
                       <option key={row.id} value={row.id}>
                         {row.name}
@@ -124,7 +126,7 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
                 type="submit"
                 className="rounded-full bg-[#7daf41] text-white hover:bg-[#6b9a39]"
               >
-                Create deck
+                {t('createDeck')}
               </Button>
             </form>
           </CardContent>
@@ -132,13 +134,13 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
 
         <Card className="rounded-2xl border border-[#e5e7eb]">
           <CardHeader>
-            <CardTitle>Your decks</CardTitle>
+            <CardTitle>{t('yourDecks')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {decks.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#e5e7eb] p-6 text-center">
                 <BookMarked className="mx-auto h-6 w-6 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">No decks yet.</p>
+                <p className="mt-2 text-sm text-muted-foreground">{t('noDecksYet')}</p>
               </div>
             ) : (
               decks.map((deck) => (
@@ -147,8 +149,8 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
                     <div>
                       <p className="font-medium text-[#1f2937]">{deck.title}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {deck.cardCount} cards ·{' '}
-                        {deck.scope === 'global' ? 'Global' : deck.className ?? 'Class deck'}
+                        {t('cardsCount', { count: deck.cardCount })} ·{' '}
+                        {deck.scope === 'global' ? t('global') : deck.className ?? t('classDeck')}
                       </p>
                       <p className="text-xs mt-1">
                         <span
@@ -156,7 +158,7 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
                             deck.isPublished ? 'bg-[#7daf41] text-white' : 'bg-[#429ead] text-white'
                           }`}
                         >
-                          {deck.isPublished ? 'Published' : 'Draft'}
+                          {deck.isPublished ? t('published') : t('draft')}
                         </span>
                       </p>
                     </div>
@@ -167,7 +169,7 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
                         className="rounded-full bg-[#429ead] text-white hover:bg-[#36899a]"
                       >
                         <Link href={`/dashboard/teacher/learning/flashcards/${deck.id}`}>
-                          Manage
+                          {t('manage')}
                         </Link>
                       </Button>
                       <form
@@ -193,7 +195,7 @@ export default async function TeacherFlashcardsPage({ searchParams }: Props) {
                             color: '#ffffff',
                           }}
                         >
-                          {deck.isPublished ? 'Unpublish' : 'Publish'}
+                          {deck.isPublished ? t('unpublish') : t('publish')}
                         </Button>
                       </form>
                     </div>

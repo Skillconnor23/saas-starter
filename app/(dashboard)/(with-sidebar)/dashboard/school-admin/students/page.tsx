@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import {
   getStudentsForSchoolAdmin,
@@ -57,6 +58,7 @@ export default async function SchoolAdminStudentsPage({
 }) {
   const user = await requireRole(['school_admin']);
   const params = await searchParams;
+  const t = await getTranslations('schoolAdmin.students');
 
   const [rows, classesWithDetails] = await Promise.all([
     getStudentsForSchoolAdmin({
@@ -76,20 +78,20 @@ export default async function SchoolAdminStudentsPage({
       <div className="mx-auto w-full max-w-5xl">
         <h1 className="mb-6 flex items-center gap-2 text-lg font-medium lg:text-2xl">
           <Users className="h-6 w-6" />
-          Students
+          {t('title')}
         </h1>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>My Classes</CardTitle>
+            <CardTitle>{t('myClasses')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              All classes. View roster or open classroom.
+              {t('myClassesDesc')}
             </p>
           </CardHeader>
           <CardContent>
             {classesWithDetails.length === 0 ? (
               <p className="py-4 text-sm text-muted-foreground">
-                No classes yet.
+                {t('noClassesYet')}
               </p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -112,7 +114,7 @@ export default async function SchoolAdminStudentsPage({
                       {formatScheduleSummary(c)}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {c.studentCount} student{c.studentCount !== 1 ? 's' : ''}
+                      {t('studentsCount', { count: c.studentCount })}
                     </p>
                     {c.teachers.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -135,13 +137,13 @@ export default async function SchoolAdminStudentsPage({
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/classroom/${c.id}/people`}>
                           <UsersRound className="mr-1 h-4 w-4" />
-                          Roster
+                          {t('roster')}
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/classroom/${c.id}`}>
                           <BookOpen className="mr-1 h-4 w-4" />
-                          Classroom
+                          {t('classroom')}
                         </Link>
                       </Button>
                     </div>
@@ -154,9 +156,9 @@ export default async function SchoolAdminStudentsPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Students across classes</CardTitle>
+            <CardTitle>{t('studentsAcrossClasses')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              View students enrolled in classes.
+              {t('studentsAcrossDesc')}
             </p>
             <SchoolAdminStudentsFilters
               classes={classesForFilter}
@@ -166,16 +168,16 @@ export default async function SchoolAdminStudentsPage({
           <CardContent>
             {rows.length === 0 ? (
               <p className="py-6 text-sm text-muted-foreground">
-                No students match your filters.
+                {t('noStudentsMatch')}
               </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Gecko level</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t('tableStudent')}</TableHead>
+                    <TableHead>{t('tableClass')}</TableHead>
+                    <TableHead>{t('geckoLevel')}</TableHead>
+                    <TableHead>{t('tableStatus')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -206,7 +208,7 @@ export default async function SchoolAdminStudentsPage({
                                 : 'bg-muted text-muted-foreground'
                           }`}
                         >
-                          {r.enrollmentStatus}
+                          {r.enrollmentStatus === 'active' ? t('statusActive') : r.enrollmentStatus === 'paused' ? t('statusPaused') : r.enrollmentStatus}
                         </span>
                       </TableCell>
                     </TableRow>

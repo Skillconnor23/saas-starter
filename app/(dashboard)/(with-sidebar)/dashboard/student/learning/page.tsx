@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { StudentQuizList } from '@/components/learning/StudentQuizList';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ type Props = {
 };
 
 export default async function StudentLearningPage({ searchParams }: Props) {
+  const t = await getTranslations('learning');
   const user = await requireRole(['student']);
   const { tab: tabQuery, month: monthQuery } = await searchParams;
   const tab = tabQuery === 'flashcards' ? 'flashcards' : 'quizzes';
@@ -60,10 +62,10 @@ export default async function StudentLearningPage({ searchParams }: Props) {
       <div className="mx-auto w-full max-w-3xl space-y-5">
         <div>
           <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] tracking-tight">
-            Learning
+            {t('title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Study with quizzes and beginner-friendly flashcards.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -77,7 +79,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
             }`}
           >
             <BookOpen className="mr-2 h-4 w-4" />
-            Quizzes
+            {t('quizzes')}
           </Link>
           <Link
             href={`/dashboard/student/learning?tab=flashcards&month=${selectedMonthKey}`}
@@ -88,7 +90,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
             }`}
           >
             <BookMarked className="mr-2 h-4 w-4" />
-            Flashcards
+            {t('flashcards')}
           </Link>
         </div>
 
@@ -102,11 +104,11 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-3">
                       <CardTitle className="text-base">
-                        {isThisMonth ? 'This month' : monthLabel(selectedMonthKey)}
+                        {isThisMonth ? t('thisMonth') : monthLabel(selectedMonthKey)}
                       </CardTitle>
                       <details>
                         <summary className="cursor-pointer text-sm text-[#429ead]">
-                          Previous months
+                          {t('previousMonths')}
                         </summary>
                         <ul className="mt-2 space-y-1 text-sm">
                           {previousMonthKeys(3).map((key) => (
@@ -126,13 +128,13 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="rounded-2xl bg-[#7daf41] px-4 py-3 text-white">
-                        <p className="text-xs">Studied</p>
+                        <p className="text-xs">{t('studied')}</p>
                         <p className="mt-1 text-2xl font-semibold">
                           {overview.flashcardsStudiedThisMonth}
                         </p>
                       </div>
                       <div className="rounded-2xl bg-[#429ead] px-4 py-3 text-white">
-                        <p className="text-xs">Accuracy</p>
+                        <p className="text-xs">{t('accuracy')}</p>
                         <p className="mt-1 text-2xl font-semibold">
                           {overview.flashcardAccuracyThisMonth != null
                             ? `${overview.flashcardAccuracyThisMonth}%`
@@ -143,7 +145,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                         className="rounded-2xl px-4 py-3 text-white"
                         style={{ backgroundColor: 'var(--accent-brown, #b64b29)' }}
                       >
-                        <p className="text-xs">Saved Words</p>
+                        <p className="text-xs">{t('savedWords')}</p>
                         <p className="mt-1 text-2xl font-semibold">{overview.savedWordsCount}</p>
                       </div>
                     </div>
@@ -151,9 +153,9 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                     <div className="rounded-xl border border-[#e5e7eb] p-3">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="font-medium text-[#1f2937]">My Saved Words</p>
+                          <p className="font-medium text-[#1f2937]">{t('mySavedWords')}</p>
                           <p className="text-xs text-muted-foreground">
-                            Review only the cards you bookmarked.
+                            {t('mySavedWordsDesc')}
                           </p>
                         </div>
                         <Button
@@ -163,7 +165,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                         >
                           <Link href="/dashboard/student/learning/flashcards/saved">
                             <Bookmark className="mr-1 h-4 w-4" />
-                            Study
+                            {t('study')}
                           </Link>
                         </Button>
                       </div>
@@ -173,7 +175,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
 
                 <Card className="rounded-2xl border border-[#e5e7eb]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Assigned decks</CardTitle>
+                    <CardTitle className="text-base">{t('assignedDecks')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {overview.assignedDecks.length ? (
@@ -186,12 +188,12 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                             <div>
                               <p className="font-medium text-[#1f2937]">{deck.title}</p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                {deck.cardCount} cards
+                                {t('cardsCount', { count: deck.cardCount })}
                                 {deck.lastStudiedAt
-                                  ? ` · Last studied ${new Date(deck.lastStudiedAt).toLocaleDateString()}`
-                                  : ' · Not started yet'}
+                                  ? ` · ${t('lastStudied', { date: new Date(deck.lastStudiedAt).toLocaleDateString() })}`
+                                  : ` · ${t('notStartedYet')}`}
                                 {deck.accuracyThisMonth != null
-                                  ? ` · ${deck.accuracyThisMonth}% this month`
+                                  ? ` · ${t('thisMonthPct', { percent: deck.accuracyThisMonth })}`
                                   : ''}
                               </p>
                             </div>
@@ -201,7 +203,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                               className="rounded-full bg-[#7daf41] text-white hover:bg-[#6b9a39]"
                             >
                               <Link href={`/dashboard/student/learning/flashcards/${deck.id}`}>
-                                Study
+                                {t('study')}
                               </Link>
                             </Button>
                           </div>
@@ -210,7 +212,7 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                     ) : (
                       <div className="rounded-xl border border-dashed border-[#e5e7eb] p-5 text-center">
                         <p className="text-sm text-muted-foreground">
-                          No flashcard decks are assigned to your classes yet.
+                          {t('noDecksAssigned')}
                         </p>
                       </div>
                     )}
@@ -220,12 +222,11 @@ export default async function StudentLearningPage({ searchParams }: Props) {
             ) : (
               <Card className="rounded-2xl border border-[#e5e7eb]">
                 <CardHeader>
-                  <CardTitle className="text-base">Flashcards are being set up</CardTitle>
+                  <CardTitle className="text-base">{t('flashcardsSettingUp')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Flashcard storage is not ready in this environment yet. Run database
-                    migrations and refresh this page shortly.
+                    {t('flashcardsNotReady')}
                   </p>
                 </CardContent>
               </Card>
@@ -236,24 +237,24 @@ export default async function StudentLearningPage({ searchParams }: Props) {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-[#429ead]" />
-                    Quiz snapshot
+                    {t('quizSnapshot')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-[#e5e7eb] p-3">
-                    <p className="text-xs text-muted-foreground">Assigned</p>
+                    <p className="text-xs text-muted-foreground">{t('assigned')}</p>
                     <p className="text-xl font-semibold text-[#1f2937]">
                       {overview.quizStats.assignedCount}
                     </p>
                   </div>
                   <div className="rounded-xl border border-[#e5e7eb] p-3">
-                    <p className="text-xs text-muted-foreground">Completion</p>
+                    <p className="text-xs text-muted-foreground">{t('completion')}</p>
                     <p className="text-xl font-semibold text-[#1f2937]">
                       {overview.quizStats.completionRate}%
                     </p>
                   </div>
                   <div className="rounded-xl border border-[#e5e7eb] p-3">
-                    <p className="text-xs text-muted-foreground">Avg this month</p>
+                    <p className="text-xs text-muted-foreground">{t('avgThisMonth')}</p>
                     <p className="text-xl font-semibold text-[#1f2937]">
                       {overview.quizStats.averageScoreThisMonth != null
                         ? `${overview.quizStats.averageScoreThisMonth}%`

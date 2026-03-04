@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,7 @@ export function ClassroomComposer({
   classId: string;
   defaultType?: string;
 }) {
+  const t = useTranslations('classroom.composer');
   const [type, setType] = useState(defaultType);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -188,7 +190,9 @@ export function ClassroomComposer({
 
           {mode === 'upload' && (
             <div className="space-y-2">
-              <Label htmlFor="file">File (PDF, PNG, JPG — max 10 MB)</Label>
+              <Label htmlFor="file">
+                {t('fileLabel')}
+              </Label>
               <Input
                 id="file"
                 type="file"
@@ -200,13 +204,15 @@ export function ClassroomComposer({
 
           {mode === 'link' && (
             <div className="space-y-2">
-              <Label htmlFor="linkUrl">URL</Label>
+              <Label htmlFor="linkUrl">
+                {t('urlLabel')}
+              </Label>
               <Input
                 id="linkUrl"
                 type="url"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                placeholder="https://..."
+                placeholder={t('urlPlaceholder')}
                 className="max-w-md"
                 required={mode === 'link'}
               />

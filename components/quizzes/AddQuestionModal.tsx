@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { addQuestionMcqAction } from '@/lib/actions/quizzes';
@@ -14,6 +15,7 @@ export function AddQuestionModal({ quizId, onClose }: AddQuestionModalProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const t = useTranslations('quizzes.addQuestion');
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,23 +36,23 @@ export function AddQuestionModal({ quizId, onClose }: AddQuestionModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
-        <h3 className="text-lg font-medium text-[#1f2937] mb-4">Add question</h3>
+        <h3 className="text-lg font-medium text-[#1f2937] mb-4">{t('title')}</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <label className="text-sm font-medium text-[#1f2937]">
-              Question prompt <span className="text-red-500">*</span>
+              {t('promptLabel')} <span className="text-red-500">*</span>
             </label>
             <textarea
               name="prompt"
               required
               rows={3}
               className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm"
-              placeholder="Enter your question..."
+              placeholder={t('promptPlaceholder')}
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-[#1f2937]">
-              Options (minimum 2)
+              {t('optionsLabel')}
             </label>
             {['A', 'B', 'C', 'D'].map((letter, i) => (
               <div key={letter} className="flex items-center gap-3">
@@ -60,7 +62,7 @@ export function AddQuestionModal({ quizId, onClose }: AddQuestionModalProps) {
                 <input
                   name={`option${letter}`}
                   className="flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm"
-                  placeholder={`Option ${letter}`}
+                  placeholder={t('optionPlaceholder', { letter })}
                 />
                 <label className="flex items-center gap-1 text-sm whitespace-nowrap">
                   <input
@@ -70,7 +72,7 @@ export function AddQuestionModal({ quizId, onClose }: AddQuestionModalProps) {
                     required
                     className="rounded-full"
                   />
-                  Correct
+                  {t('correctLabel')}
                 </label>
               </div>
             ))}
@@ -83,14 +85,14 @@ export function AddQuestionModal({ quizId, onClose }: AddQuestionModalProps) {
               onClick={onClose}
               className="rounded-full"
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={pending}
               className="rounded-full bg-[#7daf41] text-white hover:border-[#7daf41] hover:bg-[#6c9b38]"
             >
-              {pending ? 'Saving...' : 'Save question'}
+              {pending ? t('saving') : t('saveQuestion')}
             </Button>
           </div>
         </form>

@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getOccurrencesForUser } from '@/lib/schedule';
 import { getClassesWithScheduleForCalendar } from '@/lib/db/queries/education';
@@ -17,6 +18,7 @@ export default async function TeacherCalendarPage({
   searchParams: Promise<{ days?: string; classId?: string }>;
 }) {
   const user = await requireRole(['teacher']);
+  const t = await getTranslations('teacher.calendar');
   const params = await searchParams;
   const days = Math.min(30, Math.max(7, parseInt(params.days ?? String(DEFAULT_DAYS), 10) || DEFAULT_DAYS));
   const classIdFilter = params.classId ?? null;
@@ -38,19 +40,24 @@ export default async function TeacherCalendarPage({
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="text-lg lg:text-2xl font-medium mb-6 flex items-center gap-2">
           <Calendar className="h-6 w-6" />
-          Calendar
+          {t('title')}
         </h1>
         <Card>
           <CardHeader>
-            <CardTitle>Upcoming classes</CardTitle>
+            <CardTitle>{t('upcomingClasses')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Next {days} days · your timezone: {viewerTimezone}
+              {t('nextDaysTimezone', { days, timezone: viewerTimezone })}
             </p>
             {classes.length >= 1 && (
               <CalendarFilterForm
                 classes={classes.map((c) => ({ id: c.id, name: c.name }))}
                 currentClassId={classIdFilter}
                 currentDays={days}
+                classLabel={t('filterClass')}
+                allClassesOption={t('filterAllClasses')}
+                daysLabel={t('filterDays')}
+                option14={t('days14')}
+                option30={t('days30')}
               />
             )}
           </CardHeader>
@@ -58,7 +65,8 @@ export default async function TeacherCalendarPage({
             <CalendarListView
               occurrences={occurrences}
               viewerTimezone={viewerTimezone}
-              daysLabel={`Next ${days} days`}
+              daysLabel={t('nextDaysLabel', { days })}
+              emptyMessage={t('emptyRange')}
             />
           </CardContent>
         </Card>

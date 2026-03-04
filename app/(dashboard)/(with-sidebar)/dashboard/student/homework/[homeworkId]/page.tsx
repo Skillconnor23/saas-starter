@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getStudentHomeworkDetail } from '@/lib/actions/homework';
 import { HomeworkDetailClient } from './HomeworkDetailClient';
@@ -11,6 +12,7 @@ export default async function StudentHomeworkDetailPage({
 }: {
   params: Promise<{ homeworkId: string }>;
 }) {
+  const t = await getTranslations('homework');
   await requireRole(['student']);
   const { homeworkId } = await params;
   const data = await getStudentHomeworkDetail(homeworkId);
@@ -25,7 +27,7 @@ export default async function StudentHomeworkDetailPage({
           href="/dashboard/student/homework"
           className="text-sm text-muted-foreground hover:text-[#1f2937]"
         >
-          ← Back to homework
+          {t('backToHomework')}
         </Link>
       </div>
       <div className="mb-6">

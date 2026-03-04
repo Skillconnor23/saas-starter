@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getStudentDashboardData } from '@/lib/db/queries/education';
 import {
@@ -94,6 +95,8 @@ export default async function StudentDashboardPage({
 }: {
   searchParams: Promise<{ joined?: string }>;
 }) {
+  const t = await getTranslations('dashboard.student');
+  const tCommon = await getTranslations('common');
   const user = await requireRole(['student']);
   const params = await searchParams;
 
@@ -109,12 +112,12 @@ export default async function StudentDashboardPage({
 
   const statusMessage =
     stats.avgScore30d == null
-      ? 'Start taking quizzes to see your progress'
+      ? t('status.startTakingQuizzes')
       : stats.avgScore30d >= 80
-        ? 'On track'
+        ? t('status.onTrack')
         : stats.avgScore30d >= 65
-          ? 'Keep improving'
-          : 'Needs attention';
+          ? t('status.keepImproving')
+          : t('status.needsAttention');
 
   const statusColor =
     stats.avgScore30d == null
@@ -131,29 +134,29 @@ export default async function StudentDashboardPage({
   return (
     <section className="flex-1">
       <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] mb-2 tracking-tight">
-        {user.name ? `Welcome back, ${firstName}` : 'Welcome back'}
+        {user.name ? t('welcomeWithName', { name: firstName }) : t('welcome')}
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Your progress and upcoming sessions
+        {t('subtitle')}
       </p>
 
       {params.joined === '1' && (
         <div className="mb-6 rounded-2xl border border-[#e5e7eb] bg-[#7daf41]/10 px-5 py-4 text-sm text-[#1f2937] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-          You joined the class successfully. Your upcoming sessions appear below.
+          {t('joinedBanner')}
         </div>
       )}
 
       {!data.hasClasses ? (
         <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <CardHeader>
-            <CardTitle>Your class</CardTitle>
+            <CardTitle>{t('classCard.title')}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Use a class code from your teacher to join, or contact support.
+              {t('classCard.body')}
             </p>
           </CardHeader>
           <CardContent>
             <Button asChild variant="primary" className="rounded-full">
-              <Link href="/dashboard/student/join">Join with class code</Link>
+              <Link href="/dashboard/student/join">{t('classCard.cta')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -165,7 +168,7 @@ export default async function StudentDashboardPage({
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-5 sm:py-3">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-sm font-medium text-muted-foreground">
-                  Avg score (30d)
+                  {t('avgScoreTitle')}
                 </span>
                 <p className="text-xl font-semibold text-[#1f2937] sm:text-2xl">
                   {stats.avgScore30d != null ? `${stats.avgScore30d}%` : '—'}
@@ -179,8 +182,8 @@ export default async function StudentDashboardPage({
                 className="shrink-0"
                 aria-label={
                   stats.avgScore30d != null
-                    ? `Average score: ${stats.avgScore30d} percent`
-                    : 'Average score not available'
+                    ? t('avgScoreAria', { percent: stats.avgScore30d })
+                    : t('avgScoreNotAvailable')
                 }
               />
             </div>
@@ -188,7 +191,7 @@ export default async function StudentDashboardPage({
             <div className="flex flex-col gap-2 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-5 sm:py-3">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-sm font-medium text-muted-foreground">
-                  Attendance rate (30d)
+                  {t('attendanceTitle')}
                 </span>
                 <p className="text-xl font-semibold text-[#1f2937] sm:text-2xl">
                   {attendanceRate30d}%
@@ -196,15 +199,15 @@ export default async function StudentDashboardPage({
               </div>
               <ProgressBar
                 value={attendanceRate30d}
-                aria-label={`Attendance rate: ${attendanceRate30d} percent`}
+                aria-label={t('attendanceAria', { percent: attendanceRate30d })}
               />
             </div>
             {/* Quizzes completed — label left, number right (reddish-brown accent) */}
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:px-5 sm:py-3">
               <span className="text-sm font-medium text-muted-foreground min-w-0">
-                Quizzes completed
+                {t('quizzesCompletedTitle')}
               </span>
-              <p className="text-xl font-bold text-[#b64b29] shrink-0 sm:text-2xl" aria-label={`${stats.quizzesCompleted} quizzes completed`}>
+              <p className="text-xl font-bold text-[#b64b29] shrink-0 sm:text-2xl" aria-label={t('quizzesCompletedAria', { count: stats.quizzesCompleted })}>
                 {stats.quizzesCompleted}
               </p>
             </div>
@@ -217,11 +220,11 @@ export default async function StudentDashboardPage({
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Video className="h-5 w-5 text-white/90" aria-hidden />
-                    Next class
+                    {t('nextClassTitle')}
                     {data.nextSessions.length > 0 &&
                       isToday(new Date(data.nextSessions[0].session.startsAt)) && (
                         <span className="inline-flex rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium text-white">
-                          Today
+                          {t('nextClassToday')}
                         </span>
                       )}
                   </CardTitle>
@@ -230,14 +233,14 @@ export default async function StudentDashboardPage({
                   {data.nextSessions.length === 0 ? (
                     <>
                       <p className="text-sm text-white/90 py-2">
-                        No upcoming sessions. Check back later or ask your teacher.
+                        {t('nextClassEmpty')}
                       </p>
                       <Link
                         href={`/classroom/${data.primaryClass.id}`}
                         className="inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white transition-colors"
                       >
                         <BookOpen className="h-4 w-4" />
-                        Open classroom
+                        {t('nextClassOpenClassroom')}
                         <ArrowRight className="h-3 w-3" />
                       </Link>
                     </>
@@ -283,7 +286,7 @@ export default async function StudentDashboardPage({
                               rel="noopener noreferrer"
                             >
                               <Video className="mr-2 h-4 w-4" />
-                              Join meeting
+                              {t('nextClassJoinMeeting')}
                             </a>
                           </Button>
                         ) : (
@@ -292,7 +295,7 @@ export default async function StudentDashboardPage({
                             className="rounded-full shrink-0 bg-white/20 text-white border border-white/40 cursor-not-allowed"
                             disabled
                           >
-                            Join meeting
+                            {t('nextClassJoinMeetingDisabled')}
                           </Button>
                         )}
                       </div>
@@ -301,7 +304,7 @@ export default async function StudentDashboardPage({
                         className="inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white transition-colors"
                       >
                         <BookOpen className="h-4 w-4" />
-                        Open classroom
+                        {t('nextClassOpenClassroom')}
                         <ArrowRight className="h-3 w-3" />
                       </Link>
                     </>
@@ -315,7 +318,7 @@ export default async function StudentDashboardPage({
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-[#429ead]" aria-hidden />
-                      Upcoming sessions
+                      {t('upcomingSessionsTitle')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -340,7 +343,7 @@ export default async function StudentDashboardPage({
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                Join
+                                {t('nextClassJoinMeeting')}
                               </a>
                             </Button>
                           ) : (
@@ -363,6 +366,7 @@ export default async function StudentDashboardPage({
                 lateCount={attendanceSummary.lateCount}
                 absentCount={attendanceSummary.absentCount}
                 participationAvg={attendanceSummary.participationAvg}
+                title={tCommon('thisMonth')}
               />
 
               {/* What to do next */}
@@ -370,7 +374,7 @@ export default async function StudentDashboardPage({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ClipboardCheck className="h-5 w-5 text-[#429ead]" aria-hidden />
-                    What to do next
+                    {t('whatToDoNextTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -379,22 +383,22 @@ export default async function StudentDashboardPage({
                       href={`/learning/${needsAttention.incompleteQuizzes[0].quizId}`}
                       className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-muted/30 px-4 py-3 text-sm font-medium text-[#1f2937] hover:bg-muted/50 transition-colors"
                     >
-                      Complete {needsAttention.incompleteQuizzes[0].quizTitle}
+                      {t('whatToDoNextCompleteQuiz', { quizTitle: needsAttention.incompleteQuizzes[0].quizTitle })}
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     </Link>
                   ) : data.nextSessions.length > 0 ? (
                     <p className="text-sm text-muted-foreground">
-                      Join your next class{' '}
-                      {new Date(data.nextSessions[0].session.startsAt).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
+                      {t('whatToDoNextJoinNextClass', {
+                        date: new Date(data.nextSessions[0].session.startsAt).toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                        }),
                       })}
-                      .
                     </p>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      You&apos;re all caught up. Check back later for new sessions.
+                      {t('whatToDoNextAllCaughtUp')}
                     </p>
                   )}
                 </CardContent>
@@ -405,7 +409,7 @@ export default async function StudentDashboardPage({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-[#7daf41]" aria-hidden />
-                    My progress
+                    {t('myProgressTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5">
@@ -413,21 +417,21 @@ export default async function StudentDashboardPage({
                     <ScoreRing score={stats.avgScore30d} size={108} strokeWidth={10} />
                     <div className="min-w-0">
                       <p className={`font-medium ${statusColor}`}>{statusMessage}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">30-day average</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('myProgress30d')}</p>
                       {stats.avgScore30d != null && stats.avgScore30d < 80 && (
                         <p className="text-xs text-muted-foreground mt-1.5">
-                          You are {80 - stats.avgScore30d}% away from your 80% goal.
+                          {t('myProgressGoalAway', { percent: 80 - stats.avgScore30d })}
                         </p>
                       )}
                       {stats.avgScore30d != null && stats.avgScore30d >= 80 && (
                         <p className="text-xs text-[#7daf41] mt-1.5">
-                          You&apos;ve reached your 80% goal.
+                          {t('myProgressGoalReached')}
                         </p>
                       )}
                     </div>
                   </div>
                   <Button asChild variant="secondary" size="sm" className="rounded-full w-full">
-                    <Link href="/dashboard/profile">View all scores</Link>
+                    <Link href="/dashboard/profile">{t('myProgressViewScores')}</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -438,13 +442,13 @@ export default async function StudentDashboardPage({
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden />
-                      Needs attention
+                      {t('needsAttentionTitle')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {needsAttention.incompleteQuizzes.map((q) => (
                       <p key={q.quizId} className="text-sm text-[#1f2937]">
-                        You have not completed{' '}
+                        {t('needsAttentionPrefix')}
                         <Link
                           href={`/learning/${q.quizId}`}
                           className="font-medium text-primary hover:underline"
@@ -458,13 +462,13 @@ export default async function StudentDashboardPage({
                     ))}
                     {needsAttention.noActivityIn7Days && (
                       <p className="text-sm text-[#1f2937]">
-                        No activity in 7 days. Complete a quiz to stay on track.
+                        {t('needsAttentionNoActivity')}
                       </p>
                     )}
                     <Button asChild variant="outline" size="sm" className="mt-3 rounded-full w-full">
                       <Link href="/dashboard/student/learning">
                         <BookOpen className="mr-2 h-4 w-4" />
-                        Open learning
+                        {t('needsAttentionOpenLearning')}
                       </Link>
                     </Button>
                   </CardContent>

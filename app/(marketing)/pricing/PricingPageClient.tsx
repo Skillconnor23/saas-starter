@@ -13,7 +13,7 @@ interface PricingPageClientProps {
 
 export function PricingPageClient({
   tiers,
-  billingToggleLabel = "Billing",
+  billingToggleLabel,
 }: PricingPageClientProps) {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"

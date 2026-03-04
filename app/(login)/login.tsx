@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,12 @@ import { Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 
+const AUTH_ERROR_KEYS = ['invalidCredentials', 'createUserFailed', 'createTeamFailed', 'invalidOrExpiredInvitation'] as const;
+
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
+  const t = useTranslations('auth.login');
+  const tNav = useTranslations('nav');
+  const tErrors = useTranslations('errors.auth');
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
@@ -21,13 +27,11 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     { error: '' }
   );
 
-  const title =
-    mode === 'signin' ? 'Welcome back' : 'Create your account';
-
-  const subtitle =
-    mode === 'signin'
-      ? 'Sign in to continue learning with Gecko Academy.'
-      : 'Set up your Gecko Academy account in a few steps.';
+  const title = mode === 'signin' ? t('title.signin') : t('title.signup');
+  const subtitle = mode === 'signin' ? t('subtitle.signin') : t('subtitle.signup');
+  const errorMessage = state?.error && AUTH_ERROR_KEYS.includes(state.error as any)
+    ? tErrors(state.error as (typeof AUTH_ERROR_KEYS)[number])
+    : state?.error;
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-white px-4 py-10 sm:px-6 lg:px-8">
@@ -38,7 +42,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#e5e7eb] bg-white">
               <Image
                 src="/gecko-logo.svg"
-                alt="Gecko Academy"
+                alt={tNav('brand')}
                 width={120}
                 height={120}
                 sizes="40px"
@@ -47,7 +51,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               />
             </div>
             <span className="text-base font-semibold text-[#1f2937]">
-              Gecko Academy
+              {tNav('brand')}
             </span>
           </div>
           <h1 className="mt-5 text-xl sm:text-2xl font-semibold tracking-tight text-[#111827]">
@@ -57,7 +61,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             {subtitle}
           </p>
           <div className="mt-3 inline-flex items-center rounded-full bg-[#ffaa00]/15 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-[#92400e]">
-            Safe, calm learning
+            {t('badge')}
           </div>
         </div>
 
@@ -72,7 +76,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               htmlFor="email"
               className="block text-sm font-medium text-[#374151]"
             >
-              Email
+              {t('emailLabel')}
             </Label>
             <Input
               id="email"
@@ -83,7 +87,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               required
               maxLength={50}
               className="w-full rounded-full border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#111827] placeholder:text-gray-400 shadow-[0_1px_2px_rgba(15,23,42,0.04)] focus-visible:border-[#7daf41] focus-visible:ring-2 focus-visible:ring-[#7daf41] focus-visible:ring-offset-0"
-              placeholder="you@example.com"
+              placeholder={t('emailPlaceholder')}
             />
           </div>
 
@@ -92,7 +96,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               htmlFor="password"
               className="block text-sm font-medium text-[#374151]"
             >
-              Password
+              {t('passwordLabel')}
             </Label>
             <Input
               id="password"
@@ -106,13 +110,13 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               minLength={8}
               maxLength={100}
               className="w-full rounded-full border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#111827] placeholder:text-gray-400 shadow-[0_1px_2px_rgba(15,23,42,0.04)] focus-visible:border-[#7daf41] focus-visible:ring-2 focus-visible:ring-[#7daf41] focus-visible:ring-offset-0"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
             />
           </div>
 
-          {state?.error && (
+          {errorMessage && (
             <p className="text-sm font-medium text-[#b64b29]">
-              {state.error}
+              {errorMessage}
             </p>
           )}
 
@@ -125,34 +129,34 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               {pending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
+                  {t('loading')}
                 </>
               ) : mode === 'signin' ? (
-                'Sign in'
+                t('submit.signin')
               ) : (
-                'Sign up'
+                t('submit.signup')
               )}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
               {mode === 'signin' ? (
                 <>
-                  Don&apos;t have an account?{' '}
+                  {t('switchToSignup')}{' '}
                   <Link
                     href={`/sign-up${redirect ? `?redirect=${redirect}` : ''}${priceId ? `&priceId=${priceId}` : ''}`}
                     className="font-medium text-[#429ead] hover:underline"
                   >
-                    Sign up here
+                    {t('switchToSignupCta')}
                   </Link>
                 </>
               ) : (
                 <>
-                  Already have an account?{' '}
+                  {t('switchToSignin')}{' '}
                   <Link
                     href={`/sign-in${redirect ? `?redirect=${redirect}` : ''}${priceId ? `&priceId=${priceId}` : ''}`}
                     className="font-medium text-[#429ead] hover:underline"
                   >
-                    Sign in here
+                    {t('switchToSigninCta')}
                   </Link>
                 </>
               )}

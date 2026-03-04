@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import {
   getTeacherDashboardClasses,
@@ -15,6 +16,8 @@ import { TeacherMyClasses } from './teacher-my-classes';
 
 export default async function TeacherDashboardPage() {
   const user = await requireRole(['teacher']);
+  const locale = await getLocale();
+  const t = await getTranslations('teacher.dashboard');
 
   const [classes, nextSession, kpis, needsAttention] = await Promise.all([
     getTeacherDashboardClasses(user.id),
@@ -31,10 +34,10 @@ export default async function TeacherDashboardPage() {
   return (
     <section className="flex-1">
       <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] mb-2 tracking-tight">
-        Teacher Dashboard
+        {t('title')}
       </h1>
       <p className="text-sm text-muted-foreground mb-8">
-        What do I teach today? Are my students keeping up? Where do I need to act?
+        {t('subtitle')}
       </p>
 
       {/* 1. My Classes */}
@@ -47,13 +50,13 @@ export default async function TeacherDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-[#429ead]" aria-hidden />
-            Next session
+            {t('nextSession')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {!nextSession ? (
             <p className="text-sm text-muted-foreground py-2">
-              No upcoming sessions.
+              {t('noUpcomingSessions')}
             </p>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -80,12 +83,12 @@ export default async function TeacherDashboardPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Join
+                    {t('join')}
                   </a>
                 </Button>
               ) : (
                 <Button variant="secondary" size="sm" className="rounded-full" disabled>
-                  Join
+                  {t('join')}
                 </Button>
               )}
             </div>
@@ -96,17 +99,17 @@ export default async function TeacherDashboardPage() {
       {/* 3. Class Health strip - mobile: slim horizontal; desktop: full strip */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-6 mb-6 sm:mb-8 rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center justify-between gap-3 sm:block">
-          <span className="text-xs text-muted-foreground">Avg quiz score (30d)</span>
+          <span className="text-xs text-muted-foreground">{t('avgQuizScore30d')}</span>
           <p className="text-lg font-semibold text-[#1f2937] sm:mt-0.5">
             {kpis.avgQuizScore30d != null ? `${kpis.avgQuizScore30d}%` : '—'}
           </p>
         </div>
         <div className="flex items-center justify-between gap-3 sm:block">
-          <span className="text-xs text-muted-foreground">Attempt rate (30d)</span>
+          <span className="text-xs text-muted-foreground">{t('attemptRate30d')}</span>
           <p className="text-lg font-semibold text-[#1f2937] sm:mt-0.5">{kpis.attemptRate30d}%</p>
         </div>
         <div className="flex items-center justify-between gap-3 sm:block">
-          <span className="text-xs text-muted-foreground">Inactive students</span>
+          <span className="text-xs text-muted-foreground">{t('inactiveStudents')}</span>
           <p className="text-lg font-semibold text-[#1f2937] sm:mt-0.5">{kpis.inactiveStudents}</p>
         </div>
       </div>
@@ -116,14 +119,14 @@ export default async function TeacherDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden />
-            Needs attention
+            {t('needsAttention')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {needsAttention.inactiveStudents.length === 0 &&
           needsAttention.lowCompletionQuizzes.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nothing needs attention right now.
+              {t('nothingNeedsAttention')}
             </p>
           ) : (
             <ul className="space-y-2">
@@ -136,7 +139,7 @@ export default async function TeacherDashboardPage() {
                     {s.studentName ?? `Student #${s.studentId}`}
                   </Link>
                   <span className="text-xs text-muted-foreground ml-2">
-                    0 quiz attempts in 14 days
+                    {t('inactiveStudentLabel')}
                   </span>
                 </li>
               ))}
@@ -144,7 +147,7 @@ export default async function TeacherDashboardPage() {
                 <li key={`${q.quizId}-${q.className}`}>
                   <span className="text-sm font-medium">{q.quizTitle}</span>
                   <span className="text-xs text-muted-foreground ml-2">
-                    {q.className} · {q.attemptPct}% attempted
+                    {t('lowCompletionLabel', { className: q.className, percent: q.attemptPct })}
                   </span>
                 </li>
               ))}
@@ -153,8 +156,8 @@ export default async function TeacherDashboardPage() {
           {(needsAttention.inactiveStudents.length > 0 ||
             needsAttention.lowCompletionQuizzes.length > 0) && (
             <p className="mt-3 text-xs text-muted-foreground">
-              <Link href="/teacher/classes" className="text-primary hover:underline">
-                View all
+              <Link href={`/${locale}/teacher/classes`} className="text-primary hover:underline">
+                {t('viewAll')}
               </Link>
             </p>
           )}

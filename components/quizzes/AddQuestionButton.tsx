@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { AddQuestionModal } from './AddQuestionModal';
 
 type AddQuestionButtonProps = {
@@ -9,6 +10,7 @@ type AddQuestionButtonProps = {
 
 export function AddQuestionButton({ quizId }: AddQuestionButtonProps) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('quizzes.addQuestion');
   return (
     <>
       <button
@@ -16,7 +18,7 @@ export function AddQuestionButton({ quizId }: AddQuestionButtonProps) {
         onClick={() => setOpen(true)}
         className="w-full rounded-full bg-[#7daf41] px-4 py-2 text-sm font-medium text-white hover:border-[#7daf41] hover:bg-[#6c9b38] transition-colors"
       >
-        Add question
+        {t('title')}
       </button>
       {open && (
         <AddQuestionModal

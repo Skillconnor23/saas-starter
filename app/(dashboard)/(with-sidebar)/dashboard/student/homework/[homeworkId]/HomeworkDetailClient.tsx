@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,7 @@ export function HomeworkDetailClient({
   submission: HomeworkSubmission | null;
   className: string;
 }) {
+  const t = useTranslations('homework');
   const [files, setFiles] = useState<FileItem[]>(
     (submission?.files ?? []) as FileItem[]
   );
@@ -99,9 +101,9 @@ export function HomeworkDetailClient({
     <div className="space-y-6 max-w-2xl">
       <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CardHeader>
-          <CardTitle className="text-base">Instructions</CardTitle>
+          <CardTitle className="text-base">{t('instructions')}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Due:{' '}
+            {t('due')}{' '}
             {homework.dueDate
               ? new Date(homework.dueDate).toLocaleString('en-US', {
                   month: 'short',
@@ -110,7 +112,7 @@ export function HomeworkDetailClient({
                   hour: 'numeric',
                   minute: '2-digit',
                 })
-              : 'No due date'}
+              : t('noDueDate')}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -127,7 +129,7 @@ export function HomeworkDetailClient({
               className="inline-flex items-center gap-2 text-sm text-[#429ead] hover:underline"
             >
               <Download className="h-4 w-4" />
-              Download worksheet
+              {t('downloadWorksheet')}
             </a>
           )}
         </CardContent>
@@ -136,15 +138,16 @@ export function HomeworkDetailClient({
       {submission ? (
         <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <CardHeader>
-            <CardTitle className="text-base">Your submission</CardTitle>
+            <CardTitle className="text-base">{t('yourSubmission')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Submitted{' '}
-              {new Date(submission.submittedAt).toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
+              {t('submittedOn', {
+                date: new Date(submission.submittedAt).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                }),
               })}
             </p>
           </CardHeader>
@@ -152,7 +155,7 @@ export function HomeworkDetailClient({
             {submission.textNote && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">
-                  Note
+                  {t('note')}
                 </p>
                 <p className="text-sm text-[#1f2937] whitespace-pre-wrap">
                   {submission.textNote}
@@ -162,7 +165,7 @@ export function HomeworkDetailClient({
             {((submission.files ?? []) as FileItem[]).length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Files
+                  {t('files')}
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {((submission.files ?? []) as FileItem[]).map((f, i) => (
@@ -211,7 +214,7 @@ export function HomeworkDetailClient({
             {(submission.feedback || submission.score != null) && (
               <div className="pt-4 border-t border-[#e5e7eb]">
                 <p className="text-sm font-medium text-muted-foreground mb-1">
-                  Teacher feedback
+                  {t('teacherFeedback')}
                 </p>
                 {submission.feedback && (
                   <p className="text-sm text-[#1f2937] whitespace-pre-wrap">
@@ -220,7 +223,7 @@ export function HomeworkDetailClient({
                 )}
                 {submission.score != null && (
                   <p className="text-sm font-medium text-[#7daf41] mt-2">
-                    Score: {submission.score}%
+                    {t('scoreLabel', { score: submission.score })}
                   </p>
                 )}
               </div>
@@ -232,17 +235,16 @@ export function HomeworkDetailClient({
       <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CardHeader>
           <CardTitle className="text-base">
-            {submission ? 'Resubmit' : 'Submit homework'}
+            {submission ? t('resubmit') : t('submitHomework')}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Upload images (JPG, PNG, WebP) or audio (MP3, M4A, WAV). Max 20 MB per
-            file.
+            {t('uploadHint')}
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="files">Files</Label>
+              <Label htmlFor="files">{t('filesLabel')}</Label>
               <div
                 className={`mt-2 flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors ${
                   dragOver
@@ -262,7 +264,7 @@ export function HomeworkDetailClient({
               >
                 <Upload className="h-10 w-10 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  Drag and drop files, or browse
+                  {t('dragDrop')}
                 </p>
                 <input
                   id="files"
@@ -284,7 +286,7 @@ export function HomeworkDetailClient({
                     {uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      'Browse'
+                      t('browse')
                     )}
                   </Button>
                 </label>
@@ -302,7 +304,7 @@ export function HomeworkDetailClient({
                         onClick={() => removeFile(i)}
                         className="text-muted-foreground hover:text-destructive"
                       >
-                        Remove
+                        {t('remove')}
                       </button>
                     </li>
                   ))}
@@ -310,13 +312,13 @@ export function HomeworkDetailClient({
               )}
             </div>
             <div>
-              <Label htmlFor="note">Optional note</Label>
+              <Label htmlFor="note">{t('optionalNote')}</Label>
               <textarea
                 id="note"
                 value={textNote}
                 onChange={(e) => setTextNote(e.target.value)}
                 rows={3}
-                placeholder="Add a note for your teacher..."
+                placeholder={t('notePlaceholder')}
                 className="mt-1 flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
@@ -332,7 +334,7 @@ export function HomeworkDetailClient({
               {pending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                submission ? 'Resubmit' : 'Submit'
+                submission ? t('resubmit') : t('submit')
               )}
             </Button>
           </form>

@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { Calendar, NotebookPen } from 'lucide-react';
 
 type QuickStatusItem = {
@@ -12,20 +15,21 @@ type ClassroomQuickStatusProps = {
 };
 
 export function ClassroomQuickStatus({ nextClass, todoCount }: ClassroomQuickStatusProps) {
+  const t = useTranslations('classroom');
   const items: QuickStatusItem[] = [];
 
   if (nextClass) {
     items.push({
       icon: <Calendar className="h-4 w-4 text-slate-500" />,
       value: nextClass,
-      label: 'Next class',
+      label: t('nextClass'),
     });
   }
 
   items.push({
     icon: <NotebookPen className="h-4 w-4 text-slate-500" />,
-    value: todoCount === 0 ? 'None' : `${todoCount} pending`,
-    label: 'To-do',
+    value: todoCount === 0 ? t('none') : t('pendingCount', { count: todoCount }),
+    label: t('todo'),
   });
 
   return (

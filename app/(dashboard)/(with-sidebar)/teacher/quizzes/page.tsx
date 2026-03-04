@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { listTeacherQuizzesForUser } from '@/lib/db/queries/quizzes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 
 export default async function TeacherQuizzesPage() {
   const user = await requireRole(['teacher']);
+  const t = await getTranslations('teacher.quizzes');
   const rows = await listTeacherQuizzesForUser(user.id);
 
   const drafts = rows.filter((r) => r.quiz.status === 'DRAFT');
@@ -18,29 +20,29 @@ export default async function TeacherQuizzesPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] tracking-tight">
-            Quizzes
+            {t('title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Create and manage weekly quizzes for your classes.
+            {t('subtitle')}
           </p>
         </div>
         <Button
           asChild
           className="rounded-full bg-[#429ead] text-white hover:border-[#429ead] hover:bg-[#36899a]"
         >
-          <Link href="/teacher/quizzes/new">New quiz</Link>
+          <Link href="/teacher/quizzes/new">{t('newQuiz')}</Link>
         </Button>
       </div>
 
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Drafts</CardTitle>
+            <CardTitle>{t('drafts')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {drafts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No draft quizzes yet.
+                {t('noDraftsYet')}
               </p>
             ) : (
               drafts.map(({ quiz, className }) => (
@@ -58,7 +60,7 @@ export default async function TeacherQuizzesPage() {
                       className="rounded-full bg-[#429ead] text-white hover:border-[#429ead] hover:bg-[#36899a]"
                       size="sm"
                     >
-                      <Link href={`/teacher/quizzes/${quiz.id}/edit`}>Edit</Link>
+                      <Link href={`/teacher/quizzes/${quiz.id}/edit`}>{t('edit')}</Link>
                     </Button>
                     <Button
                       asChild
@@ -67,7 +69,7 @@ export default async function TeacherQuizzesPage() {
                       className="rounded-full"
                     >
                       <Link href={`/teacher/quizzes/${quiz.id}/results`}>
-                        Results
+                        {t('results')}
                       </Link>
                     </Button>
                   </div>
@@ -79,12 +81,12 @@ export default async function TeacherQuizzesPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Published</CardTitle>
+            <CardTitle>{t('published')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {published.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No published quizzes yet.
+                {t('noPublishedYet')}
               </p>
             ) : (
               published.map(({ quiz, className }) => (
@@ -102,7 +104,7 @@ export default async function TeacherQuizzesPage() {
                       size="sm"
                       className="rounded-full bg-[#429ead] text-white hover:border-[#429ead] hover:bg-[#36899a]"
                     >
-                      <Link href={`/teacher/quizzes/${quiz.id}/edit`}>Edit</Link>
+                      <Link href={`/teacher/quizzes/${quiz.id}/edit`}>{t('edit')}</Link>
                     </Button>
                     <Button
                       asChild
@@ -111,7 +113,7 @@ export default async function TeacherQuizzesPage() {
                       className="rounded-full"
                     >
                       <Link href={`/teacher/quizzes/${quiz.id}/results`}>
-                        Results
+                        {t('results')}
                       </Link>
                     </Button>
                   </div>

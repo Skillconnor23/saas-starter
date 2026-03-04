@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import {
   addFlashcardCardAction,
@@ -31,6 +32,7 @@ export default async function TeacherFlashcardDeckDetailPage({
   const user = await requireRole(['teacher', 'admin', 'school_admin']);
   const { deckId } = await params;
   const { error } = await searchParams;
+  const t = await getTranslations('teacher.flashcards');
 
   const [deckWithCards, classes] = await Promise.all([
     getFlashcardDeckWithCards(deckId),
@@ -56,7 +58,7 @@ export default async function TeacherFlashcardDeckDetailPage({
         <Button variant="ghost" size="sm" asChild className="rounded-full">
           <Link href="/dashboard/teacher/learning/flashcards">
             <ArrowLeft className="mr-1 h-4 w-4" />
-            Back to Flashcards
+            {t('backToFlashcards')}
           </Link>
         </Button>
 
@@ -65,7 +67,7 @@ export default async function TeacherFlashcardDeckDetailPage({
             {deckWithCards.deck.title}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {deckWithCards.cards.length} cards in this deck.
+            {t('cardsInDeck', { count: deckWithCards.cards.length })}
           </p>
         </div>
 
@@ -77,7 +79,7 @@ export default async function TeacherFlashcardDeckDetailPage({
 
         <Card className="rounded-2xl border border-[#e5e7eb]">
           <CardHeader>
-            <CardTitle>Deck details</CardTitle>
+            <CardTitle>{t('deckDetails')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -93,7 +95,7 @@ export default async function TeacherFlashcardDeckDetailPage({
             >
               <div>
                 <label className="text-sm font-medium text-[#1f2937]">
-                  Title <span className="text-[#b64b29]">*</span>
+                  {t('titleLabel')} <span className="text-[#b64b29]">*</span>
                 </label>
                 <input
                   name="title"
@@ -104,7 +106,7 @@ export default async function TeacherFlashcardDeckDetailPage({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[#1f2937]">Description</label>
+                <label className="text-sm font-medium text-[#1f2937]">{t('descriptionLabel')}</label>
                 <textarea
                   name="description"
                   rows={3}
@@ -115,24 +117,24 @@ export default async function TeacherFlashcardDeckDetailPage({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium text-[#1f2937]">Scope</label>
+                  <label className="text-sm font-medium text-[#1f2937]">{t('scopeLabel')}</label>
                   <select
                     name="scope"
                     defaultValue={deckWithCards.deck.scope}
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm"
                   >
-                    <option value="class">Class</option>
-                    <option value="global">Global</option>
+                    <option value="class">{t('scopeClass')}</option>
+                    <option value="global">{t('global')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-[#1f2937]">Class</label>
+                  <label className="text-sm font-medium text-[#1f2937]">{t('scopeClass')}</label>
                   <select
                     name="classId"
                     defaultValue={deckWithCards.deck.classId ?? ''}
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm"
                   >
-                    <option value="">Select class</option>
+                    <option value="">{t('selectClass')}</option>
                     {classes.map((row) => (
                       <option key={row.id} value={row.id}>
                         {row.name}
@@ -146,7 +148,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                 type="submit"
                 className="rounded-full bg-[#429ead] text-white hover:bg-[#36899a]"
               >
-                Save deck
+                {t('saveDeck')}
               </Button>
             </form>
 
@@ -171,7 +173,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                   backgroundColor: deckWithCards.deck.isPublished ? '#b64b29' : '#7daf41',
                 }}
               >
-                {deckWithCards.deck.isPublished ? 'Unpublish' : 'Publish'}
+                {deckWithCards.deck.isPublished ? t('unpublish') : t('publish')}
               </Button>
             </form>
           </CardContent>
@@ -179,7 +181,7 @@ export default async function TeacherFlashcardDeckDetailPage({
 
         <Card className="rounded-2xl border border-[#e5e7eb]">
           <CardHeader>
-            <CardTitle>Add card</CardTitle>
+            <CardTitle>{t('addCard')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -196,41 +198,41 @@ export default async function TeacherFlashcardDeckDetailPage({
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-sm font-medium text-[#1f2937]">
-                    Front <span className="text-[#b64b29]">*</span>
+                    {t('frontLabel')} <span className="text-[#b64b29]">*</span>
                   </label>
                   <input
                     name="front"
                     required
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
-                    placeholder="English word or phrase"
+                    placeholder={t('frontPlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-[#1f2937]">
-                    Back <span className="text-[#b64b29]">*</span>
+                    {t('backLabel')} <span className="text-[#b64b29]">*</span>
                   </label>
                   <input
                     name="back"
                     required
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
-                    placeholder="Meaning or simple definition"
+                    placeholder={t('backPlaceholder')}
                   />
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-[#1f2937]">Example</label>
+                <label className="text-sm font-medium text-[#1f2937]">{t('exampleLabel')}</label>
                 <textarea
                   name="example"
                   rows={2}
                   className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
-                  placeholder="Optional sentence example"
+                  placeholder={t('examplePlaceholder')}
                 />
               </div>
               <Button
                 type="submit"
                 className="rounded-full bg-[#7daf41] text-white hover:bg-[#6b9a39]"
               >
-                Add card
+                {t('addCardButton')}
               </Button>
             </form>
           </CardContent>
@@ -238,12 +240,12 @@ export default async function TeacherFlashcardDeckDetailPage({
 
         <Card className="rounded-2xl border border-[#e5e7eb]">
           <CardHeader>
-            <CardTitle>Cards</CardTitle>
+            <CardTitle>{t('cards')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {deckWithCards.cards.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#e5e7eb] p-5 text-center">
-                <p className="text-sm text-muted-foreground">No cards yet.</p>
+                <p className="text-sm text-muted-foreground">{t('noCardsYet')}</p>
               </div>
             ) : (
               deckWithCards.cards.map((card) => (
@@ -261,7 +263,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                   >
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <label className="text-xs font-medium text-muted-foreground">Front</label>
+                        <label className="text-xs font-medium text-muted-foreground">{t('frontLabel')}</label>
                         <input
                           name="front"
                           required
@@ -270,7 +272,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-medium text-muted-foreground">Back</label>
+                        <label className="text-xs font-medium text-muted-foreground">{t('backLabel')}</label>
                         <input
                           name="back"
                           required
@@ -280,7 +282,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-muted-foreground">Example</label>
+                      <label className="text-xs font-medium text-muted-foreground">{t('exampleLabel')}</label>
                       <textarea
                         name="example"
                         defaultValue={card.example ?? ''}
@@ -293,7 +295,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                       size="sm"
                       className="rounded-full bg-[#429ead] text-white hover:bg-[#36899a]"
                     >
-                      Save card
+                      {t('saveCard')}
                     </Button>
                   </form>
                   <form
@@ -313,7 +315,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                       className="rounded-full text-white"
                       style={{ backgroundColor: 'var(--accent-brown, #b64b29)' }}
                     >
-                      Remove
+                      {t('remove')}
                     </Button>
                   </form>
                 </div>

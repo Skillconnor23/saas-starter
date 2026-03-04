@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { CalendarEventClient } from "@/lib/schedule/calendar-events";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock3, Video, BookOpen } from "lucide-react";
@@ -53,6 +54,7 @@ export function DayEventsPanel({
   open,
   onOpenChange,
 }: Props) {
+  const t = useTranslations("schedule");
   if (!open) return null;
 
   const handleBackdropClick = () => onOpenChange(false);
@@ -71,12 +73,12 @@ export function DayEventsPanel({
           <div className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium">Classes on</p>
+              <p className="text-sm font-medium">{t("classesOn")}</p>
               <p className="text-sm text-muted-foreground">{dateLabel}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-            Close
+            {t("close")}
           </Button>
         </header>
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
@@ -99,9 +101,9 @@ export function DayEventsPanel({
                       <Clock3 className="h-3.5 w-3.5" />
                       <span>{formatTimeRange(ev, viewerTimezone)}</span>
                     </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Class timezone: {formatClassTimezone(ev)}
-                    </p>
+<p className="mt-0.5 text-xs text-muted-foreground">
+                    {t("classTimezone", { tz: formatClassTimezone(ev) })}
+                  </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -117,7 +119,7 @@ export function DayEventsPanel({
                         rel="noopener noreferrer"
                       >
                         <Video className="h-4 w-4" />
-                        Join
+                        {t("join")}
                       </a>
                     </Button>
                   )}
@@ -127,7 +129,7 @@ export function DayEventsPanel({
                     size="sm"
                     className={cn("gap-1.5", joinAllowed && "ml-1") }
                   >
-                    <Link href={ev.classroomUrl}>Open classroom</Link>
+                    <Link href={ev.classroomUrl}>{t("openClassroom")}</Link>
                   </Button>
                 </div>
               </div>
@@ -141,12 +143,12 @@ export function DayEventsPanel({
         <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b">
           <div className="flex flex-col">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Classes on
+              {t("classesOn")}
             </span>
             <span className="text-sm font-medium">{dateLabel}</span>
           </div>
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-            Close
+            {t("close")}
           </Button>
         </div>
         <div className="max-h-[60vh] overflow-y-auto px-4 py-3 space-y-3">
@@ -165,7 +167,7 @@ export function DayEventsPanel({
                   <span>{formatTimeRange(ev, viewerTimezone)}</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  Class timezone: {formatClassTimezone(ev)}
+                  {t("classTimezone", { tz: formatClassTimezone(ev) })}
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1.5">
                   {joinAllowed && ev.joinUrl && (
@@ -180,7 +182,7 @@ export function DayEventsPanel({
                         rel="noopener noreferrer"
                       >
                         <Video className="h-4 w-4" />
-                        Join
+                        {t("join")}
                       </a>
                     </Button>
                   )}
@@ -190,7 +192,7 @@ export function DayEventsPanel({
                     size="sm"
                     className="flex-1 justify-center"
                   >
-                    <Link href={ev.classroomUrl}>Open classroom</Link>
+                    <Link href={ev.classroomUrl}>{t("openClassroom")}</Link>
                   </Button>
                 </div>
               </div>

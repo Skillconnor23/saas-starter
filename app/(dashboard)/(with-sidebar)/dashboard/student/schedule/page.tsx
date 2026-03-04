@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getCalendarEventsForStudent } from '@/lib/schedule/calendar-events';
 import { MonthCalendar } from '@/components/schedule/MonthCalendar';
@@ -7,6 +8,8 @@ import { SetTimezoneOnMount } from '@/components/calendar/SetTimezoneOnMount';
 import { CalendarDays } from 'lucide-react';
 
 export default async function StudentSchedulePage() {
+  const t = await getTranslations('schedule');
+  const tSidebar = await getTranslations('dashboard.sidebar.student');
   const user = await requireRole(['student']);
   const viewerTimezone = user.timezone ?? 'UTC';
 
@@ -27,10 +30,10 @@ export default async function StudentSchedulePage() {
           <header className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <CalendarDays className="h-6 w-6" />
-              <h1 className="text-lg lg:text-2xl font-medium">Schedule</h1>
+              <h1 className="text-lg lg:text-2xl font-medium">{tSidebar('schedule')}</h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your timezone: {viewerTimezone}
+              {t('yourTimezone', { tz: viewerTimezone })}
             </p>
           </header>
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { MarketingSection } from "@/components/marketing/MarketingSection";
 import { FeatureCard } from "@/components/marketing/FeatureCard";
@@ -14,7 +15,30 @@ import {
   FileText,
 } from "lucide-react";
 
-export default function SchoolsPage() {
+const PLATFORM_FEATURE_KEYS = [
+  "localLanguageUi",
+  "curriculumLibrary",
+  "homework",
+  "progress",
+  "classManagement",
+  "dashboard",
+] as const;
+
+const PLATFORM_FEATURE_ICONS = [
+  Globe,
+  Library,
+  FileText,
+  BarChart3,
+  Users,
+  LayoutDashboard,
+] as const;
+
+export default async function SchoolsPage() {
+  const t = await getTranslations("marketing.schools");
+  const tNav = await getTranslations("nav");
+  const locale = await getLocale();
+  const contactHref = `/${locale}/contact`;
+
   return (
     <div className="bg-white">
       {/* 1. HERO */}
@@ -22,10 +46,10 @@ export default function SchoolsPage() {
         <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-16">
           <div className="flex-1">
             <h1 className="text-4xl font-semibold tracking-tight text-[#3d4236] md:text-5xl">
-              English infrastructure for schools.
+              {t("heroTitle")}
             </h1>
             <p className="mt-6 max-w-xl text-lg text-[#5a5f57]">
-              License the Gecko platform by student seats. Add certified Gecko teachers to run live classes.
+              {t("heroSubtitle")}
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
               <Button
@@ -33,7 +57,7 @@ export default function SchoolsPage() {
                 size="lg"
                 className="bg-[#7daf41] hover:bg-[#6b9a39] text-white"
               >
-                <Link href="/contact">Book a Demo</Link>
+                <Link href={contactHref}>{tNav("bookDemo")}</Link>
               </Button>
               <Button
                 asChild
@@ -41,14 +65,14 @@ export default function SchoolsPage() {
                 variant="outline"
                 className="border-[#429ead] bg-white text-[#429ead] hover:bg-[#429ead]/5 hover:text-[#429ead]"
               >
-                <Link href="#platform">See the Platform</Link>
+                <Link href="#platform">{t("heroSecondary")}</Link>
               </Button>
             </div>
           </div>
           <div className="flex-1 lg:max-w-[480px]">
             <Image
               src="/platform-dashboard-cta.svg"
-              alt="Gecko Academy platform"
+              alt={t("platformImageAlt")}
               width={1500}
               height={1500}
               className="w-full h-auto"
@@ -62,9 +86,9 @@ export default function SchoolsPage() {
       <MarketingSection className="py-12">
         <div className="grid gap-4 sm:grid-cols-3 sm:gap-6">
           {[
-            { icon: Globe, label: "Localized platform" },
-            { icon: Users, label: "Certified teachers" },
-            { icon: BookOpen, label: "Structured curriculum + homework" },
+            { icon: Globe, label: t("trust.localizedPlatform") },
+            { icon: Users, label: t("trust.certifiedTeachers") },
+            { icon: BookOpen, label: t("trust.structuredCurriculum") },
           ].map((item) => (
             <div
               key={item.label}
@@ -84,17 +108,17 @@ export default function SchoolsPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-[#429ead] p-6 shadow-md sm:p-8">
             <h2 className="text-2xl font-semibold text-white md:text-3xl">
-              Problem
+              {t("problem.title")}
             </h2>
             <p className="mt-4 text-white">
-              Many schools struggle with English education:
+              {t("problem.lead")}
             </p>
             <ul className="mt-6 space-y-3 text-white">
               {[
-                "Limited speaking practice",
-                "Inconsistent curriculum",
-                "Lack of fluent teachers",
-                "No digital learning tools",
+                t("problem.bullet1"),
+                t("problem.bullet2"),
+                t("problem.bullet3"),
+                t("problem.bullet4"),
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <span className="text-white">•</span>
@@ -105,15 +129,15 @@ export default function SchoolsPage() {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-[#7daf41] p-6 shadow-md sm:p-8">
             <h2 className="text-2xl font-semibold text-white md:text-3xl">
-              Solution
+              {t("solution.title")}
             </h2>
-            <p className="mt-4 text-white">Gecko provides:</p>
+            <p className="mt-4 text-white">{t("solution.lead")}</p>
             <ul className="mt-6 space-y-3 text-white">
               {[
-                "English learning platform",
-                "Structured curriculum",
-                "Homework and progress tracking",
-                "Certified teachers who speak the local language",
+                t("solution.bullet1"),
+                t("solution.bullet2"),
+                t("solution.bullet3"),
+                t("solution.bullet4"),
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <span className="text-white">•</span>
@@ -128,20 +152,20 @@ export default function SchoolsPage() {
       {/* 4. HOW IT WORKS */}
       <MarketingSection>
         <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
-          How It Works
+          {t("howItWorks.title")}
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {[
-            { step: 1, text: "School licenses platform seats" },
-            { step: 2, text: "Choose platform only or platform + teacher" },
-            { step: 3, text: "Students begin classes" },
+            { step: 1, text: t("howItWorks.step1") },
+            { step: 2, text: t("howItWorks.step2") },
+            { step: 3, text: t("howItWorks.step3") },
           ].map((item) => (
             <div
               key={item.step}
               className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md"
             >
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#7daf41]/10 text-sm font-semibold text-[#7daf41]">
-                Step {item.step}
+                {t("howItWorks.stepLabel", { step: item.step })}
               </span>
               <p className="mt-5 font-medium text-[#3d4236]">{item.text}</p>
             </div>
@@ -153,7 +177,7 @@ export default function SchoolsPage() {
             size="lg"
             className="bg-[#7daf41] hover:bg-[#6b9a39] text-white"
           >
-            <Link href="/contact">Book a Demo</Link>
+            <Link href={contactHref}>{tNav("bookDemo")}</Link>
           </Button>
         </div>
       </MarketingSection>
@@ -161,30 +185,23 @@ export default function SchoolsPage() {
       {/* 5. PLATFORM FEATURES */}
       <MarketingSection id="platform">
         <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
-          Platform Features
+          {t("platformFeatures.title")}
         </h2>
         <div className="mt-12 flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
           <div className="grid flex-1 gap-4 sm:grid-cols-2">
-            {[
-              { icon: Globe, title: "Local language UI", desc: "Platform in students' native language" },
-              { icon: Library, title: "Curriculum library", desc: "Structured lessons and materials" },
-              { icon: FileText, title: "Homework + submissions", desc: "Assign and track assignments" },
-              { icon: BarChart3, title: "Progress tracking", desc: "Scores, activity, and reports" },
-              { icon: Users, title: "Class management", desc: "Rosters, scheduling, and groups" },
-              { icon: LayoutDashboard, title: "Teacher/admin dashboard", desc: "Full control and visibility" },
-            ].map((item) => (
+            {PLATFORM_FEATURE_KEYS.map((key, i) => (
               <FeatureCard
-                key={item.title}
-                icon={item.icon}
-                title={item.title}
-                description={item.desc}
+                key={key}
+                icon={PLATFORM_FEATURE_ICONS[i]}
+                title={t(`platformFeatures.${key}.title`)}
+                description={t(`platformFeatures.${key}.desc`)}
               />
             ))}
           </div>
           <div className="w-full shrink-0 lg:w-[420px]">
             <Image
               src="/schools-features.svg"
-              alt="Gecko school dashboard cards"
+              alt={t("platformFeaturesImageAlt")}
               width={1500}
               height={1500}
               className="w-full h-auto"
@@ -197,29 +214,29 @@ export default function SchoolsPage() {
       {/* 6. TEACHER ADD-ON */}
       <MarketingSection>
         <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
-          Add Gecko Teachers (Optional)
+          {t("teacherAddon.title")}
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-center text-[#5a5f57]">
-          Certified teachers who speak the local language, teach live classes, and follow Gecko curriculum.
+          {t("teacherAddon.subtitle")}
         </p>
         <div className="mt-12 grid gap-8 sm:grid-cols-3 justify-items-center">
           <TeacherCard
             name="Connor S."
             imageSrc="/teacher-connor-s.svg"
-            credentials="Certified • Bilingual • ESL Experience"
-            languages="English + Mongolian"
+            credentials={t("teacherAddon.card.credentials")}
+            languages={t("teacherAddon.card.languages")}
           />
           <TeacherCard
             name="Kay M."
             imageSrc="/teacher-kay-m.svg"
-            credentials="Certified • Bilingual • ESL Experience"
-            languages="English + Mongolian"
+            credentials={t("teacherAddon.card.credentials")}
+            languages={t("teacherAddon.card.languages")}
           />
           <TeacherCard
             name="Mason B."
             imageSrc="/teacher-mason-b.svg"
-            credentials="Certified • Bilingual • ESL Experience"
-            languages="English + Mongolian"
+            credentials={t("teacherAddon.card.credentials")}
+            languages={t("teacherAddon.card.languages")}
           />
         </div>
       </MarketingSection>
@@ -228,14 +245,14 @@ export default function SchoolsPage() {
       <MarketingSection>
         <div className="rounded-3xl border border-slate-200 bg-white p-12 shadow-md text-center sm:p-16">
           <h2 className="text-2xl font-semibold text-[#3d4236] md:text-3xl">
-            Ready to bring Gecko to your school?
+            {t("footerCta.title")}
           </h2>
           <Button
             asChild
             size="lg"
             className="mt-8 bg-[#7daf41] hover:bg-[#6b9a39] text-white"
           >
-            <Link href="/contact">Book a Demo</Link>
+            <Link href={contactHref}>{tNav("bookDemo")}</Link>
           </Button>
         </div>
       </MarketingSection>

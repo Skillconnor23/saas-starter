@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireClassroomAccess, canPostToClassroom } from '@/lib/auth/classroom';
 import { listClassroomPosts } from '@/lib/db/queries/education';
 import { getClassroomSidebarData } from '@/lib/db/queries/classroom';
@@ -17,6 +18,7 @@ import { AddPostMenu } from '@/components/classroom/AddPostMenu';
 type Props = { params: Promise<{ classId: string }> };
 
 export default async function ClassroomPage({ params }: Props) {
+  const t = await getTranslations('classroom');
   const { classId } = await params;
   const { user, eduClass } = await requireClassroomAccess(classId);
 
@@ -35,7 +37,7 @@ export default async function ClassroomPage({ params }: Props) {
           <Button variant="ghost" size="sm" asChild className="-ml-2 mb-4">
             <Link href="/dashboard" className="flex items-center gap-1 text-muted-foreground">
               <ArrowLeft className="h-4 w-4" />
-              Back to dashboard
+              {t('backToDashboard')}
             </Link>
           </Button>
           <div className="flex flex-wrap items-start justify-between gap-4 pb-4">
@@ -58,7 +60,7 @@ export default async function ClassroomPage({ params }: Props) {
             <Button variant="outline" size="sm" asChild>
               <Link href={`/classroom/${classId}/people`} className="flex items-center gap-1.5">
                 <Users className="h-4 w-4" />
-                People
+                {t('people')}
               </Link>
             </Button>
             {canPost && (
@@ -68,7 +70,7 @@ export default async function ClassroomPage({ params }: Props) {
                   className="flex items-center gap-1.5"
                 >
                   <ClipboardList className="h-4 w-4" />
-                  Attendance
+                  {t('attendance')}
                 </Link>
               </Button>
             )}

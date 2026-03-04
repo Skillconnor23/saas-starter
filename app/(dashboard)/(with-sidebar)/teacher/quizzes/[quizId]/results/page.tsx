@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getTeacherQuizResultsAction } from '@/lib/actions/quizzes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,7 @@ type Props = { params: Promise<{ quizId: string }> };
 export default async function QuizResultsPage({ params }: Props) {
   const { quizId } = await params;
   await requireRole(['teacher', 'admin', 'school_admin']);
+  const t = await getTranslations('teacher.quizzes');
   const data = await getTeacherQuizResultsAction(quizId);
   const { quiz, submissions } = data;
 
@@ -37,11 +39,11 @@ export default async function QuizResultsPage({ params }: Props) {
       <Button variant="ghost" size="sm" asChild className="mb-4 -ml-1">
         <Link href="/teacher/quizzes" className="flex items-center gap-1 text-muted-foreground">
           <ArrowLeft className="h-4 w-4" />
-          Back to Quizzes
+          {t('backToQuizzes')}
         </Link>
       </Button>
       <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] mb-2 tracking-tight">
-        Quiz results
+        {t('resultsTitle')}
       </h1>
       <p className="text-sm text-muted-foreground mb-6">{quiz.title}</p>
 
@@ -50,7 +52,7 @@ export default async function QuizResultsPage({ params }: Props) {
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">
-                Submissions
+                {t('submissions')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -62,7 +64,7 @@ export default async function QuizResultsPage({ params }: Props) {
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">
-                Average score
+                {t('averageScore')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -75,20 +77,20 @@ export default async function QuizResultsPage({ params }: Props) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Student scores</CardTitle>
+            <CardTitle>{t('studentScores')}</CardTitle>
           </CardHeader>
           <CardContent>
             {submissions.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No submissions yet.
+                {t('noSubmissionsYet')}
               </p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead className="text-right">Score</TableHead>
+                    <TableHead>{t('student')}</TableHead>
+                    <TableHead>{t('submitted')}</TableHead>
+                    <TableHead className="text-right">{t('score')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

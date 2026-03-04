@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getStudentHomeworkList } from '@/lib/actions/homework';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ClipboardList } from 'lucide-react';
 
 export default async function StudentHomeworkListPage() {
+  const t = await getTranslations('homework');
+  const tSidebar = await getTranslations('dashboard.sidebar.student');
   await requireRole(['student']);
   const list = await getStudentHomeworkList();
   if (!list) return null;
@@ -15,10 +18,10 @@ export default async function StudentHomeworkListPage() {
   return (
     <section className="flex-1">
       <h1 className="text-lg lg:text-2xl font-medium text-[#1f2937] mb-2">
-        Homework
+        {tSidebar('homework')}
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        View and submit your homework assignments
+        {t('viewAndSubmit')}
       </p>
 
       {list.length === 0 ? (
@@ -26,7 +29,7 @@ export default async function StudentHomeworkListPage() {
           <CardContent className="py-12 text-center">
             <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
-              No homework assignments yet. Check back later.
+              {t('noHomeworkYet')}
             </p>
           </CardContent>
         </Card>
@@ -43,14 +46,14 @@ export default async function StudentHomeworkListPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Due:{' '}
+                  {t('due')}{' '}
                   {homework.dueDate
                     ? new Date(homework.dueDate).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })
-                    : 'No due date'}
+                    : t('noDueDate')}
                 </p>
                 <div className="flex items-center gap-2">
                   <span
@@ -61,11 +64,13 @@ export default async function StudentHomeworkListPage() {
                     }`}
                   >
                     {submission
-                      ? `Submitted ${new Date(submission.submittedAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}`
-                      : 'Not submitted'}
+                      ? t('submittedOn', {
+                          date: new Date(submission.submittedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          }),
+                        })
+                      : t('notSubmitted')}
                   </span>
                 </div>
                 <Button
@@ -75,7 +80,7 @@ export default async function StudentHomeworkListPage() {
                   className="rounded-full w-full"
                 >
                   <Link href={`/dashboard/student/homework/${homework.id}`}>
-                    Open
+                    {t('open')}
                   </Link>
                 </Button>
               </CardContent>

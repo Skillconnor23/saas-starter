@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   Table,
   TableBody,
@@ -16,6 +17,7 @@ import type { SchoolAdminClassRow } from '@/lib/db/queries/school-admin-dashboar
 type SortKey = keyof Pick<SchoolAdminClassRow, 'className' | 'studentCount' | 'avgQuizScore30d' | 'attemptRate30d' | 'lastActivityAt'>;
 
 export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] }) {
+  const t = useTranslations('schoolAdmin.classTable');
   const [sortKey, setSortKey] = useState<SortKey>('className');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
@@ -55,16 +57,16 @@ export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] })
               onClick={() => toggleSort('className')}
               className="font-medium hover:underline text-left"
             >
-              Class
+              {t('class')}
             </button>
           </TableHead>
-          <TableHead>Teacher</TableHead>
+          <TableHead>{t('teacher')}</TableHead>
           <TableHead>
             <button
               onClick={() => toggleSort('studentCount')}
               className="font-medium hover:underline text-left"
             >
-              Students
+              {t('students')}
             </button>
           </TableHead>
           <TableHead>
@@ -72,7 +74,7 @@ export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] })
               onClick={() => toggleSort('avgQuizScore30d')}
               className="font-medium hover:underline text-left"
             >
-              Avg score (30d)
+              {t('avgScore30d')}
             </button>
           </TableHead>
           <TableHead>
@@ -80,7 +82,7 @@ export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] })
               onClick={() => toggleSort('attemptRate30d')}
               className="font-medium hover:underline text-left"
             >
-              Attempt rate (30d)
+              {t('attemptRate30d')}
             </button>
           </TableHead>
           <TableHead>
@@ -88,10 +90,10 @@ export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] })
               onClick={() => toggleSort('lastActivityAt')}
               className="font-medium hover:underline text-left"
             >
-              Last activity
+              {t('lastActivity')}
             </button>
           </TableHead>
-          <TableHead>Status</TableHead>
+          <TableHead>{t('status')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -123,17 +125,17 @@ export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] })
             <TableCell>
               {r.status === 'on_track' ? (
                 <span
-                  title="On track"
+                  title={t('onTrackTitle')}
                   className="inline-flex text-[#7daf41]"
-                  aria-label="On track"
+                  aria-label={t('onTrackAria')}
                 >
                   <CheckCircle className="h-5 w-5" />
                 </span>
               ) : (
                 <span
-                  title="Needs attention: low activity or quiz attempts"
+                  title={t('needsAttentionTitle')}
                   className="inline-flex text-amber-500"
-                  aria-label="Needs attention: low activity or quiz attempts"
+                  aria-label={t('needsAttentionAria')}
                 >
                   <AlertTriangle className="h-5 w-5" />
                 </span>

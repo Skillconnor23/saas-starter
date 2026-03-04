@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { Check, RotateCcw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { saveFlashcardResultAction } from '@/lib/actions/learning/flashcards';
@@ -28,6 +29,7 @@ export function FlashcardStudyClient({
   backHref,
   emptyMessage,
 }: Props) {
+  const t = useTranslations('learning');
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [attempted, setAttempted] = useState(0);
@@ -37,14 +39,17 @@ export function FlashcardStudyClient({
   const current = cards[index] ?? null;
   const finished = cards.length > 0 && index >= cards.length;
   const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : null;
-  const progressLabel = `${Math.min(index + 1, cards.length)} of ${cards.length}`;
+  const progressLabel = t('cardOf', {
+    current: Math.min(index + 1, cards.length),
+    total: cards.length,
+  });
 
   if (cards.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-8 text-center">
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
         <Button asChild variant="secondary" className="mt-4 rounded-full">
-          <Link href={backHref}>Back</Link>
+          <Link href={backHref}>{t('back')}</Link>
         </Button>
       </div>
     );
@@ -70,21 +75,21 @@ export function FlashcardStudyClient({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs text-muted-foreground">{deckTitle}</p>
-          <p className="text-sm font-medium text-[#1f2937]">Card {progressLabel}</p>
+          <p className="text-sm font-medium text-[#1f2937]">{progressLabel}</p>
         </div>
         <Button asChild variant="ghost" size="sm" className="rounded-full">
-          <Link href={backHref}>Back</Link>
+          <Link href={backHref}>{t('back')}</Link>
         </Button>
       </div>
 
       {finished ? (
         <div className="rounded-2xl border border-[#e5e7eb] bg-white p-6 text-center">
-          <p className="text-sm text-muted-foreground">Session complete</p>
+          <p className="text-sm text-muted-foreground">{t('sessionComplete')}</p>
           <p className="mt-1 text-2xl font-semibold text-[#1f2937]">
             {accuracy != null ? `${accuracy}%` : '—'}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            {correct} correct out of {attempted}
+            {t('correctOutOf', { correct, attempted })}
           </p>
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Button
@@ -98,10 +103,10 @@ export function FlashcardStudyClient({
               className="rounded-full bg-[#7daf41] text-white hover:bg-[#6b9a39]"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
-              Study again
+              {t('studyAgain')}
             </Button>
             <Button asChild variant="secondary" className="rounded-full">
-              <Link href={backHref}>Done</Link>
+              <Link href={backHref}>{t('done')}</Link>
             </Button>
           </div>
         </div>
@@ -114,6 +119,8 @@ export function FlashcardStudyClient({
           onToggle={() => setRevealed((v) => !v)}
           onAnswer={(isCorrect) => handleGrade(isCorrect ? 'correct' : 'incorrect')}
           disabled={isPending}
+          wrongAriaLabel={t('wrongAria')}
+          correctAriaLabel={t('correctAria')}
         />
       ) : null}
     </div>
@@ -138,7 +145,9 @@ function Flashcard({
   onToggle,
   onAnswer,
   disabled = false,
-}: FlashcardProps) {
+  wrongAriaLabel,
+  correctAriaLabel,
+}: FlashcardProps & { wrongAriaLabel: string; correctAriaLabel: string }) {
   return (
     <div className="w-full max-w-3xl mx-auto px-6 py-10">
       <div
@@ -179,7 +188,7 @@ function Flashcard({
           }}
           className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition hover:scale-110 disabled:opacity-60"
           style={{ backgroundColor: '#b64b29' }}
-          aria-label="Wrong"
+          aria-label={wrongAriaLabel}
         >
           <X className="w-7 h-7 text-white" />
         </button>
@@ -193,7 +202,7 @@ function Flashcard({
           }}
           className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition hover:scale-110 disabled:opacity-60"
           style={{ backgroundColor: '#7daf41' }}
-          aria-label="Correct"
+          aria-label={correctAriaLabel}
         >
           <Check className="w-7 h-7 text-white" />
         </button>

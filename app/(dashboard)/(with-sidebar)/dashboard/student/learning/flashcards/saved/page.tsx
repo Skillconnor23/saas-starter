@@ -1,10 +1,12 @@
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { FlashcardStudyClient } from '@/components/learning/FlashcardStudyClient';
 import { listSavedFlashcardsForStudent } from '@/lib/db/queries/flashcards';
 
 export default async function SavedWordsFlashcardPage() {
+  const t = await getTranslations('learning');
   const user = await requireRole(['student']);
   const savedCards = await listSavedFlashcardsForStudent(user.id);
 
@@ -12,13 +14,13 @@ export default async function SavedWordsFlashcardPage() {
     <section className="flex-1">
       <div className="mx-auto w-full max-w-2xl space-y-4">
         <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] tracking-tight">
-          My Saved Words
+          {t('mySavedWords')}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Practice your bookmarked cards anytime.
+          {t('mySavedWordsPageSubtitle')}
         </p>
         <FlashcardStudyClient
-          deckTitle="My Saved Words"
+          deckTitle={t('mySavedWords')}
           cards={savedCards.map((card) => ({
             id: card.cardId,
             deckId: card.deckId,
@@ -28,7 +30,7 @@ export default async function SavedWordsFlashcardPage() {
             isSaved: true,
           }))}
           backHref="/dashboard/student/learning?tab=flashcards"
-          emptyMessage="You have not saved any words yet. Open a deck and tap save on the back side."
+          emptyMessage={t('emptySaved')}
         />
       </div>
     </section>

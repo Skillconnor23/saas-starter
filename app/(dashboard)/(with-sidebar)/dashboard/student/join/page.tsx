@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JoinClassForm } from './join-class-form';
@@ -7,6 +8,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export default async function StudentJoinClassPage() {
+  const t = await getTranslations('join');
   await requireRole(['student']);
 
   return (
@@ -16,19 +18,18 @@ export default async function StudentJoinClassPage() {
         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
       >
         <ArrowLeft className="mr-1 h-4 w-4" />
-        Back to dashboard
+        {t('backToDashboard')}
       </Link>
 
-      <h1 className="text-lg lg:text-2xl font-medium mb-6">Join a class</h1>
+      <h1 className="text-lg lg:text-2xl font-medium mb-6">{t('joinAClass')}</h1>
 
       <Card className="max-w-md">
         <CardHeader>
-          <CardTitle>Enter class code</CardTitle>
+          <CardTitle>{t('enterClassCode')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Ask your teacher or school for the class code. Enter it below to join
-            the class and see upcoming sessions.
+            {t('enterClassCodeDesc')}
           </p>
           <JoinClassForm />
         </CardContent>

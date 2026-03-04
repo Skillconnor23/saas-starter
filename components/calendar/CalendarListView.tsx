@@ -7,6 +7,8 @@ type Props = {
   occurrences: Occurrence[];
   viewerTimezone: string;
   daysLabel?: string;
+  /** Optional translated empty state message */
+  emptyMessage?: string;
 };
 
 function formatDateKey(d: Date, tz: string): string {
@@ -36,6 +38,7 @@ export function CalendarListView({
   occurrences,
   viewerTimezone,
   daysLabel = 'Upcoming',
+  emptyMessage = 'No classes scheduled in this range.',
 }: Props) {
   const tz = viewerTimezone || 'UTC';
   const byDate = new Map<string, Occurrence[]>();
@@ -49,7 +52,7 @@ export function CalendarListView({
   if (occurrences.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-6 text-center">
-        No classes scheduled in this range.
+        {emptyMessage}
       </p>
     );
   }

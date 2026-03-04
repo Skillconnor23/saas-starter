@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { FlashcardStudyClient } from '@/components/learning/FlashcardStudyClient';
 import {
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default async function StudyFlashcardDeckPage({ params }: Props) {
+  const t = await getTranslations('learning');
   const user = await requireRole(['student']);
   const { deckId } = await params;
 
@@ -43,13 +45,13 @@ export default async function StudyFlashcardDeckPage({ params }: Props) {
           {deckWithCards.deck.title}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Flip, self-grade, and save important words as you study.
+          {t('deckSubtitle')}
         </p>
         <FlashcardStudyClient
           deckTitle={deckWithCards.deck.title}
           cards={cards}
           backHref="/dashboard/student/learning?tab=flashcards"
-          emptyMessage="This deck has no cards yet."
+          emptyMessage={t('emptyDeck')}
         />
       </div>
     </section>

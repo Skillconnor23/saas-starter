@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { locales } from '@/lib/i18n/config';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -25,105 +27,105 @@ import {
 import type { PlatformRole } from '@/lib/db/schema';
 import { useNavDrawer } from '@/app/(dashboard)/layout';
 
-type NavItem = { href: string; icon: React.ElementType; label: string };
+type NavItem = { href: string; icon: React.ElementType; labelKey: string };
 
-const navGroups: Record<
+const navGroupKeys: Record<
   PlatformRole,
-  { label: string; items: NavItem[] }[]
+  { labelKey: string; items: NavItem[] }[]
 > = {
   student: [
     {
-      label: 'Main',
+      labelKey: 'main',
       items: [
-        { href: '/dashboard/student', icon: GraduationCap, label: 'Dashboard' },
-        { href: '/dashboard/student/learning', icon: BookOpen, label: 'Learning' },
-        { href: '__PRIMARY_CLASS__', icon: BookOpen, label: 'My class' },
-        { href: '__PEOPLE__', icon: Users, label: 'People' },
-        { href: '/dashboard/student/schedule', icon: CalendarDays, label: 'Schedule' },
-        { href: '/dashboard/student/homework', icon: ClipboardList, label: 'Homework' },
-        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
+        { href: '/dashboard/student', icon: GraduationCap, labelKey: 'dashboard' },
+        { href: '/dashboard/student/learning', icon: BookOpen, labelKey: 'learning' },
+        { href: '__PRIMARY_CLASS__', icon: BookOpen, labelKey: 'myClass' },
+        { href: '__PEOPLE__', icon: Users, labelKey: 'people' },
+        { href: '/dashboard/student/schedule', icon: CalendarDays, labelKey: 'schedule' },
+        { href: '/dashboard/student/homework', icon: ClipboardList, labelKey: 'homework' },
+        { href: '/dashboard/messages', icon: MessageSquare, labelKey: 'messages' },
       ],
     },
     {
-      label: 'Settings',
+      labelKey: 'settings',
       items: [
-        { href: '/dashboard/student/join', icon: LogIn, label: 'Join class' },
-        { href: '/dashboard/profile', icon: User, label: 'Profile' },
-        { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
+        { href: '/dashboard/student/join', icon: LogIn, labelKey: 'joinClass' },
+        { href: '/dashboard/profile', icon: User, labelKey: 'profile' },
+        { href: '/dashboard/activity', icon: Activity, labelKey: 'activity' },
       ],
     },
   ],
   teacher: [
     {
-      label: 'Main',
+      labelKey: 'main',
       items: [
-        { href: '/dashboard/teacher', icon: UserCog, label: 'Dashboard' },
-        { href: '/teacher/classes', icon: GraduationCap, label: 'Classes' },
-        { href: '/teacher/quizzes', icon: BookOpen, label: 'Quizzes' },
+        { href: '/dashboard/teacher', icon: UserCog, labelKey: 'dashboard' },
+        { href: '/teacher/classes', icon: GraduationCap, labelKey: 'classes' },
+        { href: '/teacher/quizzes', icon: BookOpen, labelKey: 'quizzes' },
         {
           href: '/dashboard/teacher/learning/flashcards',
           icon: BookMarked,
-          label: 'Flashcards',
+          labelKey: 'flashcards',
         },
-        { href: '/dashboard/teacher/students', icon: Users, label: 'Students' },
-        { href: '/dashboard/teacher/schedule', icon: CalendarDays, label: 'Schedule' },
-        { href: '/dashboard/homework', icon: ClipboardList, label: 'Homework' },
-        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
+        { href: '/dashboard/teacher/students', icon: Users, labelKey: 'students' },
+        { href: '/dashboard/teacher/schedule', icon: CalendarDays, labelKey: 'schedule' },
+        { href: '/dashboard/homework', icon: ClipboardList, labelKey: 'homework' },
+        { href: '/dashboard/messages', icon: MessageSquare, labelKey: 'messages' },
       ],
     },
     {
-      label: 'Settings',
+      labelKey: 'settings',
       items: [
-        { href: '/dashboard/profile', icon: User, label: 'Profile' },
-        { href: '/dashboard/team', icon: Users, label: 'Team' },
-        { href: '/dashboard/general', icon: Settings, label: 'General' },
-        { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-        { href: '/dashboard/security', icon: Shield, label: 'Security' },
+        { href: '/dashboard/profile', icon: User, labelKey: 'profile' },
+        { href: '/dashboard/team', icon: Users, labelKey: 'team' },
+        { href: '/dashboard/general', icon: Settings, labelKey: 'general' },
+        { href: '/dashboard/activity', icon: Activity, labelKey: 'activity' },
+        { href: '/dashboard/security', icon: Shield, labelKey: 'security' },
       ],
     },
   ],
   school_admin: [
     {
-      label: 'Main',
+      labelKey: 'main',
       items: [
-        { href: '/dashboard/school-admin', icon: Building2, label: 'Dashboard' },
-        { href: '/dashboard/school-admin/students', icon: Users, label: 'Students' },
-        { href: '/dashboard/school-admin/schedule', icon: CalendarDays, label: 'Schedule' },
-        { href: '/dashboard/admin/classes', icon: GraduationCap, label: 'Classes' },
-        { href: '/dashboard/homework', icon: ClipboardList, label: 'Homework' },
-        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
+        { href: '/dashboard/school-admin', icon: Building2, labelKey: 'dashboard' },
+        { href: '/dashboard/school-admin/students', icon: Users, labelKey: 'students' },
+        { href: '/dashboard/school-admin/schedule', icon: CalendarDays, labelKey: 'schedule' },
+        { href: '/dashboard/admin/classes', icon: GraduationCap, labelKey: 'classes' },
+        { href: '/dashboard/homework', icon: ClipboardList, labelKey: 'homework' },
+        { href: '/dashboard/messages', icon: MessageSquare, labelKey: 'messages' },
       ],
     },
     {
-      label: 'Settings',
+      labelKey: 'settings',
       items: [
-        { href: '/dashboard/profile', icon: User, label: 'Profile' },
-        { href: '/dashboard/team', icon: Users, label: 'Team' },
-        { href: '/dashboard/general', icon: Settings, label: 'General' },
-        { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-        { href: '/dashboard/security', icon: Shield, label: 'Security' },
+        { href: '/dashboard/profile', icon: User, labelKey: 'profile' },
+        { href: '/dashboard/team', icon: Users, labelKey: 'team' },
+        { href: '/dashboard/general', icon: Settings, labelKey: 'general' },
+        { href: '/dashboard/activity', icon: Activity, labelKey: 'activity' },
+        { href: '/dashboard/security', icon: Shield, labelKey: 'security' },
       ],
     },
   ],
   admin: [
     {
-      label: 'Main',
+      labelKey: 'main',
       items: [
-        { href: '/dashboard/admin', icon: UserCog, label: 'Dashboard' },
-        { href: '/dashboard/admin/users', icon: Users, label: 'Users' },
-        { href: '/dashboard/admin/classes', icon: GraduationCap, label: 'Classes' },
-        { href: '/dashboard/homework', icon: ClipboardList, label: 'Homework' },
-        { href: '/dashboard/messages', icon: MessageSquare, label: 'Messages' },
+        { href: '/dashboard/admin', icon: UserCog, labelKey: 'dashboard' },
+        { href: '/dashboard/admin/users', icon: Users, labelKey: 'users' },
+        { href: '/dashboard/admin/classes', icon: GraduationCap, labelKey: 'classes' },
+        { href: '/dashboard/homework', icon: ClipboardList, labelKey: 'homework' },
+        { href: '/dashboard/messages', icon: MessageSquare, labelKey: 'messages' },
       ],
     },
     {
-      label: 'Settings',
+      labelKey: 'settings',
       items: [
-        { href: '/dashboard/profile', icon: User, label: 'Profile' },
-        { href: '/dashboard/team', icon: Users, label: 'Team' },
-        { href: '/dashboard/general', icon: Settings, label: 'General' },
-        { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-        { href: '/dashboard/security', icon: Shield, label: 'Security' },
+        { href: '/dashboard/profile', icon: User, labelKey: 'profile' },
+        { href: '/dashboard/team', icon: Users, labelKey: 'team' },
+        { href: '/dashboard/general', icon: Settings, labelKey: 'general' },
+        { href: '/dashboard/activity', icon: Activity, labelKey: 'activity' },
+        { href: '/dashboard/security', icon: Shield, labelKey: 'security' },
       ],
     },
   ],
@@ -158,7 +160,22 @@ export function DashboardSidebar({
   userAvatarUrl,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const locale = useLocale();
   const { navOpen, setNavOpen } = useNavDrawer();
+
+  function withLocalePrefix(path: string): string {
+    const base = path.startsWith('/') ? path : `/${path}`;
+    return `/${locale}${base}`;
+  }
+
+  function stripLocaleFromPath(path: string | null): string {
+    if (!path) return '/';
+    const segments = path.split('/');
+    if (segments.length > 1 && locales.includes(segments[1] as any)) {
+      return `/${segments.slice(2).join('/')}`.replace(/\/+$/, '') || '/';
+    }
+    return path;
+  }
 
   useEffect(() => {
     if (!navOpen) return;
@@ -175,22 +192,29 @@ export function DashboardSidebar({
 
   function resolveItemHref(item: NavItem): string {
     if (item.href === '__PRIMARY_CLASS__') {
-      return studentPrimaryClassId
+      const base = studentPrimaryClassId
         ? `/classroom/${studentPrimaryClassId}`
         : '/dashboard/student';
+      return withLocalePrefix(base);
     }
     if (item.href === '__PEOPLE__') {
-      return studentPrimaryClassId
+      const base = studentPrimaryClassId
         ? `/classroom/${studentPrimaryClassId}/people`
         : '/dashboard/student';
+      return withLocalePrefix(base);
     }
-    return item.href;
+    return withLocalePrefix(item.href);
   }
 
-  const groups = navGroups[platformRole] ?? navGroups.student;
-  const isMessages = pathname === '/dashboard/messages';
+  const sidebarNs = platformRole === 'school_admin' ? 'schoolAdmin' : platformRole;
+  const tSidebar = useTranslations('dashboard.sidebar.' + sidebarNs);
+  const tNav = useTranslations('nav');
+  const groups = navGroupKeys[platformRole] ?? navGroupKeys.student;
+  const pathWithoutLocale = stripLocaleFromPath(pathname);
+  const isMessages = pathWithoutLocale === '/dashboard/messages';
   const isSchedulePage =
-    pathname.startsWith('/dashboard/') && pathname.includes('/schedule');
+    pathWithoutLocale.startsWith('/dashboard/') &&
+    pathWithoutLocale.includes('/schedule');
 
   function handleNavigate() {
     setNavOpen(false);
@@ -200,31 +224,33 @@ export function DashboardSidebar({
     <>
       <div className="flex-1 space-y-6 overflow-y-auto">
               {groups.map((group) => (
-            <div key={group.label}>
+            <div key={group.labelKey}>
               <h3 className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-white/70 md:text-white/60">
-                {group.label}
+                {tSidebar(group.labelKey)}
               </h3>
             <div className="space-y-1">
               {group.items.map((item) => {
                 const href = resolveItemHref(item);
                 const isActive =
-                  pathname === href ||
+                  pathWithoutLocale === item.href ||
                   (item.href === '/dashboard/student/learning' &&
-                    (pathname?.startsWith('/dashboard/student/learning') ||
-                      pathname?.startsWith('/learning'))) ||
-                  (item.href === '/teacher/classes' && pathname?.startsWith('/teacher/classes')) ||
-                  (item.href === '/teacher/quizzes' && pathname?.startsWith('/teacher/quizzes')) ||
+                    (pathWithoutLocale?.startsWith('/dashboard/student/learning') ||
+                      pathWithoutLocale?.startsWith('/learning'))) ||
+                  (item.href === '/teacher/classes' &&
+                    pathWithoutLocale?.startsWith('/teacher/classes')) ||
+                  (item.href === '/teacher/quizzes' &&
+                    pathWithoutLocale?.startsWith('/teacher/quizzes')) ||
                   (item.href === '/dashboard/teacher/learning/flashcards' &&
-                    pathname?.startsWith('/dashboard/teacher/learning/flashcards')) ||
+                    pathWithoutLocale?.startsWith('/dashboard/teacher/learning/flashcards')) ||
                   (item.href === '/dashboard/student/homework' &&
-                    pathname?.startsWith('/dashboard/student/homework')) ||
+                    pathWithoutLocale?.startsWith('/dashboard/student/homework')) ||
                   (item.href === '/dashboard/homework' &&
-                    pathname?.startsWith('/dashboard/homework'));
+                    pathWithoutLocale?.startsWith('/dashboard/homework'));
                 const showMessageBadge =
                   item.href === '/dashboard/messages' && unreadMessageCount > 0;
                 return (
                   <Link
-                    key={`${group.label}-${item.href}`}
+                    key={`${group.labelKey}-${item.href}`}
                     href={href}
                     onClick={handleNavigate}
                     className="block min-h-[48px] active:opacity-90"
@@ -235,7 +261,7 @@ export function DashboardSidebar({
                       }`}
                     >
                       <item.icon className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
-                      <span className="flex-1 text-left">{item.label}</span>
+                      <span className="flex-1 text-left">{tSidebar(item.labelKey)}</span>
                       {showMessageBadge && (
                         <span
                           className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#b64b29] px-1.5 text-[10px] font-medium text-white"
@@ -254,7 +280,7 @@ export function DashboardSidebar({
       </div>
       {(userName || userEmail) && (
         <Link
-          href="/dashboard/profile"
+          href={withLocalePrefix('/dashboard/profile')}
           className="mt-auto block min-h-[48px] border-t border-white/20 pt-4 group"
         >
           <div className="flex min-h-[48px] items-center gap-3 rounded-full py-2 group-hover:bg-white/10 group-active:bg-white/12 cursor-pointer md:py-0">
@@ -293,13 +319,13 @@ export function DashboardSidebar({
         <div className="flex h-full flex-col p-4 sm:p-5">
           {/* Drawer header: X button (mobile only) */}
           <div className="mb-4 flex min-h-[48px] shrink-0 items-center justify-between md:hidden">
-            <span className="text-base font-medium text-white">Menu</span>
+            <span className="text-base font-medium text-white">{tNav('mobileMenu')}</span>
             <Button
               variant="ghost"
               size="icon"
               className="-mr-2 h-12 min-h-[48px] w-12 min-w-[48px] rounded-full text-white hover:bg-white/10 active:bg-white/14"
               onClick={() => setNavOpen(false)}
-              aria-label="Close menu"
+              aria-label={tNav('closeMenu')}
             >
               <X className="h-6 w-6" />
             </Button>

@@ -65,7 +65,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (userWithTeam.length === 0) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: 'invalidCredentials',
       email,
       password
     };
@@ -80,7 +80,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (!isPasswordValid) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: 'invalidCredentials',
       email,
       password
     };
@@ -117,7 +117,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: 'createUserFailed',
       email,
       password
     };
@@ -135,7 +135,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (!createdUser) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: 'createUserFailed',
       email,
       password
     };
@@ -176,7 +176,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         .where(eq(teams.id, teamId))
         .limit(1);
     } else {
-      return { error: 'Invalid or expired invitation.', email, password };
+      return { error: 'invalidOrExpiredInvitation', email, password };
     }
   } else {
     // Create a new team if there's no invitation
@@ -188,7 +188,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
     if (!createdTeam) {
       return {
-        error: 'Failed to create team. Please try again.',
+        error: 'createTeamFailed',
         email,
         password
       };

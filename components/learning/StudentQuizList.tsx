@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import {
   getQuizzesForStudentClasses,
   getQuizResultsForStudentProfile,
@@ -29,6 +30,8 @@ export async function StudentQuizList({
   studentUserId: number;
   showIntro?: boolean;
 }) {
+  const t = await getTranslations('quizzes');
+  const tLearning = await getTranslations('learning');
   const [quizzes, stats, assessments] = await Promise.all([
     getQuizzesForStudentClasses(studentUserId),
     getStudentDashboardStats(studentUserId),
@@ -45,9 +48,9 @@ export async function StudentQuizList({
       {showIntro && (
         <div>
           <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] mb-2 tracking-tight">
-            Learning
+            {tLearning('title')}
           </h1>
-          <p className="text-sm text-muted-foreground">Weekly quizzes from your class.</p>
+          <p className="text-sm text-muted-foreground">{t('weeklyQuizzes')}</p>
         </div>
       )}
 
@@ -60,9 +63,9 @@ export async function StudentQuizList({
           >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
-                This week
+                {t('thisWeek')}
                 <span className="inline-flex rounded-full bg-[#e5e7eb]/80 px-2.5 py-0.5 text-xs font-medium text-[#6b7280]">
-                  This Week
+                  {t('thisWeek')}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -86,12 +89,12 @@ export async function StudentQuizList({
                       className="h-7 rounded-full bg-[#429ead] px-3 text-xs text-white hover:bg-[#36899a]"
                       asChild
                     >
-                      <Link href={`/learning/${latest.quiz.id}`}>Review</Link>
+                      <Link href={`/learning/${latest.quiz.id}`}>{t('review')}</Link>
                     </Button>
                   </>
                 ) : (
                   <Button variant="primary" size="sm" className="rounded-full" asChild>
-                    <Link href={`/learning/${latest.quiz.id}`}>Start quiz</Link>
+                    <Link href={`/learning/${latest.quiz.id}`}>{t('startQuiz')}</Link>
                   </Button>
                 )}
               </div>
@@ -102,7 +105,7 @@ export async function StudentQuizList({
             <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-2">
               <span className="flex items-center gap-2 text-xs text-[#9ca3af]">
                 <TrendingUp className="h-4 w-4 shrink-0" />
-                Avg score (30d)
+                {t('avgScore30d')}
               </span>
               <span className="text-sm font-bold text-[#1f2937]">
                 {stats.avgScore30d != null ? `${stats.avgScore30d}%` : '—'}
@@ -111,14 +114,14 @@ export async function StudentQuizList({
             <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-2">
               <span className="flex items-center gap-2 text-xs text-[#9ca3af]">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                Last quiz
+                {t('lastQuiz')}
               </span>
               <span className="text-sm font-bold text-[#1f2937]">
                 {assessments.lastQuiz != null ? `${assessments.lastQuiz.score}%` : '—'}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-2">
-              <span className="text-xs text-[#9ca3af]">Completion</span>
+              <span className="text-xs text-[#9ca3af]">{t('completion')}</span>
               <span className="text-sm font-bold text-[#1f2937]">{completionRate}%</span>
             </div>
           </div>
@@ -127,21 +130,21 @@ export async function StudentQuizList({
 
       <Card className="rounded-2xl border border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-2">
-          <CardTitle>All quizzes</CardTitle>
+          <CardTitle>{t('allQuizzes')}</CardTitle>
         </CardHeader>
         <CardContent className="pt-0 pb-5">
           {quizzes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <BookOpen className="h-10 w-10 text-muted-foreground/50 mb-3" aria-hidden />
-              <p className="font-medium text-[#1f2937]">No quizzes yet</p>
+              <p className="font-medium text-[#1f2937]">{t('noQuizzesYet')}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Your teacher will post weekly quizzes here.
+                {t('noQuizzesYetDesc')}
               </p>
             </div>
           ) : (
             <>
               <p className="text-xs text-[#9ca3af] mb-3">
-                Showing {quizzes.length} quiz{quizzes.length !== 1 ? 'zes' : ''}
+                {quizzes.length === 1 ? t('showingCount', { count: quizzes.length }) : t('showingCountPlural', { count: quizzes.length })}
               </p>
               <ul className="space-y-1.5">
                 {quizzes.map(({ quiz, className, submission }) => (
@@ -168,7 +171,7 @@ export async function StudentQuizList({
                       className="h-7 shrink-0 rounded-full bg-[#429ead] px-3 text-xs text-white hover:bg-[#36899a]"
                       asChild
                     >
-                      <Link href={`/learning/${quiz.id}`}>{submission ? 'Review' : 'Start'}</Link>
+                      <Link href={`/learning/${quiz.id}`}>{submission ? t('review') : t('startQuiz')}</Link>
                     </Button>
                   </li>
                 ))}

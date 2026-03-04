@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useTranslations } from 'next-intl';
 import { joinClassByCodeAction } from '@/lib/actions/education';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Label } from '@/components/ui/label';
 type ActionState = { error?: string };
 
 export function JoinClassForm() {
+  const t = useTranslations('join');
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     joinClassByCodeAction,
     {}
@@ -17,13 +19,13 @@ export function JoinClassForm() {
   return (
     <form action={formAction} className="space-y-4">
       <div>
-        <Label htmlFor="code">Class code</Label>
+        <Label htmlFor="code">{t('classCode')}</Label>
         <Input
           id="code"
           name="code"
           type="text"
           required
-          placeholder="e.g. ABC123"
+          placeholder={t('classCodePlaceholder')}
           className="mt-1 font-mono uppercase"
           autoComplete="off"
           maxLength={12}
@@ -33,7 +35,7 @@ export function JoinClassForm() {
         <p className="text-sm text-red-500">{state.error}</p>
       )}
       <Button type="submit" disabled={isPending}>
-        {isPending ? 'Joining...' : 'Join class'}
+        {isPending ? t('joining') : t('joinClass')}
       </Button>
     </form>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 
@@ -23,83 +24,48 @@ declare global {
 }
 
 export default function TrialPage() {
+  const t = useTranslations("marketing.trial");
   const [level, setLevel] = useState<Level>('beginner');
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const calendlyRef = useRef<HTMLDivElement>(null);
 
   const calendlyUrl = level === 'beginner' ? BEGINNER_CALENDLY_URL : INTERMEDIATE_CALENDLY_URL;
 
-  // Debug: log level + URL + ref.
-  useEffect(() => {
-    console.log("[Calendly] level:", level);
-    console.log("[Calendly] calendlyUrl:", calendlyUrl);
-    console.log("[Calendly] ref?", !!calendlyRef.current);
-  }, [level, calendlyUrl]);
-
-  // Load Calendly script once on the client.
   useEffect(() => {
     const src = "https://assets.calendly.com/assets/external/widget.js";
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
 
     if (existing) {
-      console.log("[Calendly] script tag already exists");
       if (window.Calendly?.initInlineWidget) {
-        console.log("[Calendly] Calendly.initInlineWidget already available");
         setScriptLoaded(true);
       } else {
-        existing.addEventListener(
-          "load",
-          () => {
-            console.log("[Calendly] existing script onload");
-            setScriptLoaded(true);
-          },
-          { once: true }
-        );
-        existing.addEventListener("error", () => {
-          console.error("[Calendly] existing script onerror");
-        });
+        existing.addEventListener("load", () => setScriptLoaded(true), { once: true });
       }
       return;
     }
 
-    console.log("[Calendly] appending script");
     const script = document.createElement("script");
     script.src = src;
     script.async = true;
-    script.onload = () => {
-      console.log("[Calendly] script onload");
-      setScriptLoaded(true);
-    };
-    script.onerror = () => {
-      console.error("[Calendly] script onerror");
-    };
+    script.onload = () => setScriptLoaded(true);
     document.body.appendChild(script);
   }, []);
 
-  // Debug + init: log why we bail and try initInlineWidget.
   useEffect(() => {
-    console.log("[Calendly] init check", {
-      scriptLoaded,
-      hasRef: !!calendlyRef.current,
-      hasCalendly: !!window.Calendly,
-      hasInit: !!window.Calendly?.initInlineWidget,
-      calendlyUrl,
-    });
-
     if (!scriptLoaded || !calendlyRef.current || !window.Calendly?.initInlineWidget) return;
     const parent = calendlyRef.current;
     parent.innerHTML = "";
-
     try {
-      window.Calendly.initInlineWidget({
-        url: calendlyUrl,
-        parentElement: parent,
-      });
-      console.log("[Calendly] initInlineWidget called");
-    } catch (e) {
-      console.error("[Calendly] initInlineWidget threw", e);
-    }
+      window.Calendly.initInlineWidget({ url: calendlyUrl, parentElement: parent });
+    } catch (_) {}
   }, [scriptLoaded, calendlyUrl]);
+
+  const bullets = [t("heroBullet1"), t("heroBullet2"), t("heroBullet3"), t("heroBullet4")];
+  const faqItems = [
+    { q: t("faq.q1"), a: t("faq.a1") },
+    { q: t("faq.q2"), a: t("faq.a2") },
+    { q: t("faq.q3"), a: t("faq.a3") },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -107,18 +73,13 @@ export default function TrialPage() {
       {/* Hero */}
       <section className="mx-auto max-w-3xl px-6 py-16 text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-[#3d4236] md:text-5xl">
-          Try a Free English Class
+          {t("heroTitle")}
         </h1>
         <p className="mt-6 text-lg text-slate-600 md:text-xl">
-          Join a live online class with a real American teacher and see how Gecko Academy works.
+          {t("heroSubtitle")}
         </p>
         <ul className="mt-8 flex flex-col gap-3 text-left sm:mx-auto sm:max-w-md">
-          {[
-            "50-minute live class",
-            "Small groups (8–12 students)",
-            "Real speaking practice",
-            "No payment required",
-          ].map((item) => (
+          {bullets.map((item) => (
             <li key={item} className="flex items-center gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#7daf41]/15">
                 <Check className="h-3.5 w-3.5 text-[#7daf41]" strokeWidth={2.5} />
@@ -133,7 +94,7 @@ export default function TrialPage() {
             size="lg"
             className="bg-[#7daf41] hover:bg-[#6b9a39] text-white"
           >
-            <a href="#book-trial">Book Free Trial</a>
+            <a href="#book-trial">{t("heroPrimary")}</a>
           </Button>
         </div>
       </section>
@@ -142,7 +103,7 @@ export default function TrialPage() {
       <section className="border-t border-slate-100 bg-slate-50/50 py-16">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <h2 className="text-2xl font-semibold text-[#3d4236] md:text-3xl">
-            Choose Your Level
+            {t("levelTitle")}
           </h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button
@@ -156,7 +117,7 @@ export default function TrialPage() {
               }
               onClick={() => setLevel('beginner')}
             >
-              Beginner
+              {t("level.beginner")}
             </Button>
             <Button
               type="button"
@@ -169,7 +130,7 @@ export default function TrialPage() {
               }
               onClick={() => setLevel('intermediate')}
             >
-              Intermediate / Advanced
+              {t("level.intermediate")}
             </Button>
           </div>
         </div>
@@ -179,10 +140,10 @@ export default function TrialPage() {
       <section id="book-trial" className="py-16">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
-            Book Your Free Trial
+            {t("bookingTitle")}
           </h2>
           <p className="mt-4 text-center text-slate-600">
-            Choose a time below to reserve your spot.
+            {t("bookingSubtitle")}
           </p>
           <div className="mt-10 w-full">
             <div
@@ -197,23 +158,10 @@ export default function TrialPage() {
       <section className="border-t border-slate-100 bg-slate-50/50 py-16">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
-            Common Questions
+            {t("faqTitle")}
           </h2>
           <dl className="mt-12 space-y-8">
-            {[
-              {
-                q: "Is the trial really free?",
-                a: "Yes. The trial class is completely free and there is no obligation to continue.",
-              },
-              {
-                q: "Do students need to prepare anything?",
-                a: "No preparation is needed. Just join the class and participate.",
-              },
-              {
-                q: "What happens after the trial?",
-                a: "If you enjoy the class, you can join a weekly class group with other students at the same level.",
-              },
-            ].map((item) => (
+            {faqItems.map((item) => (
               <div key={item.q} className="rounded-xl border border-slate-200 bg-white p-6">
                 <dt className="font-semibold text-[#3d4236]">{item.q}</dt>
                 <dd className="mt-3 text-slate-600">{item.a}</dd>
