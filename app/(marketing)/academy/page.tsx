@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { MarketingSection } from "@/components/marketing/MarketingSection";
 import { FeatureCard } from "@/components/marketing/FeatureCard";
@@ -20,13 +21,13 @@ export default function AcademyPage() {
   return (
     <div className="bg-white">
       {/* 1. HERO */}
-      <MarketingSection className="pt-12 pb-16 sm:pt-16 sm:pb-20">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-16">
-          <div className="flex-1">
-            <h1 className="text-4xl font-semibold tracking-tight text-[#3d4236] md:text-5xl">
+      <section className="mx-auto max-w-7xl px-6 pt-10 pb-12 md:pt-14 md:pb-16">
+        <div className="grid lg:grid-cols-2 items-center gap-12 lg:gap-20">
+          <div>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#3d4236]">
               Learn English with real teachers.
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-[#5a5f57]">
+            <p className="mt-6 max-w-xl text-lg md:text-xl text-slate-600">
               Small live classes + a learning platform in your language + structured homework.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
@@ -47,16 +48,21 @@ export default function AcademyPage() {
               </Button>
             </div>
           </div>
-          <div className="flex-1 lg:max-w-[480px]">
-            <div className="aspect-[4/3] rounded-3xl border border-slate-200 bg-slate-100 shadow-md flex items-center justify-center">
-              <span className="text-slate-400 text-sm">Platform or class image</span>
-            </div>
+          <div className="w-full max-w-[760px]">
+            <Image
+              src="/platform-dashboard-cta.svg"
+              alt="Gecko Academy student dashboard"
+              width={1500}
+              height={1500}
+              priority
+              className="w-full h-auto"
+            />
           </div>
         </div>
-      </MarketingSection>
+      </section>
 
       {/* 2. TRUST STRIP */}
-      <MarketingSection className="py-12">
+      <MarketingSection className="pt-10 md:pt-14 pb-12">
         <div className="grid gap-4 sm:grid-cols-3 sm:gap-6">
           {[
             { icon: MessageCircle, label: "Teachers speak your language" },
@@ -114,29 +120,22 @@ export default function AcademyPage() {
         <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
           What You Get
         </h2>
-        <div className="mt-12 flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
-          <div className="grid flex-1 gap-4 sm:grid-cols-2">
-            {[
-              { icon: Mic2, title: "Live speaking classes", desc: "Small groups with real conversation" },
-              { icon: Globe, title: "Platform in your language", desc: "UI and support in your native language" },
-              { icon: FileText, title: "Homework assignments", desc: "Structured practice between classes" },
-              { icon: Video, title: "Lesson recordings", desc: "Review and catch up anytime" },
-              { icon: BookMarked, title: "Vocabulary trainer", desc: "Build and reinforce vocabulary" },
-              { icon: BarChart3, title: "Progress tracking", desc: "See your improvement over time" },
-            ].map((item) => (
-              <FeatureCard
-                key={item.title}
-                icon={item.icon}
-                title={item.title}
-                description={item.desc}
-              />
-            ))}
-          </div>
-          <div className="w-full shrink-0 lg:w-[420px]">
-            <div className="aspect-[4/3] rounded-3xl border border-slate-200 bg-slate-100 shadow-md flex items-center justify-center">
-              <span className="text-slate-400 text-sm">Platform screenshot</span>
-            </div>
-          </div>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 max-w-4xl mx-auto">
+          {[
+            { icon: Mic2, title: "Live speaking classes", desc: "Small groups with real conversation" },
+            { icon: Globe, title: "Platform in your language", desc: "UI and support in your native language" },
+            { icon: FileText, title: "Homework assignments", desc: "Structured practice between classes" },
+            { icon: Video, title: "Lesson recordings", desc: "Review and catch up anytime" },
+            { icon: BookMarked, title: "Vocabulary trainer", desc: "Build and reinforce vocabulary" },
+            { icon: BarChart3, title: "Progress tracking", desc: "See your improvement over time" },
+          ].map((item) => (
+            <FeatureCard
+              key={item.title}
+              icon={item.icon}
+              title={item.title}
+              description={item.desc}
+            />
+          ))}
         </div>
       </MarketingSection>
 
@@ -148,19 +147,22 @@ export default function AcademyPage() {
         <p className="mx-auto mt-6 max-w-2xl text-center text-[#5a5f57]">
           Certified teachers who speak your language and help you speak with confidence.
         </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="mt-12 grid gap-8 sm:grid-cols-3 justify-items-center">
           <TeacherCard
-            name="Teacher Name"
+            name="Connor S."
+            imageSrc="/teacher-connor-s.svg"
             credentials="Certified • Bilingual • ESL Experience"
             languages="English + Mongolian"
           />
           <TeacherCard
-            name="Teacher Name"
+            name="Kay M."
+            imageSrc="/teacher-kay-m.svg"
             credentials="Certified • Bilingual • ESL Experience"
             languages="English + Mongolian"
           />
           <TeacherCard
-            name="Teacher Name"
+            name="Mason B."
+            imageSrc="/teacher-mason-b.svg"
             credentials="Certified • Bilingual • ESL Experience"
             languages="English + Mongolian"
           />
@@ -194,25 +196,34 @@ export default function AcademyPage() {
 
       {/* 7. FINAL CTA */}
       <MarketingSection>
-        <div className="rounded-3xl border border-slate-200 bg-white p-12 shadow-md text-center sm:p-16">
-          <h2 className="text-2xl font-semibold text-[#3d4236] md:text-3xl">
-            Ready to try a real English class?
-          </h2>
-          <Button
-            asChild
-            size="lg"
-            className="mt-8 bg-[#7daf41] hover:bg-[#6b9a39] text-white"
-          >
-            <Link href="/contact">Start Free Trial</Link>
-          </Button>
-          <p className="mt-6">
-            <Link
-              href="/pricing-students"
-              className="text-sm font-medium text-[#429ead] hover:underline"
+        <div className="flex flex-col items-center gap-10">
+          <Image
+            src="/platform-dashboard-cta.svg"
+            alt="Gecko Academy platform"
+            width={1500}
+            height={1500}
+            className="w-full max-w-4xl h-auto"
+          />
+          <div className="rounded-3xl border border-slate-200 bg-white p-12 shadow-md text-center sm:p-16">
+            <h2 className="text-2xl font-semibold text-[#3d4236] md:text-3xl">
+              Ready to try a real English class?
+            </h2>
+            <Button
+              asChild
+              size="lg"
+              className="mt-8 bg-[#7daf41] hover:bg-[#6b9a39] text-white"
             >
-              See student pricing
-            </Link>
-          </p>
+              <Link href="/contact">Start Free Trial</Link>
+            </Button>
+            <p className="mt-6">
+              <Link
+                href="/pricing-students"
+                className="text-sm font-medium text-[#429ead] hover:underline"
+              >
+                See student pricing
+              </Link>
+            </p>
+          </div>
         </div>
       </MarketingSection>
     </div>

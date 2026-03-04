@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { MarketingSection } from "@/components/marketing/MarketingSection";
 import { FeatureCard } from "@/components/marketing/FeatureCard";
@@ -45,9 +46,14 @@ export default function SchoolsPage() {
             </div>
           </div>
           <div className="flex-1 lg:max-w-[480px]">
-            <div className="aspect-[4/3] rounded-3xl border border-slate-200 bg-slate-100 shadow-md flex items-center justify-center">
-              <span className="text-slate-400 text-sm">Platform screenshot</span>
-            </div>
+            <Image
+              src="/platform-dashboard-cta.svg"
+              alt="Gecko Academy platform"
+              width={1500}
+              height={1500}
+              className="w-full h-auto"
+              sizes="(max-width: 1024px) 100vw, 480px"
+            />
           </div>
         </div>
       </MarketingSection>
@@ -176,9 +182,14 @@ export default function SchoolsPage() {
             ))}
           </div>
           <div className="w-full shrink-0 lg:w-[420px]">
-            <div className="aspect-[4/3] rounded-3xl border border-slate-200 bg-slate-100 shadow-md flex items-center justify-center">
-              <span className="text-slate-400 text-sm">Platform screenshot</span>
-            </div>
+            <Image
+              src="/platform-dashboard-cta.svg"
+              alt="Gecko Academy platform"
+              width={1500}
+              height={1500}
+              className="w-full h-auto"
+              sizes="(max-width: 1024px) 100vw, 420px"
+            />
           </div>
         </div>
       </MarketingSection>
@@ -191,19 +202,22 @@ export default function SchoolsPage() {
         <p className="mx-auto mt-6 max-w-2xl text-center text-[#5a5f57]">
           Certified teachers who speak the local language, teach live classes, and follow Gecko curriculum.
         </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="mt-12 grid gap-8 sm:grid-cols-3 justify-items-center">
           <TeacherCard
-            name="Teacher Name"
+            name="Connor S."
+            imageSrc="/teacher-connor-s.svg"
             credentials="Certified • Bilingual • ESL Experience"
             languages="English + Mongolian"
           />
           <TeacherCard
-            name="Teacher Name"
+            name="Kay M."
+            imageSrc="/teacher-kay-m.svg"
             credentials="Certified • Bilingual • ESL Experience"
             languages="English + Mongolian"
           />
           <TeacherCard
-            name="Teacher Name"
+            name="Mason B."
+            imageSrc="/teacher-mason-b.svg"
             credentials="Certified • Bilingual • ESL Experience"
             languages="English + Mongolian"
           />
