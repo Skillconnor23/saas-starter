@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Home, LogOut, Menu } from 'lucide-react';
+import { Home, LogOut, Menu, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
 import { NotificationsBell } from '@/components/notifications/NotificationsBell';
-import { STUDENT_TRIAL_HREF } from '@/lib/routes';
+import { STUDENT_TRIAL_HREF, SCHOOLS_DEMO_HREF } from '@/lib/routes';
 import useSWR, { mutate } from 'swr';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -32,17 +32,32 @@ function NavLink({
   children,
   isActive,
   muted,
+  mobile,
+  onClick,
 }: {
   href: string;
   children: React.ReactNode;
   isActive: boolean;
   muted?: boolean;
+  mobile?: boolean;
+  onClick?: () => void;
 }) {
   const baseColor = isActive ? "text-[#7daf41]" : muted ? "text-gray-400" : "text-gray-700";
+  if (mobile) {
+    return (
+      <Link
+        href={href}
+        onClick={onClick}
+        className={`block px-4 py-3 font-medium transition-colors duration-200 hover:bg-slate-50 hover:text-[#429ead] ${baseColor}`}
+      >
+        {children}
+      </Link>
+    );
+  }
   return (
     <Link
       href={href}
-      className={`hidden sm:inline font-medium transition-colors duration-200 hover:text-[#429ead] ${baseColor}`}
+      className={`hidden md:inline font-medium transition-colors duration-200 hover:text-[#429ead] ${baseColor}`}
     >
       {children}
     </Link>
@@ -69,7 +84,7 @@ function UserMenu() {
   if (!user) {
     return (
       <>
-        <nav className="flex items-center gap-8 md:gap-10">
+        <nav className="hidden md:flex items-center gap-8 md:gap-10">
           <NavLink href="/schools" isActive={pathname === "/schools"}>
             Schools
           </NavLink>
@@ -86,8 +101,12 @@ function UserMenu() {
             Log in
           </NavLink>
         </nav>
-        <Button asChild>
-          <Link href={STUDENT_TRIAL_HREF}>Start a Free Trial</Link>
+        <Button asChild className="hidden md:inline-flex">
+          {pathname === '/schools' ? (
+            <Link href={SCHOOLS_DEMO_HREF}>Book a Demo</Link>
+          ) : (
+            <Link href={STUDENT_TRIAL_HREF}>Start a Free Trial</Link>
+          )}
         </Button>
       </>
     );
@@ -133,8 +152,13 @@ function UserMenu() {
 
 /** Header for marketing and app: logo (→ /), nav, user menu. showSidebarToggle for app routes. */
 export function MarketingHeader({ showSidebarToggle = false, onMenuClick }: { showSidebarToggle?: boolean; onMenuClick?: () => void }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <header className="w-full border-b border-gray-200 bg-white shrink-0">
+    <header className="relative w-full border-b border-gray-200 bg-white shrink-0">
       <div className="flex h-16 w-full items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-initial">
           {showSidebarToggle && (
@@ -166,11 +190,81 @@ export function MarketingHeader({ showSidebarToggle = false, onMenuClick }: { sh
         </div>
         <div className="ml-auto flex items-center gap-2 shrink-0">
           <NotificationsBell />
-          <Suspense fallback={<div className="h-9" />}>
-            <UserMenu />
-          </Suspense>
+          <div className="hidden md:flex items-center gap-2">
+            <Suspense fallback={<div className="h-9" />}>
+              <UserMenu />
+            </Suspense>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden h-10 w-10 shrink-0 rounded-full text-[#1f2937] hover:bg-[#f3f4f6]"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
         </div>
       </div>
+      {/* Mobile menu dropdown */}
+      {mobileMenuOpen && (
+        <div className="absolute left-0 right-0 top-16 z-50 md:hidden w-full bg-white py-2 shadow-lg">
+          {!user ? (
+            <>
+              <NavLink href="/schools" isActive={pathname === '/schools'} mobile onClick={() => setMobileMenuOpen(false)}>
+                Schools
+              </NavLink>
+              <NavLink href="/academy" isActive={pathname === '/academy'} mobile onClick={() => setMobileMenuOpen(false)}>
+                Students
+              </NavLink>
+              <NavLink href="/pricing" isActive={pathname === '/pricing' || pathname === '/pricing-schools' || pathname === '/pricing-students'} mobile onClick={() => setMobileMenuOpen(false)}>
+                Pricing
+              </NavLink>
+              <NavLink href="/contact" isActive={pathname === '/contact'} mobile onClick={() => setMobileMenuOpen(false)}>
+                Contact
+              </NavLink>
+              <NavLink href="/sign-in" isActive={pathname === '/sign-in'} muted mobile onClick={() => setMobileMenuOpen(false)}>
+                Log in
+              </NavLink>
+              <div className="border-t border-slate-100 px-4 py-3 mt-2">
+                <Button asChild className="w-full">
+                  {pathname === '/schools' ? (
+                    <Link href={SCHOOLS_DEMO_HREF} onClick={() => setMobileMenuOpen(false)}>
+                      Book a Demo
+                    </Link>
+                  ) : (
+                    <Link href={STUDENT_TRIAL_HREF} onClick={() => setMobileMenuOpen(false)}>
+                      Start a Free Trial
+                    </Link>
+                  )}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/dashboard"
+                className="block px-4 py-3 font-medium text-gray-700 hover:bg-slate-50 hover:text-[#429ead]"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                className="block w-full px-4 py-3 text-left font-medium text-gray-700 hover:bg-slate-50 hover:text-[#429ead]"
+                onClick={async () => {
+                  await signOut();
+                  mutate('/api/user');
+                  setMobileMenuOpen(false);
+                  router.push('/academy');
+                }}
+              >
+                Sign out
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 }
