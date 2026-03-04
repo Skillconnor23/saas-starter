@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Home, LogOut, Menu } from 'lucide-react';
@@ -49,15 +49,20 @@ function NavLink({
 }
 
 function UserMenu() {
+  const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: user } = useSWR<User>('/api/user', fetcher);
   const router = useRouter();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   async function handleSignOut() {
     await signOut();
     mutate('/api/user');
-    router.push('/');
+    router.push('/academy');
   }
 
   if (!user) {
@@ -84,6 +89,16 @@ function UserMenu() {
           <Link href="/sign-up">Sign up</Link>
         </Button>
       </>
+    );
+  }
+
+  // Render dropdown only after mount to avoid Radix ID hydration mismatch (client-only)
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-2 rounded-full bg-transparent px-2 py-1 text-left text-[10px] uppercase tracking-wider text-[#5a5f57]">
+        <span className="hidden sm:inline">{formatRole(user.platformRole)} Account</span>
+        <span className="sm:hidden">Account</span>
+      </div>
     );
   }
 
@@ -132,7 +147,7 @@ export function MarketingHeader({ showSidebarToggle = false, onMenuClick }: { sh
               <Menu className="h-6 w-6" />
             </Button>
           )}
-          <Link href="/" className="flex items-center gap-3 min-w-0">
+          <Link href="/academy" className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
               <Image
                 src="/gecko-logo.svg"

@@ -11,9 +11,9 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = protectedRoutePrefixes.some((p) => pathname.startsWith(p));
 
-  // Redirect old starter landing routes to the single homepage
+  // Redirect old starter landing routes to default landing (/academy)
   if (legacyMarketingPaths.includes(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/academy', request.url));
   }
 
   if (isProtectedRoute && !sessionCookie) {
