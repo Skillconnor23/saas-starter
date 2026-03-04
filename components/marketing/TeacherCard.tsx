@@ -16,15 +16,15 @@ export function TeacherCard({
   imageAlt = name,
 }: TeacherCardProps) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-md">
-      <div className="relative aspect-[4/5] w-full bg-slate-100">
+    <div className="w-full max-w-[300px] rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-md">
+      <div className="relative h-[230px] w-full bg-slate-100">
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={imageAlt}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="300px"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-200">
@@ -32,7 +32,7 @@ export function TeacherCard({
           </div>
         )}
       </div>
-      <div className="p-4">
+      <div className="p-4 text-center">
         <div className="font-semibold text-[#3d4236]">{name}</div>
         <div className="mt-1 text-sm text-[#5a5f57]">{credentials}</div>
         <div className="mt-1 text-sm text-[#429ead]">{languages}</div>
