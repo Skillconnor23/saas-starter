@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { STUDENT_TRIAL_HREF } from "@/lib/routes";
+import { Card } from "@/components/ui/card";
 import { MarketingSection } from "@/components/marketing/MarketingSection";
 import { FeatureCard } from "@/components/marketing/FeatureCard";
 import { TeacherCard } from "@/components/marketing/TeacherCard";
@@ -94,21 +95,53 @@ export default async function AcademyPage() {
         <h2 className="text-center text-2xl font-semibold text-[#3d4236] md:text-3xl">
           {t("howItWorks.title")}
         </h2>
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
-            { step: 1, text: t("howItWorks.step1") },
-            { step: 2, text: t("howItWorks.step2") },
-            { step: 3, text: t("howItWorks.step3") },
+            {
+              step: 1,
+              text: t("howItWorks.step1"),
+              image: "/images/how-it-works/level-check.png",
+              imageAlt: "Level check",
+              badgeClass: "bg-green-100 text-green-700",
+            },
+            {
+              step: 2,
+              text: t("howItWorks.step2"),
+              image: "/images/how-it-works/live-class.png",
+              imageAlt: "Live class",
+              badgeClass: "bg-blue-100 text-blue-700",
+            },
+            {
+              step: 3,
+              text: t("howItWorks.step3"),
+              image: "/images/how-it-works/practice-homework.png",
+              imageAlt: "Practice homework",
+              badgeClass: "bg-red-100 text-red-700",
+            },
           ].map((item) => (
-            <div
+            <Card
               key={item.step}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md"
+              className="rounded-2xl shadow-md p-6 flex flex-col gap-4 border border-slate-200 bg-white"
             >
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#429ead]/10 text-sm font-semibold text-[#429ead]">
-                {t("howItWorks.stepLabel", { step: item.step })}
-              </span>
-              <p className="mt-5 font-medium text-[#3d4236]">{item.text}</p>
-            </div>
+              <div className="relative h-44 w-full overflow-hidden rounded-2xl">
+                <Image
+                  src={item.image}
+                  alt={item.imageAlt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover"
+                  priority={item.step === 1}
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <span
+                  className={`rounded-full px-4 py-2 text-sm font-semibold ${item.badgeClass}`}
+                >
+                  {t("howItWorks.stepLabel", { step: item.step })}
+                </span>
+              </div>
+              <p className="text-lg font-medium text-[#3d4236]">{item.text}</p>
+            </Card>
           ))}
         </div>
         <div className="mt-12 text-center">

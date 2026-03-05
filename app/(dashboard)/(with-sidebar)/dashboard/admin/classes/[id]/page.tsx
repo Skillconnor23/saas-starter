@@ -21,7 +21,9 @@ import { AddStudentForm } from './add-student-form';
 import { AddTeacherForm } from './add-teacher-form';
 import { AssignTeacherSection } from './assign-teacher-section';
 import { JoinCodeCard } from './join-code-card';
+import { InviteLinkCard } from './invite-link-card';
 import { WeeklyScheduleCard } from './WeeklyScheduleCard';
+import { getActiveInviteForClassAction } from '@/lib/actions/class-invite';
 
 export default async function ClassDetailPage({
   params,
@@ -32,9 +34,10 @@ export default async function ClassDetailPage({
   const eduClass = await getClassById(id);
   if (!eduClass) notFound();
 
-  const [enrollments, teachers] = await Promise.all([
+  const [enrollments, teachers, invite] = await Promise.all([
     listEnrollmentsByClassId(id),
     listTeachersByClassId(id),
+    getActiveInviteForClassAction(id),
   ]);
 
   return (
@@ -71,6 +74,8 @@ export default async function ClassDetailPage({
         joinCode={eduClass.joinCode}
         joinCodeEnabled={eduClass.joinCodeEnabled}
       />
+
+      <InviteLinkCard classId={id} initialToken={invite?.token ?? null} />
 
       <div className="mb-6">
         <WeeklyScheduleCard

@@ -12,6 +12,19 @@ export async function getCurrentUser(): Promise<CurrentUser> {
 }
 
 /**
+ * Returns the current user if authenticated, otherwise null.
+ * Does not throw, redirect, or require auth. Use for public or optional-auth flows
+ * (e.g. join invite page where both logged-in and logged-out users can land).
+ */
+export async function getCurrentUserOrNull(): Promise<CurrentUser | null> {
+  try {
+    return await getUser();
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Requires the user to be logged in. Redirects to /sign-in if not.
  * Returns the user.
  */
@@ -25,7 +38,7 @@ export async function requireAuth(): Promise<NonNullable<CurrentUser>> {
 
 /**
  * Requires the user to be logged in and have a platform role.
- * Redirects to /sign-in if not authenticated, or /onboarding/role if no platform role.
+ * Redirects to /sign-in if not authenticated, or /dashboard/student if no platform role (default).
  * Returns the user with platformRole.
  */
 export async function requirePlatformRole(): Promise<
@@ -33,7 +46,7 @@ export async function requirePlatformRole(): Promise<
 > {
   const user = await requireAuth();
   if (!user.platformRole) {
-    redirect('/onboarding/role');
+    redirect('/dashboard/student');
   }
   return user as NonNullable<CurrentUser> & { platformRole: PlatformRole };
 }
@@ -41,7 +54,7 @@ export async function requirePlatformRole(): Promise<
 /**
  * Requires the user to have one of the given platform roles.
  * Redirects to /sign-in if not authenticated.
- * Redirects to /onboarding/role if user has no platform role.
+ * Redirects to /dashboard/student if user has no platform role.
  * Redirects to /dashboard if user does not have an allowed role.
  */
 export async function requireRole(

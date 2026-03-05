@@ -25,6 +25,7 @@ import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
+import { consumeClassInviteCookieAndRedirect } from '@/lib/actions/class-invite';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -97,6 +98,10 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
+  await consumeClassInviteCookieAndRedirect(
+    foundUser.id,
+    foundUser.platformRole as 'student' | 'teacher' | 'admin' | 'school_admin' | null
+  );
   redirect('/dashboard');
 });
 
@@ -140,6 +145,13 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       password
     };
   }
+
+  // Default all new signups to student; class-invite flow also sets student.
+  await db
+    .update(users)
+    .set({ platformRole: 'student', updatedAt: new Date() })
+    .where(eq(users.id, createdUser.id));
+  (createdUser as { platformRole?: string }).platformRole = 'student';
 
   let teamId: number;
   let userRole: string;
@@ -218,6 +230,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
+  await consumeClassInviteCookieAndRedirect(
+    createdUser.id,
+    (createdUser as { platformRole?: string }).platformRole as 'student' | 'teacher' | 'admin' | 'school_admin' | null
+  );
   redirect('/dashboard');
 });
 

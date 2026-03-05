@@ -1,7 +1,7 @@
 import type { PlatformRole } from '@/lib/db/schema';
 
 export function getRoleDashboardPath(platformRole: PlatformRole | null): string {
-  if (!platformRole) return '/onboarding/role';
+  if (!platformRole) return '/dashboard/student';
   switch (platformRole) {
     case 'student':
       return '/dashboard/student';

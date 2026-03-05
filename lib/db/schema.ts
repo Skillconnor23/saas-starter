@@ -222,6 +222,31 @@ export const eduEnrollments = pgTable(
   ]
 );
 
+/** Shareable invite links for students to join a class. Token in URL e.g. /join/ABC123XYZ */
+export const classInvites = pgTable(
+  'class_invites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    classId: uuid('class_id')
+      .notNull()
+      .references(() => eduClasses.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    createdByUserId: integer('created_by_user_id')
+      .notNull()
+      .references(() => users.id),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    maxUses: integer('max_uses'),
+    usesCount: integer('uses_count').notNull().default(0),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('class_invites_class_id_idx').on(table.classId),
+    index('class_invites_token_idx').on(table.token),
+  ]
+);
+
 export const sessionKindEnum = ['extra', 'override', 'cancel'] as const;
 export type SessionKind = (typeof sessionKindEnum)[number];
 
@@ -663,6 +688,7 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
 export const eduClassesRelations = relations(eduClasses, ({ many }) => ({
   classTeachers: many(eduClassTeachers),
   enrollments: many(eduEnrollments),
+  classInvites: many(classInvites),
   sessions: many(eduSessions),
   classSessions: many(classSessions),
   classroomPosts: many(classroomPosts),
@@ -672,6 +698,17 @@ export const eduClassesRelations = relations(eduClasses, ({ many }) => ({
   readings: many(eduReadings),
   curriculumFiles: many(curriculumFiles),
   curriculumWeeks: many(curriculumWeeks),
+}));
+
+export const classInvitesRelations = relations(classInvites, ({ one }) => ({
+  class: one(eduClasses, {
+    fields: [classInvites.classId],
+    references: [eduClasses.id],
+  }),
+  createdBy: one(users, {
+    fields: [classInvites.createdByUserId],
+    references: [users.id],
+  }),
 }));
 
 export const eduClassTeachersRelations = relations(eduClassTeachers, ({ one }) => ({
@@ -1164,6 +1201,8 @@ export type EduClassTeacher = typeof eduClassTeachers.$inferSelect;
 export type NewEduClassTeacher = typeof eduClassTeachers.$inferInsert;
 export type EduEnrollment = typeof eduEnrollments.$inferSelect;
 export type NewEduEnrollment = typeof eduEnrollments.$inferInsert;
+export type ClassInvite = typeof classInvites.$inferSelect;
+export type NewClassInvite = typeof classInvites.$inferInsert;
 export type EduSession = typeof eduSessions.$inferSelect;
 export type NewEduSession = typeof eduSessions.$inferInsert;
 export type ClassroomPost = typeof classroomPosts.$inferSelect;

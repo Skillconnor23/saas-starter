@@ -405,6 +405,13 @@
     "completion": "Completion",
     "avgScore30d": "Avg score (30d)"
   },
+  "classInvite": {
+    "inviteLink": "Invite link",
+    "copyLink": "Copy link",
+    "regenerateLink": "Regenerate link",
+    "generateLink": "Generate invite link",
+    "copied": "Copied!"
+  },
   "join": {
     "backToDashboard": "Back to dashboard",
     "joinAClass": "Join a class",
@@ -413,7 +420,16 @@
     "classCode": "Class code",
     "classCodePlaceholder": "e.g. ABC123",
     "joining": "Joining...",
-    "joinClass": "Join class"
+    "joinClass": "Join class",
+    "invite": {
+      "joinThisClass": "Join this class",
+      "logIn": "Log in",
+      "createStudentAccount": "Create student account",
+      "invalidOrExpired": "This invite link is invalid or has expired.",
+      "invalidOrExpiredHelp": "Please ask your teacher or school for a new invite link.",
+      "classLabel": "Class",
+      "onlyStudentsCanJoin": "Only student accounts can join a class via this link. Please log in with a student account."
+    }
   },
   "auth": {
     "login": {

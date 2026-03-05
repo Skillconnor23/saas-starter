@@ -379,6 +379,13 @@
     "completion": "Дуусгасан",
     "avgScore30d": "Дундаж оноо (30 хоног)"
   },
+  "classInvite": {
+    "inviteLink": "Урилгын холбоос",
+    "copyLink": "Холбоос хуулах",
+    "regenerateLink": "Дахин үүсгэх",
+    "generateLink": "Урилгын холбоос үүсгэх",
+    "copied": "Хуулсан!"
+  },
   "join": {
     "backToDashboard": "Самбар руу буцах",
     "joinAClass": "Ангид нэгдэх",
@@ -387,7 +394,16 @@
     "classCode": "Ангийн код",
     "classCodePlaceholder": "жишээ нь ABC123",
     "joining": "Нэгдэж байна...",
-    "joinClass": "Ангид нэгдэх"
+    "joinClass": "Ангид нэгдэх",
+    "invite": {
+      "joinThisClass": "Энэ ангид нэгдэх",
+      "logIn": "Нэвтрэх",
+      "createStudentAccount": "Сурагчийн эрх үүсгэх",
+      "invalidOrExpired": "Урилгын холбоос буруу эсвэл хугацаа дууссан.",
+      "invalidOrExpiredHelp": "Багжаасаа эсвэл сургуулиасаа шинэ урилгын холбоос асуугаарай.",
+      "classLabel": "Анги",
+      "onlyStudentsCanJoin": "Энэ холбоосоор зөвхөн сурагчийн эрхтэй хэрэглэгчид ангид нэгдэнэ. Сурагчийн эрхээр нэвтэрнэ үү."
+    }
   },
   "auth": {
     "login": {
