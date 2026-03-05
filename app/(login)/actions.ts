@@ -102,7 +102,8 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     foundUser.id,
     foundUser.platformRole as 'student' | 'teacher' | 'admin' | 'school_admin' | null
   );
-  redirect('/dashboard');
+  const safeNext = redirectTo && typeof redirectTo === 'string' && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/dashboard';
+  redirect(safeNext);
 });
 
 const signUpSchema = z.object({
@@ -234,7 +235,8 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     createdUser.id,
     (createdUser as { platformRole?: string }).platformRole as 'student' | 'teacher' | 'admin' | 'school_admin' | null
   );
-  redirect('/dashboard');
+  const safeNext = redirectTo && typeof redirectTo === 'string' && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/dashboard';
+  redirect(safeNext);
 });
 
 export async function signOut() {
