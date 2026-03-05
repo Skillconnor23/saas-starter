@@ -1,7 +1,10 @@
 import Stripe from 'stripe';
-import { handleSubscriptionChange, stripe } from '@/lib/payments/stripe';
+import { getStripe, handleSubscriptionChange } from '@/lib/payments/stripe';
 import { NextRequest, NextResponse } from 'next/server';
 import { assertRateLimit, getRequestClientIp, rateLimitHeaders } from '@/lib/security/rate-limit';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -22,7 +25,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    event = getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed.', err);
     return NextResponse.json(

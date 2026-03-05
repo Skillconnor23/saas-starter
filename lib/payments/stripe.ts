@@ -7,14 +7,23 @@ import {
   updateTeamSubscription
 } from '@/lib/db/queries';
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('STRIPE_SECRET_KEY is not set; using placeholder key for non-runtime initialization.');
+let _stripe: Stripe | null = null;
+
+function requireStripeSecretKey(): string {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+  }
+  return key;
 }
 
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2025-04-30.basil'
-});
+export function getStripe(): Stripe {
+  if (_stripe) return _stripe;
+  _stripe = new Stripe(requireStripeSecretKey(), {
+    apiVersion: '2025-04-30.basil'
+  });
+  return _stripe;
+}
 
 export async function createCheckoutSession({
   team,
@@ -29,6 +38,7 @@ export async function createCheckoutSession({
     redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
 
+  const stripe = getStripe();
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [
@@ -56,6 +66,7 @@ export async function createCustomerPortalSession(team: Team) {
     redirect('/pricing');
   }
 
+  const stripe = getStripe();
   let configuration: Stripe.BillingPortal.Configuration;
   const configurations = await stripe.billingPortal.configurations.list();
 
@@ -152,6 +163,7 @@ export async function handleSubscriptionChange(
 }
 
 export async function getStripePrices() {
+  const stripe = getStripe();
   const prices = await stripe.prices.list({
     expand: ['data.product'],
     active: true,
@@ -170,6 +182,7 @@ export async function getStripePrices() {
 }
 
 export async function getStripeProducts() {
+  const stripe = getStripe();
   const products = await stripe.products.list({
     active: true,
     expand: ['data.default_price']

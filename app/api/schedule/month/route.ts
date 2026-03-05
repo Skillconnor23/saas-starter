@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/user';
 import { getCalendarEventsForStudent } from '@/lib/schedule/calendar-events';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: Request) {
   const user = await requireRole(['student']);
   const { searchParams } = new URL(request.url);
@@ -24,4 +27,3 @@ export async function GET(request: Request) {
     }))
   );
 }
-
