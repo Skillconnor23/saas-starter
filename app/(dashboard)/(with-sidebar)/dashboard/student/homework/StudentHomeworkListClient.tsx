@@ -61,6 +61,8 @@ type Props = {
 export function StudentHomeworkListClient({ list }: Props) {
   const t = useTranslations('homework');
   const tList = useTranslations('homework.listPage');
+  const locale = useLocale();
+  const withLocalePrefix = (path: string) => `/${locale}${path.startsWith('/') ? path : `/${path}`}`;
   const [filter, setFilter] = useState<Filter>('all');
 
   const counts = useMemo(() => {
