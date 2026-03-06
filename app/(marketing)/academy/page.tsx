@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { STUDENT_TRIAL_HREF } from "@/lib/routes";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,7 @@ export const revalidate = 0;
 
 export default async function AcademyPage() {
   const t = await getTranslations("marketing.home");
+  const locale = await getLocale();
 
   return (
     <div className="bg-white">
@@ -144,13 +145,21 @@ export default async function AcademyPage() {
             </Card>
           ))}
         </div>
-        <div className="mt-12 text-center">
+        <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button
             asChild
             size="lg"
             className="bg-[#7daf41] hover:bg-[#6b9a39] text-white"
           >
             <Link href={STUDENT_TRIAL_HREF}>{t("heroPrimary")}</Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="border-[#7daf41] text-[#7daf41] hover:bg-[#7daf41]/5"
+          >
+            <Link href={`/${locale}/level-check`}>{t("howItWorks.step1")}</Link>
           </Button>
         </div>
       </MarketingSection>

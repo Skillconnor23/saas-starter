@@ -218,6 +218,31 @@
       }
     }
   },
+  "levelCheck": {
+    "landing": {
+      "title": "Gecko Level Check",
+      "subtitle": "Take a 20-question placement test to find your G.E.C.K.O level and the right Gecko class for you.",
+      "startButton": "Start Level Check",
+      "signInPrompt": "You'll need to sign in or create an account to start.",
+      "whatToExpect": {
+        "title": "What to expect",
+        "step1": "20 questions — multiple choice, vocabulary, sentence ordering, and a short writing prompt",
+        "step2": "Results saved to your account — your recommended Gecko level",
+        "step3": "Recommendation for a trial class or joining a Gecko class"
+      },
+      "timeEstimate": "About 10–15 minutes"
+    },
+    "result": {
+      "title": "Your Gecko Level",
+      "subtitle": "Based on your placement test, here is your recommended level.",
+      "scoreLabel": "Score",
+      "explanationTitle": "What this level means",
+      "recommendedClassTitle": "Recommended class",
+      "bookTrialButton": "Book Trial Class",
+      "viewClassesButton": "View Classes",
+      "resultSaved": "Your result has been saved to your account."
+    }
+  },
   "pricingStudents": {
     "heroTitle": "Gecko Academy — Pricing",
     "heroSubtitle": "Live English classes with native-level teachers, weekend-friendly schedules, and a platform built for real progress.",

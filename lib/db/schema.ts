@@ -185,6 +185,38 @@ export const invitations = pgTable('invitations', {
 export const geckoLevelEnum = ['G', 'E', 'C', 'K', 'O'] as const;
 export type GeckoLevel = (typeof geckoLevelEnum)[number];
 
+/** Gecko Level Check placement test results - tied to user account */
+export const geckoPlacementResults = pgTable(
+  'gecko_placement_results',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    placementScore: integer('placement_score').notNull(),
+    placementLevel: varchar('placement_level', { length: 1 })
+      .notNull()
+      .$type<GeckoLevel>(),
+    answers: jsonb('answers').$type<Record<string, unknown>>().default({}),
+    writingResponses: jsonb('writing_responses').$type<Record<string, string>>().default({}),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('gecko_placement_results_user_idx').on(table.userId),
+    index('gecko_placement_results_created_idx').on(table.createdAt),
+  ]
+);
+
+export const geckoPlacementResultsRelations = relations(
+  geckoPlacementResults,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [geckoPlacementResults.userId],
+      references: [users.id],
+    }),
+  })
+);
+
 export const eduClasses = pgTable(
   'edu_classes',
   {
@@ -668,6 +700,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   flashcardSaves: many(flashcardSaves),
   flashcardStudyEvents: many(flashcardStudyEvents),
   schoolMemberships: many(schoolMemberships),
+  geckoPlacementResults: many(geckoPlacementResults),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -1232,6 +1265,9 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
+
+export type GeckoPlacementResult = typeof geckoPlacementResults.$inferSelect;
+export type NewGeckoPlacementResult = typeof geckoPlacementResults.$inferInsert;
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
