@@ -132,7 +132,7 @@ export async function TeacherMyClasses({ classes }: Props) {
                     {c.status && (
                       <span
                         className={`h-2 w-2 shrink-0 rounded-full ${
-                          c.status === 'on_track' ? 'bg-[#7daf41]' : 'bg-amber-500'
+                          c.status === 'on_track' ? 'bg-[#7daf41]' : 'bg-red-500'
                         }`}
                         aria-hidden
                       />

@@ -134,7 +134,7 @@ export function SchoolAdminClassTable({ rows }: { rows: SchoolAdminClassRow[] })
               ) : (
                 <span
                   title={t('needsAttentionTitle')}
-                  className="inline-flex text-amber-500"
+                  className="inline-flex text-red-500"
                   aria-label={t('needsAttentionAria')}
                 >
                   <AlertTriangle className="h-5 w-5" />

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { requirePermission } from '@/lib/auth/permissions';
+import { getLocale } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Users, GraduationCap, UserCog, Building2 } from 'lucide-react';
@@ -38,6 +39,10 @@ const hubCards = [
 
 export default async function AdminUsersHubPage() {
   await requirePermission(['classes:read', 'users:read']);
+  const locale = await getLocale();
+
+  const withLocale = (path: string) =>
+    path.startsWith('/') ? `/${locale}${path}` : `/${locale}/${path}`;
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -48,7 +53,7 @@ export default async function AdminUsersHubPage() {
         </h1>
         <div className="grid gap-4 sm:grid-cols-2">
           {hubCards.map((card) => (
-            <Link key={card.href} href={card.href}>
+            <Link key={card.href} href={withLocale(card.href)}>
               <Card className="h-full transition-colors hover:bg-muted/50 cursor-pointer">
                 <CardHeader>
                   <div className="flex items-center gap-2">

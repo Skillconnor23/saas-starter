@@ -41,7 +41,7 @@ export function StudentAttendanceMonthCard({
     <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <ClipboardCheck className="h-5 w-5 text-[#429ead]" aria-hidden />
+          <ClipboardCheck className="h-5 w-5 text-slate-500" aria-hidden />
           {t('attendanceThisMonth', { title: heading })}
         </CardTitle>
       </CardHeader>
@@ -91,7 +91,7 @@ export function ClassAttendanceMonthCard({
     <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <ClipboardCheck className="h-5 w-5 text-[#429ead]" aria-hidden />
+          <ClipboardCheck className="h-5 w-5 text-slate-500" aria-hidden />
           This month
         </CardTitle>
       </CardHeader>
@@ -153,7 +153,7 @@ export function SchoolAttendanceMonthCard({
     <Card className="rounded-2xl border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <ClipboardCheck className="h-5 w-5 text-[#429ead]" aria-hidden />
+          <ClipboardCheck className="h-5 w-5 text-slate-500" aria-hidden />
           {title}
         </CardTitle>
       </CardHeader>

@@ -70,53 +70,59 @@ export default async function SchoolAdminDashboardPage() {
         />
       </div>
 
-      {/* KPI cards - mobile: slim horizontal; desktop: full cards */}
+      {/* KPI cards - neutral white cards with gray borders */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 mb-6 sm:mb-8">
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-[#429ead] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
-          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#ffffff] sm:mb-1">
-            <Users className="h-4 w-4 shrink-0 text-[#ffffff]" />
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
+          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-600 sm:mb-1">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+              <Users className="h-4 w-4 text-slate-600" />
+            </div>
             <span>{t('activeStudents')}</span>
           </div>
-          <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
+          <p className="text-xl font-semibold text-slate-900 shrink-0 sm:text-2xl">
             {kpis.activeStudents}
           </p>
         </div>
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-[#7daf41] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
-          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#ffffff] sm:mb-1">
-            <GraduationCap className="h-4 w-4 shrink-0 text-[#ffffff]" />
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
+          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-600 sm:mb-1">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+              <GraduationCap className="h-4 w-4 text-slate-600" />
+            </div>
             <span>{t('activeClasses')}</span>
           </div>
-          <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
+          <p className="text-xl font-semibold text-slate-900 shrink-0 sm:text-2xl">
             {kpis.activeClasses}
           </p>
         </div>
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-[#b64b29] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
-          <div className="text-sm font-medium text-[#ffffff] sm:mb-1">
-            {t('avgQuizScoreLabel')}
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-1">
+          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-600 sm:mb-1">
+            <span>{t('avgQuizScoreLabel')}</span>
           </div>
-          <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
+          <p className="text-xl font-semibold text-slate-900 shrink-0 sm:text-2xl">
             {kpis.avgQuizScore7d != null ? `${kpis.avgQuizScore7d}%` : '—'}
             {' / '}
             {kpis.avgQuizScore30d != null ? `${kpis.avgQuizScore30d}%` : '—'}
           </p>
         </div>
-        <div className="flex items-center justify-between gap-4 rounded-xl bg-[#ffaa00] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.10)] sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-3">
-          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#ffffff] sm:mb-1">
-            <BookOpen className="h-4 w-4 shrink-0 text-[#ffffff]" />
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-col sm:items-stretch sm:justify-normal sm:p-5 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-600 sm:mb-1">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+              <BookOpen className="h-4 w-4 text-slate-600" />
+            </div>
             <span>{t('completionRate30d')}</span>
           </div>
           <div className="flex items-center gap-3 sm:justify-between">
-            <p className="text-xl font-semibold text-[#ffffff] shrink-0 sm:text-2xl">
+            <p className="text-xl font-semibold text-slate-900 shrink-0 sm:text-2xl">
               {completionRate}%
             </p>
             <div
               className="relative h-12 w-12 shrink-0 rounded-full"
               style={{
-                background: `conic-gradient(#ffffff ${completionDegrees}deg, rgba(255,255,255,0.25) 0deg)`,
+                background: `conic-gradient(#475569 ${completionDegrees}deg, #e2e8f0 0deg)`,
               }}
             >
-              <div className="absolute inset-[3px] rounded-full bg-[#ffaa00]" />
-              <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-[#ffffff]">
+              <div className="absolute inset-[3px] rounded-full bg-white" />
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-900">
                 {completionRate}%
               </div>
             </div>
@@ -151,7 +157,7 @@ export default async function SchoolAdminDashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <AlertTriangle className="h-5 w-5 text-red-500" />
                 {t('needsAttention')}
               </CardTitle>
             </CardHeader>
@@ -224,7 +230,7 @@ export default async function SchoolAdminDashboardPage() {
             </CardContent>
           </Card>
 
-          <Button asChild className="mt-4 w-full rounded-full bg-[#429ead] text-white hover:bg-[#36899a]">
+          <Button asChild className="mt-4 w-full rounded-full bg-[#7daf41] text-white hover:bg-[#6b9a39]">
             <Link href={`/${locale}/dashboard/school-admin/school`}>
               <GraduationCap className="mr-2 h-4 w-4" />
               {t('manageClasses')}
