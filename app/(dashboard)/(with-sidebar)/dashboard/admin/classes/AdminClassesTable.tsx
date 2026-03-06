@@ -70,7 +70,7 @@ export function AdminClassesTable({ classes }: { classes: ClassRow[] }) {
                   variant="outline"
                   size="sm"
                   onClick={() => setArchiveTarget(c)}
-                  className="text-red-600 hover:text-red-700 hover:border-red-300"
+                  className="text-amber-600 hover:text-amber-700 hover:border-amber-300"
                 >
                   <Archive className="h-4 w-4 mr-1" />
                   Archive

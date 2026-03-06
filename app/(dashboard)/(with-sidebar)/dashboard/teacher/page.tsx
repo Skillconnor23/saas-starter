@@ -118,7 +118,7 @@ export default async function TeacherDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-500" aria-hidden />
+            <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden />
             {t('needsAttention')}
           </CardTitle>
         </CardHeader>
