@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/db/queries';
+import { createAuditLog } from '@/lib/auth/audit';
 import type { PlatformRole } from '@/lib/db/schema';
 
 export type CurrentUser = Awaited<ReturnType<typeof getUser>>;
@@ -62,6 +63,11 @@ export async function requireRole(
 ): Promise<NonNullable<CurrentUser> & { platformRole: PlatformRole }> {
   const user = await requirePlatformRole();
   if (!allowedRoles.includes(user.platformRole as PlatformRole)) {
+    createAuditLog({
+      action: 'failed_privileged_access',
+      userId: user.id,
+      metadata: { requiredRoles: allowedRoles, hadRole: user.platformRole },
+    }).catch(() => {});
     redirect('/dashboard');
   }
   return user;

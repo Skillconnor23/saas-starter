@@ -26,6 +26,7 @@ import {
   MessageSquare,
   X,
   ClipboardList,
+  Mail,
 } from 'lucide-react';
 import type { PlatformRole } from '@/lib/db/schema';
 import { useNavDrawer } from '@/app/(dashboard)/layout';
@@ -103,6 +104,7 @@ const navGroupKeys: Record<
         { href: '/dashboard/admin/schools', icon: Building2, labelKey: 'schools' },
         { href: '/dashboard/admin/users', icon: Users, labelKey: 'users' },
         { href: '/dashboard/admin/classes', icon: GraduationCap, labelKey: 'classes' },
+        { href: '/dashboard/admin/invites', icon: Mail, labelKey: 'invites' },
         { href: '/dashboard/homework', icon: ClipboardList, labelKey: 'homework' },
         { href: '/dashboard/messages', icon: MessageSquare, labelKey: 'messages' },
       ],
@@ -239,6 +241,8 @@ export function DashboardSidebar({
                   pathWithoutLocale === item.href ||
                   (item.href === '/dashboard/admin/users' &&
                     pathWithoutLocale?.startsWith('/dashboard/admin/users')) ||
+                  (item.href === '/dashboard/admin/invites' &&
+                    pathWithoutLocale?.startsWith('/dashboard/admin/invites')) ||
                   (item.href === '/dashboard/student/learning' &&
                     (pathWithoutLocale?.startsWith('/dashboard/student/learning') ||
                       pathWithoutLocale?.startsWith('/learning'))) ||

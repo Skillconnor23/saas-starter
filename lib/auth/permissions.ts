@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/db/queries';
+import { createAuditLog } from '@/lib/auth/audit';
 import type { PlatformRole } from '@/lib/db/schema';
 
 export type Permission =
@@ -10,11 +11,13 @@ export type Permission =
   | 'enrollments:read'
   | 'enrollments:write'
   | 'users:read'
-  | 'users:write';
+  | 'users:write'
+  | 'invites:create';
 
 const ALL_PERMISSIONS: Permission[] = [
   'classes:read',
   'classes:write',
+  'invites:create',
   'sessions:read',
   'sessions:write',
   'enrollments:read',
@@ -28,6 +31,7 @@ const roleToPermissions: Record<PlatformRole, Permission[]> = {
   school_admin: [
     'classes:read',
     'classes:write',
+    'invites:create',
     'sessions:read',
     'sessions:write',
     'enrollments:read',
@@ -74,6 +78,11 @@ export async function requirePermission(
     : [permissionOrPermissions];
   const allowed = permissions.some((p) => can(user, p));
   if (!allowed) {
+    createAuditLog({
+      action: 'failed_privileged_access',
+      userId: user.id,
+      metadata: { required: permissions, hadRole: user.platformRole },
+    }).catch(() => {});
     redirect('/dashboard');
   }
   return user;

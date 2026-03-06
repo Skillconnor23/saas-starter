@@ -37,6 +37,23 @@ export async function listSchools(filters?: ListSchoolsFilters) {
     .orderBy(schools.name);
 }
 
+/** Schools for invite dropdown. Pass schoolId to limit to one school (school_admin). */
+export async function getSchoolsForInviteSelector(schoolId?: string) {
+  const base = db
+    .select({ id: schools.id, name: schools.name })
+    .from(schools)
+    .where(eq(schools.isArchived, false))
+    .orderBy(schools.name);
+  if (schoolId) {
+    return db
+      .select({ id: schools.id, name: schools.name })
+      .from(schools)
+      .where(and(eq(schools.id, schoolId), eq(schools.isArchived, false)))
+      .orderBy(schools.name);
+  }
+  return base;
+}
+
 export async function getSchoolById(id: string) {
   const [row] = await db
     .select()

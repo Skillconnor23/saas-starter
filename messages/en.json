@@ -509,7 +509,16 @@
       "switchToSignup": "Don't have an account?",
       "switchToSignupCta": "Sign up here",
       "switchToSignin": "Already have an account?",
-      "switchToSigninCta": "Sign in here"
+      "switchToSigninCta": "Sign in here",
+      "resendVerificationHint": "Check your inbox or request a new verification link.",
+      "resendVerificationCta": "Resend verification email",
+      "resendVerificationSending": "Sending…",
+      "resendVerificationSuccess": "Verification email sent. Check your inbox."
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "description": "We've sent you a verification link. Click it to verify your account, then sign in.",
+      "backToSignIn": "Back to sign in"
     }
   },
   "dashboard": {
@@ -571,6 +580,7 @@
         "schools": "Schools",
         "users": "Users",
         "classes": "Classes",
+        "invites": "Invites",
         "homework": "Homework",
         "messages": "Messages",
         "profile": "Profile",
@@ -968,6 +978,7 @@
     "generic": "Something went wrong. Please try again.",
     "auth": {
       "invalidCredentials": "Invalid email or password. Please try again.",
+      "emailNotVerified": "Please verify your email before signing in.",
       "createUserFailed": "Failed to create user. Please try again.",
       "createTeamFailed": "Failed to create team. Please try again.",
       "invalidOrExpiredInvitation": "Invalid or expired invitation.",

@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { signIn, signUp } from './actions';
+import { signIn, signUp, resendVerificationEmail } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 
-const AUTH_ERROR_KEYS = ['invalidCredentials', 'createUserFailed', 'createTeamFailed', 'invalidOrExpiredInvitation'] as const;
+const AUTH_ERROR_KEYS = ['invalidCredentials', 'emailNotVerified', 'createUserFailed', 'createTeamFailed', 'invalidOrExpiredInvitation'] as const;
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const t = useTranslations('auth.login');
@@ -22,6 +22,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
+  const prefilledEmail = searchParams.get('email');
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     mode === 'signin' ? signIn : signUp,
     { error: '' }
@@ -29,9 +30,14 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
 
   const title = mode === 'signin' ? t('title.signin') : t('title.signup');
   const subtitle = mode === 'signin' ? t('subtitle.signin') : t('subtitle.signup');
-  const errorMessage = state?.error && AUTH_ERROR_KEYS.includes(state.error as any)
+  const errorMessage = state?.error && AUTH_ERROR_KEYS.includes(state.error as (typeof AUTH_ERROR_KEYS)[number])
     ? tErrors(state.error as (typeof AUTH_ERROR_KEYS)[number])
     : state?.error;
+  const showResendVerification = mode === 'signin' && state?.error === 'emailNotVerified';
+  const [resendState, resendFormAction, resendPending] = useActionState(
+    resendVerificationEmail,
+    null as { success?: boolean; error?: string } | null
+  );
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-white px-4 py-10 sm:px-6 lg:px-8">
@@ -62,6 +68,43 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           </p>
         </div>
 
+        {errorMessage && (
+          <div className="mt-6 space-y-2">
+            <p className="text-sm font-medium text-[#b64b29]">
+              {errorMessage}
+            </p>
+            {showResendVerification && (
+              <div className="space-y-1">
+                <p className="text-sm text-[#6b7280]">
+                  {t('resendVerificationHint')}
+                </p>
+                <form action={resendFormAction} className="inline-block">
+                  <input type="hidden" name="email" value={state?.email ?? ''} />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    disabled={resendPending || !state?.email}
+                    className="text-[#429ead] border-[#429ead] hover:bg-[#429ead]/10"
+                  >
+                    {resendPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        {t('resendVerificationSending')}
+                      </>
+                    ) : (
+                      t('resendVerificationCta')
+                    )}
+                  </Button>
+                </form>
+                {resendState?.success && (
+                  <p className="text-sm text-[#7daf41]">{t('resendVerificationSuccess')}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Form */}
         <form className="mt-8 space-y-5" action={formAction}>
           <input type="hidden" name="redirect" value={redirect || ''} />
@@ -80,7 +123,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               name="email"
               type="email"
               autoComplete="email"
-              defaultValue={state.email}
+              defaultValue={state?.email ?? prefilledEmail ?? ''}
               required
               maxLength={50}
               className="w-full rounded-full border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#111827] placeholder:text-gray-400 shadow-[0_1px_2px_rgba(15,23,42,0.04)] focus-visible:border-[#7daf41] focus-visible:ring-2 focus-visible:ring-[#7daf41] focus-visible:ring-offset-0"
@@ -110,12 +153,6 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               placeholder={t('passwordPlaceholder')}
             />
           </div>
-
-          {errorMessage && (
-            <p className="text-sm font-medium text-[#b64b29]">
-              {errorMessage}
-            </p>
-          )}
 
           <div className="space-y-3">
             <Button

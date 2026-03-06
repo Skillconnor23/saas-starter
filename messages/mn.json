@@ -483,7 +483,16 @@
       "switchToSignup": "Бүртгэл байхгүй юу?",
       "switchToSignupCta": "Энд бүртгүүлнэ үү",
       "switchToSignin": "Өмнө нь бүртгүүлсэн үү?",
-      "switchToSigninCta": "Энд нэвтрэнэ үү"
+      "switchToSigninCta": "Энд нэвтрэнэ үү",
+      "resendVerificationHint": "И-мэйлээ шалгаад шинэ холбоос хүсэх.",
+      "resendVerificationCta": "Баталгаажуулах и-мэйл дахин илгээх",
+      "resendVerificationSending": "Илгээж байна…",
+      "resendVerificationSuccess": "Баталгаажуулах и-мэйл илгээгдлээ. И-мэйлээ шалгана уу."
+    },
+    "checkEmail": {
+      "title": "И-мэйлээ шалгана уу",
+      "description": "Бид танд баталгаажуулах холбоос илгээсэн. Дараад нэвтрэнэ үү.",
+      "backToSignIn": "Нэвтрэх хуудас руу буцах"
     }
   },
   "dashboard": {
@@ -545,6 +554,7 @@
         "schools": "Сургуулиуд",
         "users": "Хэрэглэгчид",
         "classes": "Ангиуд",
+        "invites": "Урилга",
         "homework": "Даалгавар",
         "messages": "Мессеж",
         "profile": "Профайл",
@@ -942,6 +952,7 @@
     "generic": "Алдаа гарлаа. Дахин оролдоно уу.",
     "auth": {
       "invalidCredentials": "И-мэйл эсвэл нууц үг буруу байна. Дахин оролдоно уу.",
+      "emailNotVerified": "Нэвтрэхээс өмнө и-мэйлээ баталгаажуулна уу.",
       "createUserFailed": "Хэрэглэгч үүсгэж чадсангүй. Дахин оролдоно уу.",
       "createTeamFailed": "Багийг үүсгэж чадсангүй. Дахин оролдоно уу.",
       "invalidOrExpiredInvitation": "Буруу эсвэл хугацаа дуссан урилга."

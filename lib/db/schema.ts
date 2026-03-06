@@ -182,6 +182,79 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
+// --- Auth: Email verification tokens (single-use, hashed) ---
+export const emailVerificationTokens = pgTable(
+  'email_verification_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: varchar('email', { length: 255 }).notNull(),
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('email_verification_tokens_email_idx').on(table.email),
+    index('email_verification_tokens_expires_idx').on(table.expiresAt),
+  ]
+);
+
+// --- Auth: Platform invites (teacher/school_admin only, single-use, hashed token) ---
+export const platformInviteRoleEnum = ['teacher', 'school_admin'] as const;
+export type PlatformInviteRole = (typeof platformInviteRoleEnum)[number];
+
+export const platformInvites = pgTable(
+  'platform_invites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: varchar('email', { length: 255 }).notNull(),
+    platformRole: varchar('platform_role', { length: 20 })
+      .notNull()
+      .$type<PlatformInviteRole>(),
+    schoolId: uuid('school_id').references(() => schools.id, { onDelete: 'cascade' }), // Required for school_admin
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    invitedByUserId: integer('invited_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('platform_invites_email_idx').on(table.email),
+    index('platform_invites_token_hash_idx').on(table.tokenHash),
+    index('platform_invites_expires_idx').on(table.expiresAt),
+  ]
+);
+
+// --- Auth: Audit logs (platform-wide security events) ---
+export const auditLogActionEnum = [
+  'signup',
+  'email_verification',
+  'invite_creation',
+  'invite_acceptance',
+  'role_change',
+  'failed_privileged_access',
+] as const;
+export type AuditLogAction = (typeof auditLogActionEnum)[number];
+
+export const auditLogs = pgTable(
+  'audit_logs',
+  {
+    id: serial('id').primaryKey(),
+    action: varchar('action', { length: 50 }).notNull().$type<AuditLogAction>(),
+    userId: integer('user_id').references(() => users.id),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('audit_logs_action_idx').on(table.action),
+    index('audit_logs_user_idx').on(table.userId),
+    index('audit_logs_created_idx').on(table.createdAt),
+  ]
+);
+
 // --- Education domain (MVP) ---
 
 export const geckoLevelEnum = ['G', 'E', 'C', 'K', 'O'] as const;
@@ -725,6 +798,24 @@ export const invitationsRelations = relations(invitations, ({ one }) => ({
   }),
 }));
 
+export const platformInvitesRelations = relations(platformInvites, ({ one }) => ({
+  school: one(schools, {
+    fields: [platformInvites.schoolId],
+    references: [schools.id],
+  }),
+  invitedBy: one(users, {
+    fields: [platformInvites.invitedByUserId],
+    references: [users.id],
+  }),
+}));
+
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [auditLogs.userId],
+    references: [users.id],
+  }),
+}));
+
 export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
   user: one(users, {
     fields: [teamMembers.userId],
@@ -739,6 +830,7 @@ export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
 export const schoolsRelations = relations(schools, ({ many }) => ({
   memberships: many(schoolMemberships),
   classes: many(eduClasses),
+  platformInvites: many(platformInvites),
 }));
 
 export const schoolMembershipsRelations = relations(schoolMemberships, ({ one }) => ({
@@ -1290,6 +1382,12 @@ export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
+export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
+export type NewEmailVerificationToken = typeof emailVerificationTokens.$inferInsert;
+export type PlatformInvite = typeof platformInvites.$inferSelect;
+export type NewPlatformInvite = typeof platformInvites.$inferInsert;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type NewAuditLog = typeof auditLogs.$inferInsert;
 export type School = typeof schools.$inferSelect;
 export type NewSchool = typeof schools.$inferInsert;
 export type SchoolMembership = typeof schoolMemberships.$inferSelect;
