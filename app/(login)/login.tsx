@@ -60,9 +60,6 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           <p className="mt-2 text-sm text-[#6b7280]">
             {subtitle}
           </p>
-          <div className="mt-3 inline-flex items-center rounded-full bg-[#ffaa00]/15 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-[#92400e]">
-            {t('badge')}
-          </div>
         </div>
 
         {/* Form */}
