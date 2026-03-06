@@ -33,7 +33,12 @@ export default async function VerifyEmailPage({
     );
   }
 
-  const result = await verifyEmailAction(token);
+  let result: { success: boolean; error?: string };
+  try {
+    result = await verifyEmailAction(token);
+  } catch {
+    result = { success: false, error: 'Verification failed' };
+  }
 
   if (result.success) {
     return (

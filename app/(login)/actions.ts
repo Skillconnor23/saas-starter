@@ -27,7 +27,10 @@ import {
   validatedActionWithUser,
 } from '@/lib/auth/middleware';
 import { consumeClassInviteCookieAndRedirect } from '@/lib/actions/class-invite';
-import { createVerificationToken } from '@/lib/auth/verification';
+import {
+  createVerificationToken,
+  sendVerificationEmailIfNeeded,
+} from '@/lib/auth/verification';
 import { sendVerificationEmail } from '@/lib/auth/email';
 import { createAuditLog } from '@/lib/auth/audit';
 import { consumePlatformInvite } from '@/lib/auth/invites';
@@ -87,6 +90,8 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     if (error instanceof AuthError) {
       const authErr = error as AuthError & { code?: string };
       if (authErr.code === 'email_not_verified') {
+        // Auto-send verification email once (with cooldown to avoid spam on repeated sign-in)
+        await sendVerificationEmailIfNeeded(email);
         return {
           error: 'emailNotVerified',
           email,
@@ -130,7 +135,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   redirect(safeNext);
 });
 
-/** Resend verification email for unverified users. */
+/** Resend verification email for unverified users. Respects cooldown to avoid spam. */
 export async function resendVerificationEmail(
   _prev: { success?: boolean; error?: string } | null,
   formData: FormData
@@ -154,9 +159,7 @@ export async function resendVerificationEmail(
     return { success: true }; // Already verified
   }
 
-  const token = await createVerificationToken(email.trim());
-  await sendVerificationEmail(email.trim(), token);
-
+  await sendVerificationEmailIfNeeded(email.trim());
   return { success: true };
 }
 

@@ -7,6 +7,8 @@ import { sendVerificationEmail } from './email';
 
 const TOKEN_BYTES = 32;
 const EXPIRY_HOURS = 24;
+/** Cooldown in ms - do not send another verification email within this window */
+const VERIFICATION_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -28,6 +30,38 @@ export async function createVerificationToken(email: string): Promise<string> {
   });
 
   return token;
+}
+
+/** Returns true if we recently sent a verification email to this address (cooldown). */
+async function isVerificationEmailInCooldown(email: string): Promise<boolean> {
+  const cutoff = new Date(Date.now() - VERIFICATION_COOLDOWN_MS);
+  const [row] = await db
+    .select({ id: emailVerificationTokens.id })
+    .from(emailVerificationTokens)
+    .where(
+      and(
+        eq(emailVerificationTokens.email, email),
+        gt(emailVerificationTokens.createdAt, cutoff),
+        isNull(emailVerificationTokens.usedAt)
+      )
+    )
+    .limit(1);
+  return !!row;
+}
+
+/**
+ * Send verification email only if not in cooldown. Prevents spam on repeated sign-in or resend.
+ * Returns { sent: true } if email was sent, { sent: false } if skipped due to cooldown.
+ */
+export async function sendVerificationEmailIfNeeded(
+  email: string
+): Promise<{ sent: boolean }> {
+  if (await isVerificationEmailInCooldown(email)) {
+    return { sent: false };
+  }
+  const token = await createVerificationToken(email);
+  await sendVerificationEmail(email, token);
+  return { sent: true };
 }
 
 export async function verifyAndConsumeToken(

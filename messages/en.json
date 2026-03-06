@@ -521,6 +521,7 @@
       "backToSignIn": "Back to sign in"
     },
     "verifyEmail": {
+      "verifying": "Verifying your email…",
       "invalidLinkTitle": "Invalid link",
       "invalidLinkDesc": "This verification link is invalid or missing.",
       "successTitle": "Email verified",
