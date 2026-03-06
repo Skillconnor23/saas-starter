@@ -6,6 +6,25 @@ import { DashboardSidebar } from './dashboard/dashboard-sidebar';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+async function safeGetPrimaryClassForStudent(userId: number): Promise<string | null> {
+  try {
+    const row = await getPrimaryClassForStudent(userId);
+    return row?.id ?? null;
+  } catch (err) {
+    console.error('[WithSidebarLayout] getPrimaryClassForStudent failed:', err);
+    return null;
+  }
+}
+
+async function safeGetUnseenMessageNotificationCount(userId: number): Promise<number> {
+  try {
+    return await getUnseenMessageNotificationCount(userId);
+  } catch (err) {
+    console.error('[WithSidebarLayout] getUnseenMessageNotificationCount failed:', err);
+    return 0;
+  }
+}
+
 export default async function WithSidebarLayout({
   children
 }: {
@@ -13,10 +32,8 @@ export default async function WithSidebarLayout({
 }) {
   const user = await requirePlatformRole();
   const [studentPrimaryClassId, unreadMessageCount] = await Promise.all([
-    user.platformRole === 'student'
-      ? (await getPrimaryClassForStudent(user.id))?.id ?? null
-      : null,
-    getUnseenMessageNotificationCount(user.id),
+    user.platformRole === 'student' ? safeGetPrimaryClassForStudent(user.id) : null,
+    safeGetUnseenMessageNotificationCount(user.id),
   ]);
   return (
     <DashboardSidebar

@@ -39,6 +39,7 @@ const createClassSchema = z.object({
 const MAX_JOIN_CODE_RETRIES = 5;
 
 export async function createClassAction(_prev: unknown, formData: FormData) {
+  try {
   await requirePermission('classes:write');
   const rawSchoolId = formData.get('schoolId');
   const schoolIdParam =
@@ -82,6 +83,10 @@ export async function createClassAction(_prev: unknown, formData: FormData) {
     error:
       lastError?.message ?? 'Could not generate unique join code. Please try again.',
   };
+  } catch (err) {
+    console.error('[createClassAction] Unexpected error:', err);
+    throw err;
+  }
 }
 
 const createSessionSchema = z.object({
