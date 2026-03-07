@@ -78,6 +78,8 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     console.log('[signin] Before authSignIn | email:', email);
   }
 
+  // authSignIn(redirect: false) in server-action credentials flow may return {} on success.
+  // Do NOT rely on result.ok — treat return without error as success.
   let result: { ok?: boolean; error?: string; url?: string | null } | undefined;
   try {
     result = await authSignIn('credentials', {
@@ -86,18 +88,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       redirect: false,
     });
 
-    // Always-on: exact authSignIn return value
-    console.log('[signin-trace] authSignIn returned |', JSON.stringify({ ok: result?.ok, error: result?.error, url: result?.url }));
-
     if (isSignInDebug) {
-      console.log(
-        '[signin] After authSignIn (returned) | ok:',
-        result?.ok,
-        '| error:',
-        result?.error,
-        '| url:',
-        result?.url
-      );
+      const r = { ok: result?.ok, error: result?.error, url: result?.url };
+      console.log('[signin] authSignIn returned |', JSON.stringify(r));
     }
 
     if (result?.error) {
@@ -114,7 +107,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
           password,
         };
       }
-      traceReturnInvalidCredentials('result.error (not verify)', { error: result.error });
+      traceReturnInvalidCredentials('result.error', { error: result.error });
       return {
         error: 'invalidCredentials',
         email,
@@ -122,14 +115,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       };
     }
 
-    if (!result?.ok) {
-      traceReturnInvalidCredentials('!result.ok', { ok: result?.ok });
-      return {
-        error: 'invalidCredentials',
-        email,
-        password,
-      };
-    }
+    // Success: authSignIn returned without error. Do not check result.ok (can be undefined).
   } catch (error) {
     if (isSignInDebug) {
       console.log(
@@ -143,7 +129,6 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     }
     // Next.js redirect() throws NEXT_REDIRECT; re-throw so redirect executes, don't treat as invalid credentials
     if (isRedirectError(error)) {
-      console.log('[signin-trace] Re-throwing redirect error');
       throw error;
     }
     if (error instanceof AuthError) {
@@ -157,8 +142,8 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
         };
       }
     }
-    traceReturnInvalidCredentials('catch (not redirect, not email_not_verified)', {
-      message: error instanceof Error ? error.message : String(error),
+    traceReturnInvalidCredentials('catch', {
+      msg: error instanceof Error ? error.message : String(error),
     });
     return {
       error: 'invalidCredentials',
@@ -182,14 +167,13 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .limit(1);
 
   if (!user) {
-    traceReturnInvalidCredentials('user lookup by email returned null');
+    traceReturnInvalidCredentials('user lookup null');
     return { error: 'invalidCredentials', email, password };
   }
 
   if (isSignInDebug) {
-    console.log('[signin] User found by email | id:', user.id, '| proceeding to redirect');
+    console.log('[signin] User loaded by email | id:', user.id);
   }
-  console.log('[signin-trace] User loaded by email | id:', user.id);
 
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_IN);
@@ -213,7 +197,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       ? redirectTo
       : '/dashboard';
 
-  console.log('[signin-trace] Success — redirecting to:', safeNext);
+  if (isSignInDebug) {
+    console.log('[signin] Redirecting to:', safeNext);
+  }
   redirect(safeNext);
 });
 
