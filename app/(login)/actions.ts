@@ -72,6 +72,19 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     });
 
     if (result?.error) {
+      const errStr = typeof result.error === 'string' ? result.error : String(result.error);
+      if (
+        errStr.toLowerCase().includes('verify') ||
+        errStr.includes('email_not_verified') ||
+        errStr.includes('EmailNotVerified')
+      ) {
+        await sendVerificationEmailIfNeeded(email);
+        return {
+          error: 'emailNotVerified',
+          email,
+          password,
+        };
+      }
       return {
         error: 'invalidCredentials',
         email,

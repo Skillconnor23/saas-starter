@@ -23,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || typeof credentials.email !== 'string') return null;
         if (!credentials?.password || typeof credentials.password !== 'string') return null;
 
-        const email = credentials.email.trim();
+        const email = credentials.email.trim().toLowerCase();
         const password = credentials.password;
 
         const [user] = await db
@@ -37,36 +37,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           )
           .limit(1);
 
+        const dbHost = process.env.POSTGRES_URL
+          ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
+          : 'unknown';
+
         if (!user) {
           if (authDebug) {
-            const dbHost = process.env.POSTGRES_URL
-              ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
-              : 'unknown';
-            console.log('[auth] User not found for email:', email, '| DB:', dbHost);
+            console.log('[auth] User not found | normalized_email:', email, '| DB:', dbHost, '| rejection: user_not_found');
           }
           return null;
         }
 
-        const hasPasswordHash = !!user.passwordHash && user.passwordHash.length > 0;
-        if (authDebug && !hasPasswordHash) {
-          const dbHost = process.env.POSTGRES_URL
-            ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
-            : 'unknown';
-          console.log('[auth] User found but password_hash is missing/empty:', user.email, '| DB:', dbHost);
+        const hasPasswordHash = !!user.passwordHash && typeof user.passwordHash === 'string' && user.passwordHash.length > 0;
+        const hashPrefix = hasPasswordHash ? user.passwordHash.slice(0, 7) : 'N/A';
+        if (!hasPasswordHash) {
+          if (authDebug) {
+            console.log('[auth] User found but password_hash missing/empty | user_id:', user.id, '| email:', user.email, '| DB:', dbHost, '| rejection: no_password_hash');
+          }
+          return null;
         }
 
         const valid = await comparePasswords(password, user.passwordHash);
+        const emailVerifiedRaw = user.emailVerified;
+        const emailVerifiedTruthy = !!emailVerifiedRaw;
+
         if (authDebug) {
-          const dbHost = process.env.POSTGRES_URL
-            ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
-            : 'unknown';
+          const rejection =
+            !valid
+              ? 'password_mismatch'
+              : !emailVerifiedTruthy
+                ? 'email_not_verified'
+                : 'none';
           console.log(
-            '[auth] User found:',
+            '[auth] Sign-in attempt | normalized_email:',
+            email,
+            '| user_id:',
+            user.id,
+            '| user.email(DB):',
             user.email,
-            '| verified:',
-            !!user.emailVerified,
-            '| password match:',
+            '| password_hash_exists:',
+            hasPasswordHash,
+            '| password_hash_prefix:',
+            hashPrefix,
+            '| password_compare:',
             valid,
+            '| email_verified(column):',
+            emailVerifiedRaw ?? 'null',
+            '| rejection:',
+            rejection,
             '| DB:',
             dbHost
           );
@@ -74,7 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!valid) return null;
 
-        if (!user.emailVerified) {
+        if (!emailVerifiedTruthy) {
           throw new EmailNotVerifiedError();
         }
 
