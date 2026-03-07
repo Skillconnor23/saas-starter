@@ -39,19 +39,34 @@ export async function getImpersonateUserIdFromCookie(): Promise<number | null> {
 
 /**
  * Looks up the teacher test user by email (CONNOR_TEACHER_TEST_EMAIL or connor+teacher@geckoteach.com).
- * Returns the user id if found and platformRole is teacher, else null.
+ * Query: email = connor+teacher@geckoteach.com AND platformRole = 'teacher' AND deletedAt IS NULL.
+ * Returns the user id if found, else null.
  */
 export async function getConnorTeacherUserId(): Promise<number | null> {
   const email = getTeacherTestEmail();
+  const debug = process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true';
+
+  if (debug) {
+    console.log('[impersonate] Teacher lookup email:', email);
+  }
+
   const [row] = await db
     .select({ id: users.id, platformRole: users.platformRole })
     .from(users)
     .where(
-      and(sql`lower(${users.email}) = lower(${email})`, isNull(users.deletedAt))
+      and(
+        sql`lower(${users.email}) = lower(${email})`,
+        eq(users.platformRole, 'teacher'),
+        isNull(users.deletedAt)
+      )
     )
     .limit(1);
-  if (!row || row.platformRole !== 'teacher') return null;
-  return row.id;
+
+  if (debug) {
+    console.log('[impersonate] Teacher lookup result:', row ? { id: row.id, platformRole: row.platformRole } : 'no user found');
+  }
+
+  return row?.id ?? null;
 }
 
 /**
@@ -60,13 +75,20 @@ export async function getConnorTeacherUserId(): Promise<number | null> {
 export async function setImpersonateTeacherCookie(): Promise<
   { ok: true; redirectTo: string } | { ok: false; error: string }
 > {
+  const debug = process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true';
   const userId = await getConnorTeacherUserId();
+
+  if (debug) {
+    console.log('[impersonate] setImpersonateTeacherCookie: userId=', userId ?? 'null');
+  }
+
   if (!userId) {
     return {
       ok: false,
       error: 'Unable to switch to teacher account.',
     };
   }
+
   const store = await cookies();
   store.set(IMPERSONATE_USER_ID_COOKIE, String(userId), {
     path: '/',
