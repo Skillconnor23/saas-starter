@@ -210,6 +210,43 @@ export function DashboardSidebar({
   const groups = navGroupKeys[platformRole] ?? navGroupKeys.student;
   const pathWithoutLocale = stripLocaleFromPath(pathname);
 
+  /**
+   * Shared active route matcher. Handles exact match, prefix match, and special cases.
+   * - __PRIMARY_CLASS__: active on any /classroom/ path (My Classroom)
+   * - Prefix-match items: active when path starts with the match path (nested routes)
+   * - Exact-match items: active only when path equals href
+   */
+  function isNavItemActive(item: NavItem): boolean {
+    if (item.href === '__PRIMARY_CLASS__') {
+      return pathWithoutLocale.startsWith('/classroom/');
+    }
+    // Map item href to the path prefix that indicates active (for nested routes)
+    const prefixMatchMap: Record<string, string> = {
+      '/dashboard/admin/users': '/dashboard/admin/users',
+      '/dashboard/admin/invites': '/dashboard/admin/invites',
+      '/dashboard/student/learning': '/dashboard/student/learning',
+      '/teacher/classes': '/teacher/classes',
+      '/dashboard/teacher/learning-tools': '/dashboard/teacher/learning-tools',
+      '/dashboard/teacher/curriculum/materials': '/dashboard/teacher/curriculum',
+      '/dashboard/student/homework': '/dashboard/student/homework',
+      '/dashboard/homework': '/dashboard/homework',
+      '/dashboard/messages': '/dashboard/messages',
+      '/dashboard/student/schedule': '/dashboard/student/schedule',
+      '/dashboard/teacher/schedule': '/dashboard/teacher/schedule',
+      '/dashboard/school-admin/schedule': '/dashboard/school-admin/schedule',
+      '/dashboard/school-admin/school': '/dashboard/school-admin/school',
+      '/dashboard/school-admin/students': '/dashboard/school-admin/students',
+    };
+    const matchPrefix = prefixMatchMap[item.href];
+    if (matchPrefix) {
+      return (
+        pathWithoutLocale.startsWith(matchPrefix) ||
+        (item.href === '/dashboard/student/learning' && pathWithoutLocale.startsWith('/learning'))
+      );
+    }
+    return pathWithoutLocale === item.href;
+  }
+
   function sidebarLabel(labelKey: string): string {
     try {
       const value = tSidebar(labelKey);
@@ -243,25 +280,7 @@ export function DashboardSidebar({
             <div className="space-y-1">
               {group.items.map((item) => {
                 const href = resolveItemHref(item);
-                const isActive =
-                  pathWithoutLocale === item.href ||
-                  (item.href === '/dashboard/admin/users' &&
-                    pathWithoutLocale?.startsWith('/dashboard/admin/users')) ||
-                  (item.href === '/dashboard/admin/invites' &&
-                    pathWithoutLocale?.startsWith('/dashboard/admin/invites')) ||
-                  (item.href === '/dashboard/student/learning' &&
-                    (pathWithoutLocale?.startsWith('/dashboard/student/learning') ||
-                      pathWithoutLocale?.startsWith('/learning'))) ||
-                  (item.href === '/teacher/classes' &&
-                    pathWithoutLocale?.startsWith('/teacher/classes')) ||
-                  (item.href === '/dashboard/teacher/learning-tools' &&
-                    pathWithoutLocale?.startsWith('/dashboard/teacher/learning-tools')) ||
-                  (item.href === '/dashboard/teacher/curriculum/materials' &&
-                    pathWithoutLocale?.startsWith('/dashboard/teacher/curriculum')) ||
-                  (item.href === '/dashboard/student/homework' &&
-                    pathWithoutLocale?.startsWith('/dashboard/student/homework')) ||
-                  (item.href === '/dashboard/homework' &&
-                    pathWithoutLocale?.startsWith('/dashboard/homework'));
+                const isActive = isNavItemActive(item);
                 const showMessageBadge =
                   item.href === '/dashboard/messages' && unreadMessageCount > 0;
                 return (

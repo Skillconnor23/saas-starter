@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
 import { getStudentHomeworkList } from '@/lib/actions/homework';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GeckoLoader } from '@/components/ui/gecko-loader';
 import { ClipboardList } from 'lucide-react';
 import { StudentHomeworkListClient } from './StudentHomeworkListClient';
 
@@ -13,7 +14,13 @@ export default async function StudentHomeworkListPage() {
   const tList = await getTranslations('homework.listPage');
   await requireRole(['student']);
   const list = await getStudentHomeworkList();
-  if (!list) return null;
+  if (!list) {
+    return (
+      <section className="flex-1 min-h-[400px]">
+        <GeckoLoader minHeight="min-h-[400px]" />
+      </section>
+    );
+  }
 
   return (
     <section className="flex-1">
