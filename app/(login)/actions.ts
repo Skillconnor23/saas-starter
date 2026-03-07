@@ -65,6 +65,11 @@ const signInSchema = z.object({
 const isSignInDebug =
   process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true';
 
+/** Always-on trace: logs every invalidCredentials return path for production debugging. */
+function traceReturnInvalidCredentials(path: string, extra?: Record<string, unknown>) {
+  console.log('[signin-trace] RETURN invalidCredentials | path:', path, extra ? '|', JSON.stringify(extra) : '');
+}
+
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
@@ -79,6 +84,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       password,
       redirect: false,
     });
+
+    // Always-on: exact authSignIn return value
+    console.log('[signin-trace] authSignIn returned |', JSON.stringify({ ok: result?.ok, error: result?.error, url: result?.url }));
 
     if (isSignInDebug) {
       console.log(
@@ -105,6 +113,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
           password,
         };
       }
+      traceReturnInvalidCredentials('result.error (not verify)', { error: result.error });
       return {
         error: 'invalidCredentials',
         email,
@@ -113,6 +122,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     }
 
     if (!result?.ok) {
+      traceReturnInvalidCredentials('!result.ok', { ok: result?.ok });
       return {
         error: 'invalidCredentials',
         email,
@@ -132,12 +142,12 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     }
     // Next.js redirect() throws NEXT_REDIRECT; re-throw so redirect executes, don't treat as invalid credentials
     if (isRedirectError(error)) {
+      console.log('[signin-trace] Re-throwing redirect error');
       throw error;
     }
     if (error instanceof AuthError) {
       const authErr = error as AuthError & { code?: string };
       if (authErr.code === 'email_not_verified') {
-        // Auto-send verification email once (with cooldown to avoid spam on repeated sign-in)
         await sendVerificationEmailIfNeeded(email);
         return {
           error: 'emailNotVerified',
@@ -146,6 +156,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
         };
       }
     }
+    traceReturnInvalidCredentials('catch (not redirect, not email_not_verified)', {
+      message: error instanceof Error ? error.message : String(error),
+    });
     return {
       error: 'invalidCredentials',
       email,
@@ -168,15 +181,14 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .limit(1);
 
   if (!user) {
-    if (isSignInDebug) {
-      console.log('[signin] User lookup by email returned null after authSignIn ok');
-    }
+    traceReturnInvalidCredentials('user lookup by email returned null');
     return { error: 'invalidCredentials', email, password };
   }
 
   if (isSignInDebug) {
     console.log('[signin] User found by email | id:', user.id, '| proceeding to redirect');
   }
+  console.log('[signin-trace] User loaded by email | id:', user.id);
 
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_IN);
@@ -200,9 +212,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       ? redirectTo
       : '/dashboard';
 
-  if (isSignInDebug) {
-    console.log('[signin] Success — redirecting to:', safeNext);
-  }
+  console.log('[signin-trace] Success — redirecting to:', safeNext);
   redirect(safeNext);
 });
 

@@ -13,21 +13,12 @@ const intlMiddleware = createMiddleware({
 
 const protectedRoutePrefixes = ['/dashboard', '/onboarding', '/classroom'];
 const legacyMarketingPaths = ['/home', '/landing', '/marketing', '/site'];
-const isAuthDebug = process.env.AUTH_DEBUG === 'true';
 
 export default authMiddleware((req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
   const pathWithoutLocale = pathname.replace(/^\/(en|mn)/, '') || '/';
 
-  if (isAuthDebug && pathWithoutLocale.startsWith('/dashboard')) {
-    console.log(
-      '[middleware] Protected route',
-      pathWithoutLocale,
-      '| session:',
-      session ? `userId=${session.user?.id}` : 'none'
-    );
-  }
   const isProtectedRoute = protectedRoutePrefixes.some((p) =>
     pathWithoutLocale.startsWith(p)
   );
@@ -40,12 +31,8 @@ export default authMiddleware((req) => {
   }
 
   if (isProtectedRoute && !session) {
-    if (isAuthDebug) {
-      console.log(
-        '[middleware] Redirecting to sign-in — no session on protected route:',
-        pathWithoutLocale
-      );
-    }
+    // Always-on: trace why user was bounced to sign-in
+    console.log('[middleware-trace] Redirect to sign-in | path:', pathWithoutLocale, '| session: none');
     const localeSegment = pathname.startsWith('/en')
       ? '/en'
       : pathname.startsWith('/mn')
