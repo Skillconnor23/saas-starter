@@ -152,7 +152,7 @@ export async function resendVerificationEmail(
   }
 
   const [user] = await db
-    .select({ id: users.id, emailVerified: users.emailVerified })
+    .select({ id: users.id, email: users.email, emailVerified: users.emailVerified })
     .from(users)
     .where(sql`lower(${users.email}) = lower(${email})`)
     .limit(1);
@@ -165,7 +165,13 @@ export async function resendVerificationEmail(
     return { success: true }; // Already verified
   }
 
-  await sendVerificationEmailIfNeeded(email);
+  const sendEmail = user.email;
+  const sendResult = await sendVerificationEmailIfNeeded(sendEmail);
+  if (!sendResult.sent) {
+    console.error('[resend-verification] Failed to send:', sendResult.error, '| user:', user.id, '| email:', sendEmail);
+  } else if (process.env.NODE_ENV !== 'production') {
+    console.log('[resend-verification] Sent to:', sendEmail);
+  }
   return { success: true };
 }
 
@@ -322,7 +328,12 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
   }
 
   const token = await createVerificationToken(email);
-  await sendVerificationEmail(email, token);
+  const sendResult = await sendVerificationEmail(email, token);
+  if (!sendResult.ok) {
+    console.error('[signup] Verification email failed:', sendResult.error, '| email:', email);
+  } else if (process.env.NODE_ENV !== 'production') {
+    console.log('[signup] Verification email sent to:', email);
+  }
 
   await createAuditLog({
     action: 'signup',

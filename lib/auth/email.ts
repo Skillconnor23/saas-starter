@@ -7,14 +7,28 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM_EMAIL = process.env.EMAIL_FROM ?? 'noreply@example.com';
 
-export async function sendVerificationEmail(email: string, token: string) {
+if (process.env.NODE_ENV === 'production' && !resend) {
+  console.error('[auth/email] RESEND_API_KEY not set — verification and password reset emails will NOT be sent');
+}
+
+export async function sendVerificationEmail(
+  email: string,
+  token: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const baseUrl = getBaseUrl();
   const verifyUrl = `${baseUrl}/verify-email?token=${encodeURIComponent(token)}`;
 
   if (!resend) {
-    console.log('[DEV] Verification email would be sent to:', email);
-    console.log('[DEV] Verify URL:', verifyUrl);
-    return { ok: true };
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[verification] DEV: Would send to:', email, '| URL:', verifyUrl);
+      return { ok: true };
+    }
+    console.error('[verification] RESEND_API_KEY not set in production — email not sent to:', email);
+    return { ok: false, error: 'Email provider not configured' };
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[verification] Sending verification email to:', email);
   }
 
   const { error } = await resend.emails.send({
@@ -29,8 +43,12 @@ export async function sendVerificationEmail(email: string, token: string) {
   });
 
   if (error) {
-    console.error('Failed to send verification email:', error);
-    return { ok: false, error };
+    const errMsg = typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error);
+    console.error('[verification] Resend failed:', errMsg, '| to:', email);
+    return { ok: false, error: errMsg };
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[verification] Verification email sent to:', email);
   }
   return { ok: true };
 }

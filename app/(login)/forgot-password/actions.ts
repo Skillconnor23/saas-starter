@@ -49,9 +49,9 @@ export async function submitForgotPassword(
   }
 
   const result = await createPasswordResetToken(user.id, user.email);
-  if (!result.ok && isDev) {
-    console.error('[forgot-password] Token created but email send failed:', result.error);
-  } else if (isDev) {
+  if (!result.ok) {
+    console.error('[forgot-password] Token created but email send failed:', result.error, '| user:', user.id);
+  } else if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {
     console.log('[forgot-password] Reset token created and email sent to:', user.email);
   }
 

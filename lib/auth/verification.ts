@@ -23,11 +23,19 @@ export async function createVerificationToken(email: string): Promise<string> {
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + EXPIRY_HOURS * 60 * 60 * 1000);
 
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[verification] Generating token for:', email);
+  }
+
   await db.insert(emailVerificationTokens).values({
     email,
     tokenHash,
     expiresAt,
   });
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[verification] Token saved to DB');
+  }
 
   return token;
 }
@@ -51,16 +59,23 @@ async function isVerificationEmailInCooldown(email: string): Promise<boolean> {
 
 /**
  * Send verification email only if not in cooldown. Prevents spam on repeated sign-in or resend.
- * Returns { sent: true } if email was sent, { sent: false } if skipped due to cooldown.
+ * Returns { sent: true } if email was sent, { sent: false, error?: string } otherwise.
  */
 export async function sendVerificationEmailIfNeeded(
   email: string
-): Promise<{ sent: boolean }> {
+): Promise<{ sent: boolean; error?: string }> {
   if (await isVerificationEmailInCooldown(email)) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[verification] Skipped (cooldown):', email);
+    }
     return { sent: false };
   }
   const token = await createVerificationToken(email);
-  await sendVerificationEmail(email, token);
+  const result = await sendVerificationEmail(email, token);
+  if (!result.ok) {
+    console.error('[verification] Email send failed:', result.error, '| to:', email);
+    return { sent: false, error: result.error };
+  }
   return { sent: true };
 }
 

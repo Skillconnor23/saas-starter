@@ -8,6 +8,7 @@ import { comparePasswords } from '@/lib/auth/session';
 import { authConfig } from './auth.config';
 
 const isDev = process.env.NODE_ENV !== 'production';
+const authDebug = process.env.AUTH_DEBUG === 'true' || isDev;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -37,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .limit(1);
 
         if (!user) {
-          if (isDev) {
+          if (authDebug) {
             const dbHost = process.env.POSTGRES_URL
               ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
               : 'unknown';
@@ -47,7 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const hasPasswordHash = !!user.passwordHash && user.passwordHash.length > 0;
-        if (isDev && !hasPasswordHash) {
+        if (authDebug && !hasPasswordHash) {
           const dbHost = process.env.POSTGRES_URL
             ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
             : 'unknown';
@@ -55,7 +56,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const valid = await comparePasswords(password, user.passwordHash);
-        if (isDev) {
+        if (authDebug) {
           const dbHost = process.env.POSTGRES_URL
             ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
             : 'unknown';
