@@ -67,7 +67,8 @@ const isSignInDebug =
 
 /** Always-on trace: logs every invalidCredentials return path for production debugging. */
 function traceReturnInvalidCredentials(path: string, extra?: Record<string, unknown>) {
-  console.log('[signin-trace] RETURN invalidCredentials | path:', path, extra ? '|', JSON.stringify(extra) : '');
+  const suffix = extra ? ` | ${JSON.stringify(extra)}` : '';
+  console.log(`[signin-trace] RETURN invalidCredentials | path: ${path}${suffix}`);
 }
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
