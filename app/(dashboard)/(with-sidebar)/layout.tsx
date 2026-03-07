@@ -1,5 +1,5 @@
 import { requirePlatformRole } from '@/lib/auth/user';
-import { isImpersonating } from '@/lib/auth/impersonate';
+import { isImpersonating, CONNOR_ADMIN_EMAIL } from '@/lib/auth/impersonate';
 import { getPrimaryClassForStudent } from '@/lib/db/queries/education';
 import { getUnseenMessageNotificationCount } from '@/lib/db/queries/notifications';
 import { DashboardSidebar } from './dashboard/dashboard-sidebar';
@@ -37,10 +37,15 @@ export default async function WithSidebarLayout({
     safeGetUnseenMessageNotificationCount(user.id),
     isImpersonating(),
   ]);
+  const isConnorAsAdmin =
+    !impersonating &&
+    user.email?.trim().toLowerCase() === CONNOR_ADMIN_EMAIL &&
+    user.platformRole === 'admin';
   return (
     <DashboardSidebar
       platformRole={user.platformRole}
       isImpersonating={impersonating}
+      isConnorAsAdmin={isConnorAsAdmin}
       studentPrimaryClassId={studentPrimaryClassId}
       unreadMessageCount={unreadMessageCount}
       userName={user.name}

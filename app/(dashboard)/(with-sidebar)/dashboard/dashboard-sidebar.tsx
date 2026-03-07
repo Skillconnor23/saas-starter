@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { signOut, clearImpersonateAction } from '@/app/(login)/actions';
+import { signOut, clearImpersonateAction, setImpersonateTeacherAction } from '@/app/(login)/actions';
 import { mutate } from 'swr';
 import { locales } from '@/lib/i18n/config';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ import {
   ClipboardList,
   Mail,
   ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import type { PlatformRole } from '@/lib/db/schema';
 import { useNavDrawer } from '@/app/(dashboard)/layout';
@@ -127,6 +128,7 @@ type DashboardSidebarProps = {
   children: React.ReactNode;
   platformRole: PlatformRole;
   isImpersonating?: boolean;
+  isConnorAsAdmin?: boolean;
   studentPrimaryClassId?: string | null;
   unreadMessageCount?: number;
   userName?: string | null;
@@ -147,6 +149,7 @@ export function DashboardSidebar({
   children,
   platformRole,
   isImpersonating = false,
+  isConnorAsAdmin = false,
   studentPrimaryClassId,
   unreadMessageCount = 0,
   userName,
@@ -394,6 +397,26 @@ export function DashboardSidebar({
 
       {/* Main content: column that owns its own scrolling */}
       <main className="min-w-0 flex-1 h-full overflow-hidden flex flex-col">
+        {isConnorAsAdmin && (
+          <div className="shrink-0 flex items-center justify-between gap-2 bg-[#b64b29] text-white px-4 py-2 text-sm">
+            <span className="font-medium">Viewing as Admin</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const result = await setImpersonateTeacherAction();
+                if (result.ok) {
+                  router.push(withLocalePrefix(result.redirectTo));
+                  setNavOpen(false);
+                }
+              }}
+              className="h-8 rounded-full border-white/30 bg-white/90 text-[#b64b29] hover:bg-white"
+            >
+              <ArrowRight className="mr-1.5 h-3.5 w-3.5" />
+              Switch to Teacher
+            </Button>
+          </div>
+        )}
         {isImpersonating && (
           <div className="shrink-0 flex items-center justify-between gap-2 bg-amber-500/90 text-black px-4 py-2 text-sm">
             <span className="font-medium">Viewing as Teacher</span>

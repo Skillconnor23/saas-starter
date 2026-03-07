@@ -18,21 +18,23 @@ const nunito = Nunito({
   weight: ['400', '500', '600', '700']
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
+  const [user, team] = await Promise.all([
+    getUser().catch(() => null),
+    getTeamForUser().catch(() => null),
+  ]);
   return (
     <html lang="en" className="bg-white dark:bg-gray-950 text-black dark:text-white">
       <body className={`min-h-[100dvh] bg-white ${nunito.className}`}>
         <SWRConfig
           value={{
             fallback: {
-              // We do NOT await here
-              // Only components that read this data will suspend
-              '/api/user': getUser(),
-              '/api/team': getTeamForUser()
+              '/api/user': user,
+              '/api/team': team,
             }
           }}
         >

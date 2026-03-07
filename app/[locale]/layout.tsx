@@ -27,12 +27,17 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
   const messages = await getMessages();
 
+  const [user, team] = await Promise.all([
+    getUser().catch(() => null),
+    getTeamForUser().catch(() => null),
+  ]);
+
   return (
     <SWRConfig
       value={{
         fallback: {
-          '/api/user': getUser(),
-          '/api/team': getTeamForUser()
+          '/api/user': user,
+          '/api/team': team,
         }
       }}
     >
