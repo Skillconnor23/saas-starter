@@ -5,8 +5,26 @@ import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.'
+  title: 'Gecko Academy',
+  description: 'Join a live English class with Gecko Academy.',
+  openGraph: {
+    title: 'Gecko Academy',
+    description: 'Join a live English class with Gecko Academy.',
+    url: 'https://www.geckoacademy.net',
+    siteName: 'Gecko Academy',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Gecko Academy',
+      },
+    ],
+    type: 'website',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export const viewport: Viewport = {

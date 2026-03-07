@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { cookies } from 'next/headers';
 import { getInviteByTokenAction } from '@/lib/actions/class-invite';
@@ -17,6 +18,28 @@ function safeLog(msg: string, data?: unknown) {
   if (INVITE_DEBUG) {
     console.log('[join-invite]', msg, data ?? '');
   }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Join Gecko Academy',
+    description: 'Apply to join an online English class at Gecko Academy.',
+    openGraph: {
+      title: 'Join Gecko Academy',
+      description: 'Apply to join an online English class at Gecko Academy.',
+      url: 'https://www.geckoacademy.net',
+      siteName: 'Gecko Academy',
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Gecko Academy',
+        },
+      ],
+      type: 'website',
+    },
+  };
 }
 
 /** Fallback labels when i18n is unavailable (e.g. route without locale). */
