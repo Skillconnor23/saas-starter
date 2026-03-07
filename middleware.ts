@@ -31,8 +31,6 @@ export default authMiddleware((req) => {
   }
 
   if (isProtectedRoute && !session) {
-    // Always-on: trace why user was bounced to sign-in
-    console.log('[middleware-trace] Redirect to sign-in | path:', pathWithoutLocale, '| session: none');
     const localeSegment = pathname.startsWith('/en')
       ? '/en'
       : pathname.startsWith('/mn')

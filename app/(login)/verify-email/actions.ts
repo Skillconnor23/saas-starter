@@ -17,14 +17,7 @@ export async function verifyEmailAction(token: string): Promise<{
 }> {
   const tokenData = await validateToken(token);
   if (!tokenData) {
-    if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {
-      console.log('[verify-email] Token invalid or expired');
-    }
     return { success: false, error: 'Invalid or expired token' };
-  }
-
-  if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {
-    console.log('[verify-email] Verifying email:', tokenData.email);
   }
 
   const updated = await db
@@ -47,10 +40,6 @@ export async function verifyEmailAction(token: string): Promise<{
     userId: updated[0].id,
     metadata: { email: tokenData.email },
   });
-
-  if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {
-    console.log('[verify-email] Success for user:', updated[0].id);
-  }
 
   return { success: true };
 }
