@@ -19,7 +19,7 @@ function generateToken(): string {
 export async function createPasswordResetToken(
   userId: number,
   email: string
-): Promise<string> {
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
   const token = generateToken();
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + EXPIRY_MINUTES * 60 * 1000);
@@ -30,8 +30,11 @@ export async function createPasswordResetToken(
     expiresAt,
   });
 
-  await sendPasswordResetEmail(email, token);
-  return token;
+  const sendResult = await sendPasswordResetEmail(email, token);
+  if (!sendResult.ok) {
+    return { ok: false, error: sendResult.error ?? 'Unknown email send failure' };
+  }
+  return { ok: true, token };
 }
 
 /**

@@ -71,14 +71,22 @@ export async function sendPlatformInviteEmail(
   return { ok: true };
 }
 
-export async function sendPasswordResetEmail(email: string, token: string) {
+export async function sendPasswordResetEmail(
+  email: string,
+  token: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const baseUrl = getBaseUrl();
   const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
   if (!resend) {
-    console.log('[DEV] Password reset email would be sent to:', email);
-    console.log('[DEV] Reset URL:', resetUrl);
-    return { ok: true };
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DEV] Password reset email would be sent to:', email);
+      console.log('[DEV] Reset URL:', resetUrl);
+      console.log('[DEV] Set RESEND_API_KEY and EMAIL_FROM for real delivery');
+      return { ok: true };
+    }
+    console.error('[password-reset] RESEND_API_KEY not set in production — email not sent to:', email);
+    return { ok: false, error: 'Email provider not configured' };
   }
 
   const { error } = await resend.emails.send({
@@ -94,8 +102,12 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   });
 
   if (error) {
-    console.error('Failed to send password reset email:', error);
-    return { ok: false, error };
+    const errMsg = typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error);
+    console.error('[password-reset] Resend failed:', errMsg, '| to:', email);
+    return { ok: false, error: errMsg };
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[DEV] Password reset email sent to:', email);
   }
   return { ok: true };
 }

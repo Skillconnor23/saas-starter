@@ -140,15 +140,21 @@ export async function resendVerificationEmail(
   _prev: { success?: boolean; error?: string } | null,
   formData: FormData
 ): Promise<{ success?: boolean; error?: string }> {
-  const email = formData.get('email');
-  if (typeof email !== 'string' || !email.trim()) {
+  const raw = formData.get('email');
+  if (typeof raw !== 'string' || !raw.trim()) {
     return { error: 'Email is required' };
+  }
+  const email = raw.trim();
+
+  const { checkRateLimit } = await import('@/lib/auth/rate-limit');
+  if (!checkRateLimit('resend-verification', email)) {
+    return { success: true }; // Don't reveal rate limit
   }
 
   const [user] = await db
     .select({ id: users.id, emailVerified: users.emailVerified })
     .from(users)
-    .where(eq(users.email, email.trim()))
+    .where(sql`lower(${users.email}) = lower(${email})`)
     .limit(1);
 
   if (!user) {
@@ -159,7 +165,7 @@ export async function resendVerificationEmail(
     return { success: true }; // Already verified
   }
 
-  await sendVerificationEmailIfNeeded(email.trim());
+  await sendVerificationEmailIfNeeded(email);
   return { success: true };
 }
 

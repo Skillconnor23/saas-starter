@@ -2,10 +2,9 @@
  * DEV-ONLY: Recover access for a user by marking them verified and optionally setting a password.
  * Usage: pnpm recover <email> [newPassword]
  *
- * Uses same env loading as Next.js so script and app hit the same database.
+ * Uses dotenv (same as seed-demo) so script and app use the same .env and POSTGRES_URL.
  */
-import { loadEnvConfig } from '@next/env';
-loadEnvConfig(process.cwd());
+import 'dotenv/config';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { db } from '../lib/db/drizzle';
 import { users } from '../lib/db/schema';

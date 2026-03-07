@@ -46,6 +46,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        const hasPasswordHash = !!user.passwordHash && user.passwordHash.length > 0;
+        if (isDev && !hasPasswordHash) {
+          const dbHost = process.env.POSTGRES_URL
+            ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
+            : 'unknown';
+          console.log('[auth] User found but password_hash is missing/empty:', user.email, '| DB:', dbHost);
+        }
+
         const valid = await comparePasswords(password, user.passwordHash);
         if (isDev) {
           const dbHost = process.env.POSTGRES_URL
