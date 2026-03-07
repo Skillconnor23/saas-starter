@@ -6,6 +6,7 @@ import { db } from '@/lib/db/drizzle';
 import { users } from '@/lib/db/schema';
 import { createPasswordResetToken } from '@/lib/auth/password-reset';
 import { checkRateLimit } from '@/lib/auth/rate-limit';
+import { getLocale } from 'next-intl/server';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -48,7 +49,8 @@ export async function submitForgotPassword(
     return { submitted: true };
   }
 
-  const result = await createPasswordResetToken(user.id, user.email);
+  const locale = await getLocale();
+  const result = await createPasswordResetToken(user.id, user.email, locale);
   if (!result.ok) {
     console.error('[forgot-password] Token created but email send failed:', result.error, '| user:', user.id);
   } else if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {

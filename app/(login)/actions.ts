@@ -62,36 +62,18 @@ const signInSchema = z.object({
   password: z.string().min(8).max(100),
 });
 
-const isSignInDebug =
-  process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true';
-
-/** Always-on trace: logs every invalidCredentials return path for production debugging. */
-function traceReturnInvalidCredentials(path: string, extra?: Record<string, unknown>) {
-  const suffix = extra ? ` | ${JSON.stringify(extra)}` : '';
-  console.log(`[signin-trace] RETURN invalidCredentials | path: ${path}${suffix}`);
-}
-
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
-  if (isSignInDebug) {
-    console.log('[signin] Before authSignIn | email:', email);
-  }
-
   // authSignIn(redirect: false) in server-action credentials flow may return {} on success.
-  // Do NOT rely on result.ok — treat return without error as success.
-  let result: { ok?: boolean; error?: string; url?: string | null } | undefined;
+  // Treat return without error as success; do NOT rely on result.ok.
+  let result: { error?: string } | undefined;
   try {
     result = await authSignIn('credentials', {
       email,
       password,
       redirect: false,
     });
-
-    if (isSignInDebug) {
-      const r = { ok: result?.ok, error: result?.error, url: result?.url };
-      console.log('[signin] authSignIn returned |', JSON.stringify(r));
-    }
 
     if (result?.error) {
       const errStr = typeof result.error === 'string' ? result.error : String(result.error);
@@ -100,41 +82,27 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
         errStr.includes('email_not_verified') ||
         errStr.includes('EmailNotVerified')
       ) {
-        await sendVerificationEmailIfNeeded(email);
+        await sendVerificationEmailIfNeeded(email, await getLocale());
         return {
           error: 'emailNotVerified',
           email,
           password,
         };
       }
-      traceReturnInvalidCredentials('result.error', { error: result.error });
       return {
         error: 'invalidCredentials',
         email,
         password,
       };
     }
-
-    // Success: authSignIn returned without error. Do not check result.ok (can be undefined).
   } catch (error) {
-    if (isSignInDebug) {
-      console.log(
-        '[signin] Caught error | isRedirectError:',
-        isRedirectError(error),
-        '| AuthError:',
-        error instanceof AuthError,
-        '| message:',
-        error instanceof Error ? error.message : String(error)
-      );
-    }
-    // Next.js redirect() throws NEXT_REDIRECT; re-throw so redirect executes, don't treat as invalid credentials
     if (isRedirectError(error)) {
       throw error;
     }
     if (error instanceof AuthError) {
       const authErr = error as AuthError & { code?: string };
       if (authErr.code === 'email_not_verified') {
-        await sendVerificationEmailIfNeeded(email);
+        await sendVerificationEmailIfNeeded(email, await getLocale());
         return {
           error: 'emailNotVerified',
           email,
@@ -142,9 +110,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
         };
       }
     }
-    traceReturnInvalidCredentials('catch', {
-      msg: error instanceof Error ? error.message : String(error),
-    });
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[signin] Unexpected error:', error instanceof Error ? error.message : String(error));
+    }
     return {
       error: 'invalidCredentials',
       email,
@@ -152,9 +120,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     };
   }
 
-  // IMPORTANT: auth()/getUser() returns null in the SAME request after signIn(redirect:false)
-  // because the session cookie is set in the response, not yet in the request. Fetch user by
-  // email instead — we know credentials were valid, so the user exists.
+  // auth() returns null in same request after signIn(redirect:false); load user by email instead.
   const [user] = await db
     .select()
     .from(users)
@@ -167,12 +133,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .limit(1);
 
   if (!user) {
-    traceReturnInvalidCredentials('user lookup null');
     return { error: 'invalidCredentials', email, password };
-  }
-
-  if (isSignInDebug) {
-    console.log('[signin] User loaded by email | id:', user.id);
   }
 
   const userWithTeam = await getUserWithTeam(user.id);
@@ -197,9 +158,6 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       ? redirectTo
       : '/dashboard';
 
-  if (isSignInDebug) {
-    console.log('[signin] Redirecting to:', safeNext);
-  }
   redirect(safeNext);
 });
 
@@ -234,7 +192,8 @@ export async function resendVerificationEmail(
   }
 
   const sendEmail = user.email;
-  const sendResult = await sendVerificationEmailIfNeeded(sendEmail);
+  const locale = await getLocale();
+  const sendResult = await sendVerificationEmailIfNeeded(sendEmail, locale);
   if (!sendResult.sent) {
     console.error('[resend-verification] Failed to send:', sendResult.error, '| user:', user.id, '| email:', sendEmail);
   } else if (process.env.NODE_ENV !== 'production') {
@@ -423,7 +382,8 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
   }
 
   const token = await createVerificationToken(emailNormalized);
-  const sendResult = await sendVerificationEmail(emailNormalized, token);
+  const locale = await getLocale();
+  const sendResult = await sendVerificationEmail(emailNormalized, token, locale);
   if (!sendResult.ok) {
     console.error('[signup] Verification email failed:', sendResult.error, '| email:', email);
   } else if (process.env.NODE_ENV !== 'production') {
@@ -439,7 +399,6 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
   await logActivity(teamId, createdUser.id, ActivityType.SIGN_UP);
 
   // Do NOT sign in - user must verify email first
-  const locale = await getLocale();
   redirect(`/${locale}/check-email`);
 });
 

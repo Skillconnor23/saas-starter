@@ -60,9 +60,11 @@ async function isVerificationEmailInCooldown(email: string): Promise<boolean> {
 /**
  * Send verification email only if not in cooldown. Prevents spam on repeated sign-in or resend.
  * Returns { sent: true } if email was sent, { sent: false, error?: string } otherwise.
+ * locale: optional, e.g. 'en' or 'mn' for language; defaults to English if missing.
  */
 export async function sendVerificationEmailIfNeeded(
-  email: string
+  email: string,
+  locale?: string | null
 ): Promise<{ sent: boolean; error?: string }> {
   if (await isVerificationEmailInCooldown(email)) {
     if (process.env.NODE_ENV !== 'production') {
@@ -71,7 +73,7 @@ export async function sendVerificationEmailIfNeeded(
     return { sent: false };
   }
   const token = await createVerificationToken(email);
-  const result = await sendVerificationEmail(email, token);
+  const result = await sendVerificationEmail(email, token, locale);
   if (!result.ok) {
     console.error('[verification] Email send failed:', result.error, '| to:', email);
     return { sent: false, error: result.error };

@@ -16,9 +16,14 @@ function generateToken(): string {
   return randomBytes(TOKEN_BYTES).toString('hex');
 }
 
+/**
+ * Create password reset token and send reset email.
+ * locale: optional, e.g. 'en' or 'mn' for email language; defaults to English if missing.
+ */
 export async function createPasswordResetToken(
   userId: number,
-  email: string
+  email: string,
+  locale?: string | null
 ): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
   const token = generateToken();
   const tokenHash = hashToken(token);
@@ -30,7 +35,7 @@ export async function createPasswordResetToken(
     expiresAt,
   });
 
-  const sendResult = await sendPasswordResetEmail(email, token);
+  const sendResult = await sendPasswordResetEmail(email, token, locale);
   if (!sendResult.ok) {
     return { ok: false, error: sendResult.error ?? 'Unknown email send failure' };
   }
