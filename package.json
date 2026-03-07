@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "seed:demo": "npx tsx scripts/seed-demo.ts",
-    "clear:demo": "npx tsx scripts/clear-demo.ts"
+    "clear:demo": "npx tsx scripts/clear-demo.ts",
+    "recover": "npx tsx scripts/recover-access.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",

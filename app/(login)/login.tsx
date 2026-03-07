@@ -146,22 +146,12 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label
-                htmlFor="password"
-                className="block text-sm font-medium text-[#374151]"
-              >
-                {t('passwordLabel')}
-              </Label>
-              {mode === 'signin' && (
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-medium text-[#429ead] hover:underline"
-                >
-                  {t('forgotPassword')}
-                </Link>
-              )}
-            </div>
+            <Label
+              htmlFor="password"
+              className="block text-sm font-medium text-[#374151]"
+            >
+              {t('passwordLabel')}
+            </Label>
             <Input
               id="password"
               name="password"
@@ -179,6 +169,16 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           </div>
 
           <div className="space-y-3">
+            {mode === 'signin' && (
+              <p className="text-center text-sm text-[#6b7280]">
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-[#429ead] hover:underline"
+                >
+                  {t('forgotPassword')}
+                </Link>
+              </p>
+            )}
             <Button
               type="submit"
               disabled={pending}
