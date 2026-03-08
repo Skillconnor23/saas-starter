@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/db/queries';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { createAuditLog } from '@/lib/auth/audit';
 import type { PlatformRole } from '@/lib/db/schema';
 
@@ -32,9 +32,9 @@ export async function getCurrentUserOrNull(): Promise<CurrentUser | null> {
 export async function requireAuth(): Promise<NonNullable<CurrentUser>> {
   const user = await getCurrentUser();
   if (!user) {
-    redirect('/sign-in');
+    await redirectWithLocale('/sign-in');
   }
-  return user;
+  return user!;
 }
 
 /**
@@ -47,7 +47,7 @@ export async function requirePlatformRole(): Promise<
 > {
   const user = await requireAuth();
   if (!user.platformRole) {
-    redirect('/dashboard/student');
+    await redirectWithLocale('/dashboard/student');
   }
   return user as NonNullable<CurrentUser> & { platformRole: PlatformRole };
 }
@@ -68,7 +68,7 @@ export async function requireRole(
       userId: user.id,
       metadata: { requiredRoles: allowedRoles, hadRole: user.platformRole },
     }).catch(() => {});
-    redirect('/dashboard');
+    await redirectWithLocale('/dashboard');
   }
   return user;
 }

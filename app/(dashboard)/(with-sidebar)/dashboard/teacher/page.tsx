@@ -11,6 +11,8 @@ import {
 } from '@/lib/db/queries/teacher-dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SetTimezoneOnMount } from '@/components/calendar/SetTimezoneOnMount';
+import { FormattedDateTime } from '@/components/display/FormattedDateTime';
 import { Calendar, AlertTriangle } from 'lucide-react';
 import { TeacherMyClasses } from './teacher-my-classes';
 
@@ -19,6 +21,7 @@ export default async function TeacherDashboardPage() {
   const locale = await getLocale();
   const t = await getTranslations('teacher.dashboard');
 
+  const viewerTimezone = user.timezone ?? 'UTC';
   const [classes, nextSession, kpis, needsAttention] = await Promise.all([
     getTeacherDashboardClasses(user.id),
     getTeacherNextSession(user.id),
@@ -33,6 +36,7 @@ export default async function TeacherDashboardPage() {
 
   return (
     <section className="flex-1">
+      {user.timezone === null && <SetTimezoneOnMount />}
       <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] mb-2 tracking-tight">
         {t('title')}
       </h1>
@@ -41,7 +45,11 @@ export default async function TeacherDashboardPage() {
       </p>
 
       {/* 1. My Classes */}
-      <TeacherMyClasses classes={classes} />
+      <TeacherMyClasses
+        classes={classes}
+        viewerTimezone={viewerTimezone}
+        nextSessionRef={nextSession ? { classId: nextSession.classId, startsAt: nextSession.startsAt } : null}
+      />
 
       {/* 2. Next Session */}
       <Card
@@ -68,7 +76,12 @@ export default async function TeacherDashboardPage() {
                   {nextSession.title ?? nextSession.className}
                 </Link>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {new Date(nextSession.startsAt).toLocaleString()}
+                  <FormattedDateTime
+                    date={nextSession.startsAt}
+                    serverFallback={viewerTimezone}
+                    dateOptions={{ weekday: 'short', month: 'short', day: 'numeric' }}
+                    timeOptions={{ hour: 'numeric', minute: '2-digit' }}
+                  />
                 </p>
               </div>
               {nextSession.meetingUrl ? (

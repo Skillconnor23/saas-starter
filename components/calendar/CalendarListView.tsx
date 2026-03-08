@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import type { Occurrence } from '@/lib/schedule';
+import { useViewerTimezone } from '@/lib/hooks/use-viewer-timezone';
 import { Button } from '@/components/ui/button';
 import { Video } from 'lucide-react';
 
@@ -11,12 +14,14 @@ type Props = {
   emptyMessage?: string;
 };
 
-function formatDateKey(d: Date, tz: string): string {
-  return d.toLocaleDateString('en-CA', { timeZone: tz });
+function formatDateKey(d: Date | string, tz: string): string {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  return date.toLocaleDateString('en-CA', { timeZone: tz });
 }
 
-function formatTime(d: Date, tz: string): string {
-  return d.toLocaleTimeString(undefined, {
+function formatTime(d: Date | string, tz: string): string {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  return date.toLocaleTimeString(undefined, {
     timeZone: tz,
     hour: 'numeric',
     minute: '2-digit',
@@ -24,8 +29,9 @@ function formatTime(d: Date, tz: string): string {
   });
 }
 
-function formatDateHeading(d: Date, tz: string): string {
-  return d.toLocaleDateString(undefined, {
+function formatDateHeading(d: Date | string, tz: string): string {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  return date.toLocaleDateString(undefined, {
     timeZone: tz,
     weekday: 'long',
     year: 'numeric',
@@ -40,7 +46,7 @@ export function CalendarListView({
   daysLabel = 'Upcoming',
   emptyMessage = 'No classes scheduled in this range.',
 }: Props) {
-  const tz = viewerTimezone || 'UTC';
+  const tz = useViewerTimezone(viewerTimezone || 'UTC');
   const byDate = new Map<string, Occurrence[]>();
   for (const o of occurrences) {
     const key = formatDateKey(o.startsAt, tz);
@@ -72,7 +78,7 @@ export function CalendarListView({
             <ul className="space-y-2">
               {items.map((o) => (
                 <li
-                  key={`${o.classId}-${o.startsAt.toISOString()}`}
+                  key={`${o.classId}-${typeof o.startsAt === 'string' ? o.startsAt : o.startsAt.toISOString()}`}
                   className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                 >
                   <span className="text-sm font-medium tabular-nums">

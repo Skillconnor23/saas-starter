@@ -27,6 +27,7 @@ import {
 } from '@/lib/db/queries/education';
 import { generateJoinCode } from '@/lib/education/join-code';
 import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import type { PlatformRole } from '@/lib/db/schema';
 
 const createClassSchema = z.object({
@@ -430,7 +431,7 @@ const joinClassByCodeSchema = z.object({
 export async function joinClassByCodeAction(_prev: unknown, formData: FormData) {
   const user = await requirePermission('classes:read');
   if ((user.platformRole as PlatformRole) !== 'student') {
-    redirect('/dashboard');
+    await redirectWithLocale('/dashboard');
   }
   const parsed = joinClassByCodeSchema.safeParse({
     code: formData.get('code'),
@@ -450,7 +451,8 @@ export async function joinClassByCodeAction(_prev: unknown, formData: FormData) 
     return { error: 'You are already enrolled in this class.' };
   }
   await dbEnrollStudent({ classId: eduClass.id, studentUserId: user.id });
-  redirect('/dashboard/student?joined=1');
+  await redirectWithLocale('/dashboard/student?joined=1');
+  return {}; // unreachable; redirect throws
 }
 
 const toggleJoinCodeSchema = z.object({

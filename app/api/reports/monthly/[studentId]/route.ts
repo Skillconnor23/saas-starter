@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { chromium } from 'playwright';
+import { getUser } from '@/lib/db/queries';
 import { canAccessStudentReport, getMonthlyReportData } from '@/lib/reports/monthly-progress-report';
 import { renderMonthlyReportHtml } from '@/lib/reports/monthly-progress-html';
 import { getMonthlyReportLabels, formatMonthLabelForLocale } from '@/lib/reports/report-labels';
@@ -64,6 +65,11 @@ export async function GET(
   const locale: Locale = isLocale(localeParam) ? localeParam : 'en';
   log('1. params ok', `month=${monthKey} locale=${locale}`);
 
+  const user = await getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   let permission;
   try {
     permission = await canAccessStudentReport(studentId);
@@ -79,7 +85,10 @@ export async function GET(
     );
   }
   if (!permission.allowed) {
-    return NextResponse.json({ error: permission.error }, { status: 403 });
+    return NextResponse.json(
+      { error: permission.error ?? 'Forbidden' },
+      { status: 403 }
+    );
   }
 
   let data;

@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
-import { getUser } from '@/lib/db/queries';
+import { requireAuth } from '@/lib/auth/user';
 import { getQuizResultsForStudentProfile } from '@/lib/db/queries/quizzes';
 import { ProfileCard } from './profile-card';
 import { StudentAssessmentsSection } from '../students/StudentAssessmentsSection';
@@ -15,9 +14,7 @@ function formatRole(role: string | null): string {
 }
 
 export default async function ProfilePage() {
-  const user = await getUser();
-  if (!user) redirect('/sign-in');
-
+  const user = await requireAuth();
   const isStudent = user.platformRole === 'student';
   const assessments = isStudent ? await getQuizResultsForStudentProfile(user.id) : null;
   const locale = await getLocale();

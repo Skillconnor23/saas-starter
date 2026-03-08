@@ -11,8 +11,10 @@ import {
 } from '@/components/ui/card';
 import { customerPortalAction } from '@/lib/payments/actions';
 import { useActionState } from 'react';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
+import type { SafeUserDto } from '@/lib/dto/safe-user';
+import { TeamDataWithMembers } from '@/lib/db/schema';
 import { removeTeamMember, inviteTeamMember } from '@/app/(login)/actions';
+import { userFetcher } from '@/lib/fetchers';
 import useSWR from 'swr';
 import { Suspense } from 'react';
 import { Input } from '@/components/ui/input';
@@ -100,7 +102,7 @@ function TeamMembers() {
     FormData
   >(removeTeamMember, {});
 
-  const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
+  const getUserDisplayName = (user: { id: number; name: string | null; email: string }) => {
     return user.name || user.email || 'Unknown User';
   };
 
@@ -131,7 +133,7 @@ function TeamMembers() {
                   <AvatarFallback>
                     {getUserDisplayName(member.user)
                       .split(' ')
-                      .map((n) => n[0])
+                      .map((n: string) => n[0])
                       .join('')}
                   </AvatarFallback>
                 </Avatar>
@@ -179,7 +181,7 @@ function InviteTeamMemberSkeleton() {
 }
 
 function InviteTeamMember() {
-  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: user } = useSWR<SafeUserDto | null>('/api/user', fetcher);
   const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
   const isOwner =
     teamData?.teamMembers?.some(

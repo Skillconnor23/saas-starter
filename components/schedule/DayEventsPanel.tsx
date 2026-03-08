@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useViewerTimezone } from "@/lib/hooks/use-viewer-timezone";
 import type { CalendarEventClient } from "@/lib/schedule/calendar-events";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock3, Video, BookOpen } from "lucide-react";
@@ -20,11 +21,11 @@ function parseDate(value: string): Date {
   return new Date(value);
 }
 
-function formatTimeRange(ev: CalendarEventClient, viewerTimezone: string): string {
+function formatTimeRange(ev: CalendarEventClient, tz: string): string {
   const start = parseDate(ev.startsAt);
   const end = parseDate(ev.endsAt);
   const opts: Intl.DateTimeFormatOptions = {
-    timeZone: viewerTimezone || "UTC",
+    timeZone: tz || "UTC",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
@@ -55,6 +56,7 @@ export function DayEventsPanel({
   onOpenChange,
 }: Props) {
   const t = useTranslations("schedule");
+  const tz = useViewerTimezone(viewerTimezone || "UTC");
   if (!open) return null;
 
   const handleBackdropClick = () => onOpenChange(false);
@@ -99,7 +101,7 @@ export function DayEventsPanel({
                     </div>
                     <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Clock3 className="h-3.5 w-3.5" />
-                      <span>{formatTimeRange(ev, viewerTimezone)}</span>
+                      <span>{formatTimeRange(ev, tz)}</span>
                     </p>
 <p className="mt-0.5 text-xs text-muted-foreground">
                     {t("classTimezone", { tz: formatClassTimezone(ev) })}
@@ -164,7 +166,7 @@ export function DayEventsPanel({
                 </p>
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock3 className="h-3.5 w-3.5" />
-                  <span>{formatTimeRange(ev, viewerTimezone)}</span>
+                  <span>{formatTimeRange(ev, tz)}</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   {t("classTimezone", { tz: formatClassTimezone(ev) })}

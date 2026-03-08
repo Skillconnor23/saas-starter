@@ -566,6 +566,7 @@
     "acceptInvite": {
       "invalidTitle": "Урилга буруу",
       "invalidOrMissing": "Урилгын холбоос буруу эсвэл байхгүй байна.",
+      "tooManyRequests": "Олон хүсэлт илгээсэн байна. Дахин оролдоно уу.",
       "backToSignIn": "Нэвтрэх руу буцах"
     },
     "forgotPassword": {

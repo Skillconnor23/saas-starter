@@ -1,7 +1,58 @@
 /**
- * Timezone utilities for schedule generation.
+ * Timezone utilities for schedule generation and display.
  * Uses Intl to avoid external date libs.
+ *
+ * Core model:
+ * - Classes have scheduleTimezone (source, e.g. Asia/Ulaanbaatar)
+ * - Occurrences have startsAt/endsAt in UTC
+ * - Display times should use viewer timezone (user.timezone or browser)
  */
+
+/** Date key (YYYY-MM-DD) in the given timezone for grouping/sorting. */
+export function getDateKeyInTz(date: Date | string, tz: string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-CA', { timeZone: tz });
+}
+
+/** Format date/time for display in the viewer's timezone. */
+export function formatInTimezone(
+  date: Date | string,
+  tz: string,
+  options: Intl.DateTimeFormatOptions = {}
+): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleString(undefined, { timeZone: tz, ...options });
+}
+
+const DEFAULT_TIME_OPTS: Intl.DateTimeFormatOptions = {
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+};
+
+/**
+ * Convert HH:mm in a source timezone to viewer timezone for display.
+ * @param referenceDate - Optional. Use the actual occurrence/session date for DST-correct conversion.
+ *   When omitted, falls back to "today" in source TZ (can be wrong around DST boundaries).
+ */
+export function formatScheduleTimeInViewerTz(
+  hhmm: string | null,
+  sourceTz: string,
+  viewerTz: string,
+  referenceDate?: Date | string,
+  options: Intl.DateTimeFormatOptions = DEFAULT_TIME_OPTS
+): string {
+  if (!hhmm?.trim()) return '—';
+  const [hh, mm] = hhmm.trim().split(':').map(Number);
+  const hour = hh ?? 0;
+  const minute = mm ?? 0;
+  const ref = referenceDate
+    ? (typeof referenceDate === 'string' ? new Date(referenceDate) : referenceDate)
+    : new Date();
+  const parts = getLocalDatePartsInTz(ref, sourceTz);
+  const utcDate = localTimeInZoneToUTC(parts.year, parts.month, parts.day, hour, minute, sourceTz);
+  return utcDate.toLocaleTimeString(undefined, { ...options, timeZone: viewerTz });
+}
 
 /** Given local date/time in IANA timezone, return the UTC Date. */
 export function localTimeInZoneToUTC(

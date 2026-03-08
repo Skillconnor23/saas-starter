@@ -4,23 +4,26 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { users } from '@/lib/db/schema';
 import { requireAuth } from '@/lib/auth/user';
-import { platformRoleSchema } from '@/lib/validations/platform-role';
-import { redirect } from 'next/navigation';
+import { getAllowedSelfServeRole } from '@/lib/auth/platform-role';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 
-export async function setPlatformRole(prevState: { error?: string }, formData: FormData) {
+/**
+ * Self-service onboarding: assigns the ONLY allowed role (student).
+ * Client input is NEVER trusted for role. Elevated roles require invitation.
+ */
+export async function setPlatformRole(
+  prevState: { error?: string },
+  _formData: FormData
+): Promise<{ error?: string }> {
   const user = await requireAuth();
 
-  const result = platformRoleSchema.safeParse(formData.get('platformRole'));
-  if (!result.success) {
-    return { error: 'Please select a valid role.' };
-  }
-
-  const role = result.data;
+  const role = getAllowedSelfServeRole();
 
   await db
     .update(users)
     .set({ platformRole: role, updatedAt: new Date() })
     .where(eq(users.id, user.id));
 
-  redirect('/dashboard');
+  await redirectWithLocale('/dashboard');
+  return {};
 }

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
+import { cookies, headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import { validatePlatformInvite, consumePlatformInvite } from '@/lib/auth/invites';
 import { eq } from 'drizzle-orm';
@@ -28,6 +29,19 @@ export default async function AcceptInvitePage({
   const tErrors = await getTranslations('errors.auth');
   const params = await searchParams;
   const token = params.token;
+
+  const hdrs = await headers();
+  const ip = (await import('@/lib/auth/rate-limit')).getClientIp(hdrs);
+  const { checkRateLimit } = await import('@/lib/auth/rate-limit');
+  if (!checkRateLimit('accept-invite-ip', ip)) {
+    return (
+      <InviteError
+        title={tAccept('invalidTitle')}
+        message={tAccept('tooManyRequests')}
+        backToSignIn={tAccept('backToSignIn')}
+      />
+    );
+  }
 
   if (!token?.trim()) {
     return (
@@ -82,7 +96,7 @@ export default async function AcceptInvitePage({
           schoolId: result.schoolId,
         },
       });
-      redirect('/dashboard');
+      await redirectWithLocale('/dashboard');
     }
   }
 
@@ -95,7 +109,7 @@ export default async function AcceptInvitePage({
     maxAge: PLATFORM_INVITE_COOKIE_MAX_AGE,
   });
 
-  redirect(`/sign-up?email=${encodeURIComponent(result.email)}`);
+  await redirectWithLocale(`/sign-up?email=${encodeURIComponent(result.email)}`);
 }
 
 async function applyPlatformRole(

@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/db/queries';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { createAuditLog } from '@/lib/auth/audit';
 import type { PlatformRole } from '@/lib/db/schema';
 
@@ -71,7 +71,7 @@ export async function requirePermission(
 ): Promise<NonNullable<Awaited<ReturnType<typeof getUser>>>> {
   const user = await getUser();
   if (!user) {
-    redirect('/sign-in');
+    await redirectWithLocale('/sign-in');
   }
   const permissions = Array.isArray(permissionOrPermissions)
     ? permissionOrPermissions
@@ -80,10 +80,10 @@ export async function requirePermission(
   if (!allowed) {
     createAuditLog({
       action: 'failed_privileged_access',
-      userId: user.id,
-      metadata: { required: permissions, hadRole: user.platformRole },
+      userId: user!.id,
+      metadata: { required: permissions, hadRole: user!.platformRole },
     }).catch(() => {});
-    redirect('/dashboard');
+    await redirectWithLocale('/dashboard');
   }
-  return user;
+  return user!;
 }

@@ -592,6 +592,7 @@
     "acceptInvite": {
       "invalidTitle": "Invite invalid",
       "invalidOrMissing": "Invalid or missing invite link.",
+      "tooManyRequests": "Too many requests. Please try again later.",
       "backToSignIn": "Back to sign in"
     },
     "forgotPassword": {

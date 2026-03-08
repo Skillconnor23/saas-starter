@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { cookies } from 'next/headers';
 
 const CLASS_INVITE_COOKIE_NAME = 'class_invite_token';
@@ -40,14 +41,14 @@ export async function setClassInviteCookieAndRedirectToSignUp(
   ...args: [unknown, unknown?]
 ): Promise<never> {
   const formData = getFormDataFromArgs(args);
-  if (!formData) redirect('/sign-in');
-  const token = formData.get('token');
-  const path = formData.get('redirectPath');
+  if (!formData) await redirectWithLocale('/sign-in');
+  const token = formData!.get('token');
+  const path = formData!.get('redirectPath');
   if (typeof token !== 'string' || !token.trim() || typeof path !== 'string' || !path.trim()) {
-    redirect('/sign-in');
+    await redirectWithLocale('/sign-in');
   }
-  await setClassInviteCookie(token.trim());
-  redirect(path);
+  await setClassInviteCookie((token as string).trim());
+  redirect(path as string);
 }
 
 /**
@@ -57,16 +58,17 @@ export async function setClassInviteCookieAndRedirectToSignIn(
   ...args: [unknown, unknown?]
 ): Promise<never> {
   const formData = getFormDataFromArgs(args);
-  if (!formData) redirect('/sign-in');
-  const token = formData.get('token');
-  const path = formData.get('redirectPath');
+  if (!formData) await redirectWithLocale('/sign-in');
+  const token = formData!.get('token');
+  const path = formData!.get('redirectPath');
   if (typeof token !== 'string' || !token.trim() || typeof path !== 'string' || !path.trim()) {
-    redirect('/sign-in');
+    await redirectWithLocale('/sign-in');
   }
-  await setClassInviteCookie(token.trim());
-  redirect(path);
+  await setClassInviteCookie((token as string).trim());
+  redirect(path as string);
 }
 import { requirePermission, can } from '@/lib/auth/permissions';
+import { checkRateLimit } from '@/lib/auth/rate-limit';
 import { getCurrentUserOrNull } from '@/lib/auth/user';
 import type { PlatformRole } from '@/lib/db/schema';
 import {
@@ -85,11 +87,12 @@ import {
 } from '@/lib/db/queries/education';
 
 /** Admin/school_admin or teacher assigned to this class can manage invite links. */
-async function requireCanManageClassInvite(classId: string) {
+async function requireCanManageClassInvite(classId: string): Promise<NonNullable<Awaited<ReturnType<typeof requirePermission>>>> {
   const user = await requirePermission('classes:read');
   if (can(user, 'classes:write')) return user;
   if ((user.platformRole as PlatformRole) === 'teacher' && await hasTeacherAssignment(classId, user.id)) return user;
-  redirect('/dashboard');
+  await redirectWithLocale('/dashboard');
+  return user; // unreachable; redirect throws
 }
 
 /** Get invite by token (for public join page). Returns null if invalid. */
@@ -130,7 +133,6 @@ export async function joinClassWithInviteFormAction(
 /**
  * Join the current user to a class using an invite token.
  * User must have platformRole = student. Idempotent if already enrolled.
- * TODO: Add rate limiting (e.g. per IP) if middleware utilities are added.
  */
 export async function joinClassWithInviteAction(
   token: string
@@ -138,6 +140,10 @@ export async function joinClassWithInviteAction(
   const user = await getCurrentUserOrNull();
   if (!user) {
     return { success: false, error: 'Not authenticated' };
+  }
+
+  if (!checkRateLimit('join-class-invite', String(user.id))) {
+    return { success: false, error: 'Too many attempts. Please try again later.' };
   }
 
   const role = user.platformRole as PlatformRole | null;
@@ -186,6 +192,9 @@ export async function getActiveInviteForClassAction(classId: string) {
 /** Create or get active invite link for a class. Only admin/teacher. */
 export async function createOrGetClassInviteAction(classId: string) {
   const user = await requireCanManageClassInvite(classId);
+  if (!checkRateLimit('create-class-invite', String(user.id))) {
+    await redirectWithLocale('/dashboard');
+  }
   const existing = await getActiveInviteForClass(classId);
   if (existing) {
     return { token: existing.token };
@@ -214,8 +223,11 @@ export async function createOrGetClassInviteFormAction(
 /** Regenerate invite link (creates new token, deactivates old). */
 export async function regenerateClassInviteAction(classId: string) {
   const user = await requireCanManageClassInvite(classId);
+  if (!checkRateLimit('create-class-invite', String(user.id))) {
+    await redirectWithLocale('/dashboard');
+  }
   await regenerateClassInvite(classId, user.id);
-  redirect(`/dashboard/admin/classes/${classId}`);
+  await redirectWithLocale(`/dashboard/admin/classes/${classId}`);
 }
 
 /** Form action for regenerate button. */

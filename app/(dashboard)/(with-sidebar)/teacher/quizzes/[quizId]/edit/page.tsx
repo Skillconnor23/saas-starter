@@ -31,10 +31,12 @@ export default async function EditQuizPage({ params }: Props) {
     getClassesForTeacherWithDetails(user.id),
   ]);
   if (!quiz || quiz.createdByUserId !== user.id) {
-    redirect('/teacher/quizzes');
+    const { redirectWithLocale } = await import('@/lib/i18n/redirect');
+    await redirectWithLocale('/teacher/quizzes');
   }
 
-  const canPublish = quiz.questions.length >= 1;
+  const q = quiz!;
+  const canPublish = q.questions.length >= 1;
 
   return (
     <section className="flex-1">
@@ -51,10 +53,10 @@ export default async function EditQuizPage({ params }: Props) {
             {t('editQuizTitle')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {quiz.title} · {quiz.status === 'PUBLISHED' ? t('publishedOrDraft') : t('publishedOrDraftDraft')}
+            {q.title} · {q.status === 'PUBLISHED' ? t('publishedOrDraft') : t('publishedOrDraftDraft')}
           </p>
         </div>
-        {quiz.status !== 'PUBLISHED' && (
+        {q.status !== 'PUBLISHED' && (
           <form
             action={async () => {
               'use server';
@@ -91,7 +93,7 @@ export default async function EditQuizPage({ params }: Props) {
                 </label>
                 <input
                   name="title"
-                  defaultValue={quiz.title}
+                  defaultValue={q.title}
                   className="w-full rounded-full border border-gray-200 px-3 py-2 text-sm"
                   required
                 />
@@ -103,7 +105,7 @@ export default async function EditQuizPage({ params }: Props) {
                 </label>
                 <textarea
                   name="description"
-                  defaultValue={quiz.description ?? ''}
+                  defaultValue={q.description ?? ''}
                   className="w-full rounded-2xl border border-gray-200 px-3 py-2 text-sm"
                   rows={3}
                 />
@@ -146,18 +148,18 @@ export default async function EditQuizPage({ params }: Props) {
           <CardHeader>
             <CardTitle>{t('questions')}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {quiz.questions.length === 0
+              {q.questions.length === 0
                 ? t('addOneToPublish')
-                : t('questionsCount', { count: quiz.questions.length })}
+                : t('questionsCount', { count: q.questions.length })}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {quiz.questions.length === 0 ? (
+            {q.questions.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4">
                 {t('noQuestionsYet')}
               </p>
             ) : (
-              quiz.questions.map((q, index) => {
+              q.questions.map((q, index) => {
                 const choices = Array.isArray(q.choices)
                   ? (q.choices as { label: string; value: string }[])
                   : [];

@@ -9,6 +9,7 @@
 @variant dark (&:is(.dark *));
 
 @theme {
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
 
@@ -77,7 +78,7 @@
 
 @layer utilities {
   body {
-    font-family: "Nunito", Arial, Helvetica, sans-serif;
+    font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
   }
 }
 

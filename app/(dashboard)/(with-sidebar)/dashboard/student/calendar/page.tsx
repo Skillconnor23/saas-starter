@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { requireRole } from '@/lib/auth/user';
 import { getOccurrencesForUser } from '@/lib/schedule';
 import { CalendarListView } from '@/components/calendar/CalendarListView';
+import { ViewerTimezoneLabel } from '@/components/display/ViewerTimezoneLabel';
 import { SetTimezoneOnMount } from '@/components/calendar/SetTimezoneOnMount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
@@ -40,7 +41,10 @@ export default async function StudentCalendarPage({
           <CardHeader>
             <CardTitle>Upcoming classes</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Next {days} days · your timezone: {viewerTimezone}
+              <ViewerTimezoneLabel
+                serverFallback={viewerTimezone}
+                template={`Next ${days} days · your timezone: {tz}`}
+              />
             </p>
           </CardHeader>
           <CardContent>

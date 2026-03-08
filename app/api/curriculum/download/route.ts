@@ -1,6 +1,6 @@
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { NextResponse } from 'next/server';
-import { getUser } from '@/lib/db/queries';
+import { requireApiRole } from '@/lib/auth/api-auth';
 import { getR2, getR2Bucket } from '@/lib/r2';
 import { db } from '@/lib/db/drizzle';
 import { curriculumFiles } from '@/lib/db/schema';
@@ -9,10 +9,9 @@ import { teacherAssignedToClass } from '@/lib/db/queries/education';
 
 export async function GET(req: Request) {
   try {
-    const user = await getUser();
-    if (!user || user.platformRole !== 'teacher') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const auth = await requireApiRole(['teacher']);
+    if (auth.response) return auth.response;
+    const user = auth.user;
 
     const { searchParams } = new URL(req.url);
     const fileId = searchParams.get('fileId');

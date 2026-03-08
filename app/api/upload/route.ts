@@ -1,66 +1,69 @@
+import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getR2, getR2Bucket, getR2PublicBaseUrl } from "@/lib/r2";
-import { getUser } from "@/lib/db/queries";
-
-/** Allowed MIME types: images and PDFs only. */
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-] as const;
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+import { requireApiAuth } from "@/lib/auth/api-auth";
+import { checkRateLimit } from "@/lib/auth/rate-limit";
+import {
+  UPLOAD_API_MAX_BYTES,
+  UPLOAD_API_ALLOWED,
+} from "@/lib/upload/constants";
+import { validateUpload, sanitizeStorageFilename } from "@/lib/upload/validate";
 
 export async function POST(req: Request) {
   try {
-    const user = await getUser();
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: "Not signed in" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+    const auth = await requireApiAuth();
+    if (auth.response) return auth.response;
+
+    if (!checkRateLimit("upload", String(auth.user.id))) {
+      return NextResponse.json(
+        { error: "Too many uploads. Please try again later." },
+        { status: 429, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
-    if (!file || !file.size) {
-      return new Response(
-        JSON.stringify({ error: "No file uploaded" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return new Response(
-        JSON.stringify({ error: "File too large (max 10 MB)" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
-      return new Response(
-        JSON.stringify({
-          error: "Invalid file type. Allowed: images (PNG, JPG) and PDF only.",
-        }),
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json(
+        { error: "No file uploaded" },
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const key = `uploads/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    const result = validateUpload(
+      buffer,
+      file.type || "application/octet-stream",
+      file.name || "",
+      UPLOAD_API_ALLOWED,
+      UPLOAD_API_MAX_BYTES
+    );
+
+    if (!result.ok) {
+      const status = result.error.includes("Invalid") || result.error.includes("does not match")
+        ? 415
+        : 400;
+      return NextResponse.json(
+        { error: result.error },
+        { status, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const safeName = sanitizeStorageFilename(file.name || "file");
+    const key = `uploads/${Date.now()}-${safeName}`;
     const baseUrl = getR2PublicBaseUrl();
     const publicUrl = `${baseUrl}/${key}`;
     const bucket = getR2Bucket();
     const client = getR2();
 
+    const contentType = UPLOAD_API_ALLOWED.find((e) => e.mime === file.type)?.mime ?? file.type;
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
         Key: key,
         Body: buffer,
-        ContentType: file.type,
+        ContentType: contentType,
       })
     );
 

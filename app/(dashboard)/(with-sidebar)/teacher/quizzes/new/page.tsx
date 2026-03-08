@@ -19,7 +19,8 @@ export default async function NewQuizPage({ searchParams }: Props) {
   const preselectedIds = queryClassId && validClassIds.has(queryClassId) ? [queryClassId] : [];
 
   if (classes.length === 0) {
-    redirect('/dashboard/teacher');
+    const { redirectWithLocale } = await import('@/lib/i18n/redirect');
+    await redirectWithLocale('/dashboard/teacher');
   }
 
   return (

@@ -14,14 +14,13 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/app/(login)/actions';
-import { User } from '@/lib/db/schema';
+import type { SafeUserDto } from '@/lib/dto/safe-user';
 import { NotificationsBell } from '@/components/notifications/NotificationsBell';
 import { STUDENT_TRIAL_HREF, SCHOOLS_DEMO_HREF } from '@/lib/routes';
 import useSWR, { mutate } from 'swr';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { locales, type Locale } from '@/lib/i18n/config';
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { userFetcher } from '@/lib/fetchers';
 
 function stripLocaleFromPath(pathname: string | null): string {
   if (!pathname) return '/';
@@ -87,7 +86,7 @@ function UserMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const pathWithoutLocale = stripLocaleFromPath(pathname);
-  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: user } = useSWR<SafeUserDto | null>('/api/user', userFetcher);
   const router = useRouter();
 
   useEffect(() => {
@@ -182,7 +181,7 @@ export function MarketingHeader({
   const router = useRouter();
   const pathWithoutLocale = useMemo(() => stripLocaleFromPath(pathname), [pathname]);
   const tNav = useTranslations('nav');
-  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: user } = useSWR<SafeUserDto | null>('/api/user', userFetcher);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (

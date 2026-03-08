@@ -1,29 +1,9 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ClientScheduleSummary } from './ClientScheduleSummary';
 import { Button } from '@/components/ui/button';
 import { BookOpen, UsersRound } from 'lucide-react';
-
-const DAY_DISPLAY: Record<string, string> = {
-  sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed',
-  thu: 'Thu', fri: 'Fri', sat: 'Sat',
-};
-
-function formatScheduleSummary(c: {
-  scheduleDays: unknown;
-  scheduleStartTime: string | null;
-  geckoLevel: string | null;
-}): string {
-  const days = Array.isArray(c.scheduleDays)
-    ? (c.scheduleDays as string[]).map((d) =>
-        DAY_DISPLAY[d?.toLowerCase?.().slice(0, 3)] ?? d
-      ).filter(Boolean)
-    : [];
-  const time = c.scheduleStartTime ?? '—';
-  const level = c.geckoLevel ?? '';
-  const parts = [days.length ? days.join(' & ') : null, time, level].filter(Boolean);
-  return parts.join(' · ') || '—';
-}
 
 type ClassWithDetails = {
   id: string;
@@ -40,6 +20,9 @@ type ClassWithDetails = {
 
 type Props = {
   classes: ClassWithDetails[];
+  viewerTimezone?: string;
+  /** When the next session is for this class, use its date for DST-correct time display */
+  nextSessionRef?: { classId: string; startsAt: Date | string } | null;
 };
 
 function ScoreRing({
@@ -102,7 +85,7 @@ function ScoreRing({
   );
 }
 
-export async function TeacherMyClasses({ classes }: Props) {
+export async function TeacherMyClasses({ classes, viewerTimezone = 'UTC', nextSessionRef = null }: Props) {
   const t = await getTranslations('teacher.myClasses');
   return (
     <Card className="mb-8">
@@ -145,7 +128,18 @@ export async function TeacherMyClasses({ classes }: Props) {
                     </span>
                   )}
                   <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                    {formatScheduleSummary(c)}
+                    <ClientScheduleSummary
+                      classData={{
+                        scheduleDays: c.scheduleDays,
+                        scheduleStartTime: c.scheduleStartTime,
+                        scheduleTimezone: c.scheduleTimezone,
+                        geckoLevel: c.geckoLevel,
+                      }}
+                      serverTimezoneFallback={viewerTimezone || 'UTC'}
+                      referenceDate={
+                        nextSessionRef?.classId === c.id ? nextSessionRef.startsAt : undefined
+                      }
+                    />
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {t('studentsCount', { count: c.studentCount })}

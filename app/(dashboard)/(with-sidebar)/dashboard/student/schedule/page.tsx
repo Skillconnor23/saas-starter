@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth/user';
 import { getCalendarEventsForStudent } from '@/lib/schedule/calendar-events';
 import { SetTimezoneOnMount } from '@/components/calendar/SetTimezoneOnMount';
 import { CalendarDays } from 'lucide-react';
+import { ViewerTimezoneLabel } from '@/components/display/ViewerTimezoneLabel';
 import { StudentScheduleClient } from './StudentScheduleClient';
 
 export default async function StudentSchedulePage() {
@@ -49,7 +50,10 @@ export default async function StudentSchedulePage() {
               </h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              {t('yourTimezone', { tz: viewerTimezone })}
+              <ViewerTimezoneLabel
+                serverFallback={viewerTimezone}
+                template={t('yourTimezone', { tz: '{tz}' })}
+              />
             </p>
           </header>
 

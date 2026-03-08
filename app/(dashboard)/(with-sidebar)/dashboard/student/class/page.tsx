@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { requireRole } from '@/lib/auth/user';
 import { getPrimaryClassForStudent } from '@/lib/db/queries/education';
 
@@ -10,8 +10,8 @@ export default async function StudentClassPage() {
   const primaryClass = await getPrimaryClassForStudent(user.id);
 
   if (!primaryClass) {
-    redirect('/dashboard/student/join');
+    await redirectWithLocale('/dashboard/student/join');
   }
 
-  redirect(`/classroom/${primaryClass.id}`);
+  await redirectWithLocale(`/classroom/${primaryClass!.id}`);
 }

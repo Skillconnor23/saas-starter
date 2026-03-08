@@ -1,7 +1,9 @@
 'use server';
 
 import { z } from 'zod';
+import { headers } from 'next/headers';
 import { resetPasswordWithToken } from '@/lib/auth/password-reset';
+import { checkRateLimit, getClientIp } from '@/lib/auth/rate-limit';
 
 const resetPasswordSchema = z
   .object({
@@ -23,6 +25,12 @@ export async function resetPasswordAction(
     password: formData.get('password')?.toString(),
     confirmPassword: formData.get('confirmPassword')?.toString(),
   });
+
+  const hdrs = await headers();
+  const ip = getClientIp(hdrs);
+  if (!checkRateLimit('reset-password-ip', ip)) {
+    return { success: false, error: 'invalid_or_expired' };
+  }
 
   if (!parsed.success) {
     const err = parsed.error.flatten();

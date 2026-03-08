@@ -11,8 +11,8 @@ import {
   uploadCurriculumFileAction,
   deleteCurriculumFileAction,
   getCurriculumFileDownloadUrl,
-  CURRICULUM_MAX_FILE_SIZE,
 } from '@/lib/actions/curriculum';
+import { CURRICULUM_MAX_FILE_SIZE } from '@/lib/curriculum/constants';
 import { Download, Trash2, Upload } from 'lucide-react';
 import type { CurriculumFileRow } from '@/lib/db/queries/curriculum';
 

@@ -10,6 +10,7 @@ import {
 } from '@/lib/db/queries/student-dashboard';
 import { getStudentMonthSummary } from '@/lib/db/queries/attendance';
 import { StudentAttendanceMonthCard } from '@/components/attendance/AttendanceMonthSummaryCard';
+import { FormattedDateTimeRange } from '@/components/display/FormattedDateTimeRange';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -78,6 +79,7 @@ export default async function StudentDashboardPage({
   const tCommon = await getTranslations('common');
   const locale = await getLocale();
   const user = await requireRole(['student']);
+  const viewerTimezone = user.timezone ?? 'UTC';
   const params = await searchParams;
 
   function withLocalePrefix(path: string): string {
@@ -203,18 +205,11 @@ export default async function StudentDashboardPage({
                     </p>
                     <p className="text-sm text-white/90 mt-0.5">
                       {data.nextSessions[0].className} ·{' '}
-                      {new Date(data.nextSessions[0].session.startsAt).toLocaleString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}{' '}
-                      –{' '}
-                      {new Date(data.nextSessions[0].session.endsAt).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
+                      <FormattedDateTimeRange
+                        start={data.nextSessions[0].session.startsAt}
+                        end={data.nextSessions[0].session.endsAt}
+                        serverFallback={viewerTimezone}
+                      />
                     </p>
                   </>
                 )}

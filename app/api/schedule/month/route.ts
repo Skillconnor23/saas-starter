@@ -1,20 +1,23 @@
 import { NextResponse } from 'next/server';
-import { requireRole } from '@/lib/auth/user';
+import { requireApiRole } from '@/lib/auth/api-auth';
 import { getCalendarEventsForStudent } from '@/lib/schedule/calendar-events';
+import { parseAndValidateDateRange } from '@/lib/api/validate-date-range';
 
 export async function GET(request: Request) {
-  const user = await requireRole(['student']);
+  const auth = await requireApiRole(['student']);
+  if (auth.response) return auth.response;
+  const user = auth.user;
+
   const { searchParams } = new URL(request.url);
   const startStr = searchParams.get('start');
   const endStr = searchParams.get('end');
 
-  if (!startStr || !endStr) {
-    return NextResponse.json({ error: 'Missing start or end' }, { status: 400 });
+  const parsed = parseAndValidateDateRange(startStr, endStr);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-
+  const { start, end } = parsed;
   const events = await getCalendarEventsForStudent(user.id, start, end);
   return NextResponse.json(
     events.map((e) => ({
@@ -24,4 +27,3 @@ export async function GET(request: Request) {
     }))
   );
 }
-

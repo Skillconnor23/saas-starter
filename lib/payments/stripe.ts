@@ -24,7 +24,8 @@ export async function createCheckoutSession({
   const user = userId ? { id: userId } : await getUser();
 
   if (!team || !user) {
-    redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
+    const { redirectWithLocale } = await import('@/lib/i18n/redirect');
+    await redirectWithLocale(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -38,8 +39,8 @@ export async function createCheckoutSession({
     mode: 'subscription',
     success_url: `${getBaseUrl()}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${getBaseUrl()}/pricing`,
-    customer: team.stripeCustomerId || undefined,
-    client_reference_id: user.id.toString(),
+    customer: team!.stripeCustomerId || undefined,
+    client_reference_id: user!.id.toString(),
     allow_promotion_codes: true,
     subscription_data: {
       trial_period_days: 14
@@ -51,7 +52,8 @@ export async function createCheckoutSession({
 
 export async function createCustomerPortalSession(team: Team) {
   if (!team.stripeCustomerId || !team.stripeProductId) {
-    redirect('/pricing');
+    const { redirectWithLocale } = await import('@/lib/i18n/redirect');
+    await redirectWithLocale('/pricing');
   }
 
   let configuration: Stripe.BillingPortal.Configuration;
@@ -60,7 +62,7 @@ export async function createCustomerPortalSession(team: Team) {
   if (configurations.data.length > 0) {
     configuration = configurations.data[0];
   } else {
-    const product = await stripe.products.retrieve(team.stripeProductId);
+    const product = await stripe.products.retrieve(team.stripeProductId!);
     if (!product.active) {
       throw new Error("Team's product is not active in Stripe");
     }
@@ -111,7 +113,7 @@ export async function createCustomerPortalSession(team: Team) {
   }
 
   return stripe.billingPortal.sessions.create({
-    customer: team.stripeCustomerId,
+    customer: team.stripeCustomerId!,
     return_url: `${getBaseUrl()}/dashboard`,
     configuration: configuration.id
   });

@@ -7,11 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { updateAccount } from '@/app/(login)/actions';
-import { User } from '@/lib/db/schema';
+import type { SafeUserDto } from '@/lib/dto/safe-user';
+import { userFetcher } from '@/lib/fetchers';
 import useSWR from 'swr';
 import { Suspense } from 'react';
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 type ActionState = {
   name?: string;
@@ -62,7 +61,7 @@ function AccountForm({
 }
 
 function AccountFormWithData({ state }: { state: ActionState }) {
-  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: user } = useSWR<SafeUserDto | null>('/api/user', userFetcher);
   return (
     <AccountForm
       state={state}

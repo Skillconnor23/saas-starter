@@ -18,6 +18,7 @@ import {
 } from '@/lib/db/schema';
 import { hashPassword } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
+import { getLocalePath, redirectWithLocale } from '@/lib/i18n/redirect';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { signIn as authSignIn, signOut as authSignOut } from '@/auth';
 import { AuthError } from 'next-auth';
@@ -42,7 +43,7 @@ import { sendVerificationEmail } from '@/lib/auth/email';
 import { createAuditLog } from '@/lib/auth/audit';
 import { consumePlatformInvite } from '@/lib/auth/invites';
 import { schoolMemberships } from '@/lib/db/schema';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { getLocale } from 'next-intl/server';
 
 async function logActivity(
@@ -70,6 +71,16 @@ const signInSchema = z.object({
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
+
+  const hdrs = await headers();
+  const ip = (await import('@/lib/auth/rate-limit')).getClientIp(hdrs);
+  const { checkRateLimit } = await import('@/lib/auth/rate-limit');
+  if (!checkRateLimit('sign-in-ip', ip)) {
+    return { error: 'invalidCredentials', email, password };
+  }
+  if (!checkRateLimit('sign-in-email', email)) {
+    return { error: 'invalidCredentials', email, password };
+  }
 
   // authSignIn(redirect: false) in server-action credentials flow may return {} on success.
   // Treat return without error as success; do NOT rely on result.ok.
@@ -255,6 +266,13 @@ const isAuthDebug = process.env.NODE_ENV !== 'production' || process.env.AUTH_DE
 export const signUp = validatedAction(signUpSchema, async (data) => {
   const { email, password, inviteId } = data;
   const emailNormalized = email.trim().toLowerCase();
+
+  const hdrs = await headers();
+  const ip = (await import('@/lib/auth/rate-limit')).getClientIp(hdrs);
+  const { checkRateLimit } = await import('@/lib/auth/rate-limit');
+  if (!checkRateLimit('sign-up-ip', ip)) {
+    return { error: 'createUserFailed', email, password };
+  }
 
   // Case-insensitive duplicate check (auth uses same lookup)
   const existingUser = await db
@@ -559,8 +577,10 @@ export const deleteAccount = validatedActionWithUser(
         );
     }
 
-    await authSignOut({ redirectTo: '/sign-in' });
-    redirect('/sign-in');
+    const signInPath = await getLocalePath('/sign-in');
+    await authSignOut({ redirectTo: signInPath });
+    await redirectWithLocale('/sign-in');
+    return {}; // unreachable; redirect throws
   }
 );
 

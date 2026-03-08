@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { requireRole } from '@/lib/auth/user';
 import {
   markReadingComplete as dbMarkReadingComplete,
@@ -35,25 +35,25 @@ export async function createReadingAction(formData: FormData): Promise<void> {
   const title = formData.get('title');
   const content = formData.get('content');
   if (typeof classId !== 'string' || !classId || typeof title !== 'string' || !title.trim() || typeof content !== 'string' || !content.trim()) {
-    redirect('/dashboard/teacher/learning-tools/readings/new?error=missing');
+    await redirectWithLocale('/dashboard/teacher/learning-tools/readings/new?error=missing');
   }
   const classes = await listClassesForTeacher(user.id);
-  if (!classes.some((c) => c.id === classId)) {
-    redirect('/dashboard/teacher/learning-tools/readings/new?error=unauthorized');
+  if (!classes.some((c) => c.id === (classId as string))) {
+    await redirectWithLocale('/dashboard/teacher/learning-tools/readings/new?error=unauthorized');
   }
   const vocabRaw = formData.get('vocabulary');
   const questionsRaw = formData.get('questions');
   const vocab = linesToArray(typeof vocabRaw === 'string' ? vocabRaw : null);
   const questions = linesToArray(typeof questionsRaw === 'string' ? questionsRaw : null);
   const reading = await dbCreateReading({
-    classId,
-    title: title.trim(),
-    content: content.trim(),
+    classId: classId as string,
+    title: (title as string).trim(),
+    content: (content as string).trim(),
     vocab,
     questions,
   });
   revalidatePath('/dashboard/teacher/learning-tools');
-  redirect(`/dashboard/teacher/learning-tools/readings/${reading.id}/edit`);
+  await redirectWithLocale(`/dashboard/teacher/learning-tools/readings/${reading.id}/edit`);
 }
 
 export async function updateReadingAction(formData: FormData): Promise<void> {
@@ -62,23 +62,23 @@ export async function updateReadingAction(formData: FormData): Promise<void> {
   const title = formData.get('title');
   const content = formData.get('content');
   if (typeof readingId !== 'string' || !readingId || typeof title !== 'string' || !title.trim() || typeof content !== 'string' || !content.trim()) {
-    redirect(`/dashboard/teacher/learning-tools/readings/${readingId}/edit?error=missing`);
+    await redirectWithLocale(`/dashboard/teacher/learning-tools/readings/${readingId}/edit?error=missing`);
   }
-  const existing = await getReadingForTeacher(readingId, user.id);
+  const existing = await getReadingForTeacher(readingId as string, user.id);
   if (!existing) {
-    redirect('/dashboard/teacher/learning-tools?error=unauthorized');
+    await redirectWithLocale('/dashboard/teacher/learning-tools?error=unauthorized');
   }
   const vocabRaw = formData.get('vocabulary');
   const questionsRaw = formData.get('questions');
   const vocab = linesToArray(typeof vocabRaw === 'string' ? vocabRaw : null);
   const questions = linesToArray(typeof questionsRaw === 'string' ? questionsRaw : null);
-  await dbUpdateReading(readingId, {
-    title: title.trim(),
-    content: content.trim(),
+  await dbUpdateReading(readingId as string, {
+    title: (title as string).trim(),
+    content: (content as string).trim(),
     vocab,
     questions,
   });
   revalidatePath('/dashboard/teacher/learning-tools');
   revalidatePath(`/dashboard/teacher/learning-tools/readings/${readingId}/edit`);
-  redirect(`/dashboard/teacher/learning-tools/readings/${readingId}/edit`);
+  await redirectWithLocale(`/dashboard/teacher/learning-tools/readings/${readingId}/edit`);
 }

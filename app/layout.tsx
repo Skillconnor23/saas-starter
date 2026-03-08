@@ -1,7 +1,8 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Nunito } from 'next/font/google';
+import localFont from 'next/font/local';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
+import { toSafeUserDto } from '@/lib/dto/safe-user';
 import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
@@ -31,9 +32,11 @@ export const viewport: Viewport = {
   maximumScale: 1
 };
 
-const nunito = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700']
+const nunito = localFont({
+  src: './fonts/Nunito-VariableFont_wght.ttf',
+  variable: '--font-nunito',
+  weight: '100 900',
+  display: 'swap',
 });
 
 export default async function RootLayout({
@@ -45,13 +48,14 @@ export default async function RootLayout({
     getUser().catch(() => null),
     getTeamForUser().catch(() => null),
   ]);
+  const safeUser = toSafeUserDto(user);
   return (
     <html lang="en" className="bg-white dark:bg-gray-950 text-black dark:text-white">
-      <body className={`min-h-[100dvh] bg-white ${nunito.className}`}>
+      <body className={`${nunito.variable} min-h-[100dvh] bg-white antialiased font-sans`}>
         <SWRConfig
           value={{
             fallback: {
-              '/api/user': user,
+              '/api/user': safeUser,
               '/api/team': team,
             }
           }}

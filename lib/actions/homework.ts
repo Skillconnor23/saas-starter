@@ -4,6 +4,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { getUser } from '@/lib/db/queries';
 import { getR2, getR2Bucket, getR2PublicBaseUrl } from '@/lib/r2';
 import {
@@ -255,7 +256,8 @@ export async function createHomeworkAction(
 
   revalidatePath('/dashboard/homework');
   revalidatePath('/dashboard/student/homework');
-  redirect('/dashboard/homework');
+  await redirectWithLocale('/dashboard/homework');
+  return { success: true }; // unreachable; redirect throws
 }
 
 const upsertSubmissionSchema = z.object({

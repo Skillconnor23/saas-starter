@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useViewerTimezone } from '@/lib/hooks/use-viewer-timezone';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,9 +56,9 @@ export function StudentScheduleClient({
   const t = useTranslations('schedule');
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'agenda' | 'month'>('agenda');
+  const tz = useViewerTimezone(viewerTimezone || 'UTC');
 
   const nextClass = upcomingEvents[0] ?? null;
-  const tz = viewerTimezone || 'UTC';
 
   const initialEventsForCalendar = initialMonthEvents;
 

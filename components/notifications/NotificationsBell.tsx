@@ -17,6 +17,7 @@ import {
   markNotificationSeenAction,
   markAllNotificationsSeenAction,
 } from '@/lib/actions/notifications';
+import { userFetcher } from '@/lib/fetchers';
 
 type Notification = {
   id: string;
@@ -79,7 +80,7 @@ export function NotificationsBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { data: user } = useSWR('/api/user', fetcher);
+  const { data: user } = useSWR('/api/user', userFetcher);
   const { data, mutate: mutateNotifications } = useSWR<NotificationsData>(
     user ? '/api/notifications' : null,
     fetcher

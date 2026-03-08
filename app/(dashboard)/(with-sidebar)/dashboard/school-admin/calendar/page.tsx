@@ -6,6 +6,7 @@ import { getOccurrencesForUser } from '@/lib/schedule';
 import { getClassesWithScheduleForCalendar } from '@/lib/db/queries/education';
 import { getSchoolIdsForUser } from '@/lib/db/queries/schools';
 import { CalendarListView } from '@/components/calendar/CalendarListView';
+import { ViewerTimezoneLabel } from '@/components/display/ViewerTimezoneLabel';
 import { SetTimezoneOnMount } from '@/components/calendar/SetTimezoneOnMount';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
@@ -48,7 +49,10 @@ export default async function SchoolAdminCalendarPage({
           <CardHeader>
             <CardTitle>{t('upcomingClasses')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t('nextDaysTimezone', { days, timezone: viewerTimezone })}
+              <ViewerTimezoneLabel
+                serverFallback={viewerTimezone}
+                template={t('nextDaysTimezone', { days, timezone: '{tz}' })}
+              />
             </p>
             {(classes.length >= 1) && (
               <CalendarFilterForm

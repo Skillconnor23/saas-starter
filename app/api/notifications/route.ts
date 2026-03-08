@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUser } from '@/lib/db/queries';
+import { requireApiAuth } from '@/lib/auth/api-auth';
 import {
   getNotifications,
   getUnseenNotificationCount,
@@ -7,15 +7,13 @@ import {
 } from '@/lib/db/queries/notifications';
 
 export async function GET() {
-  const user = await getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const auth = await requireApiAuth();
+  if (auth.response) return auth.response;
 
   const [notifications, unseenCount, unseenMessageCount] = await Promise.all([
-    getNotifications(user.id, 20),
-    getUnseenNotificationCount(user.id),
-    getUnseenMessageNotificationCount(user.id),
+    getNotifications(auth.user.id, 20),
+    getUnseenNotificationCount(auth.user.id),
+    getUnseenMessageNotificationCount(auth.user.id),
   ]);
 
   return NextResponse.json({

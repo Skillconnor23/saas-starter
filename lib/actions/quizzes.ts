@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { requireRole } from '@/lib/auth/user';
 import { getUser } from '@/lib/db/queries';
 import {
@@ -422,21 +423,21 @@ export async function getTeacherQuizResultsAction(quizId: string) {
   const user = await requireRole(['teacher', 'admin', 'school_admin']);
   const data = await dbGetTeacherQuizResults(quizId);
   if (!data) {
-    redirect('/dashboard');
+    await redirectWithLocale('/dashboard');
   }
 
   if (user.platformRole === 'teacher') {
     const canManage = await teacherCanManageQuiz(quizId, user.id);
-    if (!canManage) redirect('/dashboard');
+    if (!canManage) await redirectWithLocale('/dashboard');
   }
 
-  return data;
+  return data as NonNullable<typeof data>;
 }
 
 export async function getAdminOverviewAction() {
   const user = await requireRole(['admin', 'school_admin']);
   if (!user) {
-    redirect('/sign-in');
+    await redirectWithLocale('/sign-in');
   }
   return dbGetAdminOverview();
 }

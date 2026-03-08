@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import type { Occurrence } from '@/lib/schedule';
+import { formatScheduleTimeInViewerTz } from '@/lib/schedule/tz';
+import { useViewerTimezone } from '@/lib/hooks/use-viewer-timezone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Video, ExternalLink } from 'lucide-react';
@@ -40,18 +42,6 @@ function formatScheduleDays(days: unknown): string {
   return labels.join(' & ');
 }
 
-/** "11:00" -> "11:00 AM", "14:30" -> "2:30 PM" */
-function formatTimeHHMM(str: string | null): string {
-  if (!str) return '—';
-  const parts = str.trim().split(':');
-  const h = parseInt(parts[0] ?? '0', 10);
-  const m = parseInt(parts[1] ?? '0', 10);
-  if (h === 0 && m === 0) return '12:00 AM';
-  if (h === 12) return m ? `12:${String(m).padStart(2, '0')} PM` : '12:00 PM';
-  if (h > 12) return `${h - 12}:${String(m).padStart(2, '0')} PM`;
-  return `${h}:${String(m).padStart(2, '0')} AM`;
-}
-
 function formatOccurrenceDate(d: Date, tz: string): string {
   return d.toLocaleDateString(undefined, {
     timeZone: tz,
@@ -85,7 +75,7 @@ type Props = {
 };
 
 export function ScheduleView({ classes, nextOccurrences, viewerTimezone }: Props) {
-  const tz = viewerTimezone || 'UTC';
+  const tz = useViewerTimezone(viewerTimezone || 'UTC');
 
   return (
     <div className="space-y-6">
@@ -107,6 +97,8 @@ export function ScheduleView({ classes, nextOccurrences, viewerTimezone }: Props
               const classTz = c.scheduleTimezone ?? 'Asia/Ulaanbaatar';
               const tzDiff = classTz !== tz;
               const dur = c.durationMinutes ?? 50;
+              const nextOcc = nextOccurrences.find((o) => o.classId === c.id);
+              const refDate = nextOcc?.startsAt ?? undefined;
 
               return (
                 <div
@@ -125,7 +117,7 @@ export function ScheduleView({ classes, nextOccurrences, viewerTimezone }: Props
                     {hasSchedule ? (
                       <p className="text-sm text-muted-foreground">
                         {formatScheduleDays(c.scheduleDays)} •{' '}
-                        {formatTimeHHMM(c.scheduleStartTime)} • {dur} min
+                        {formatScheduleTimeInViewerTz(c.scheduleStartTime, classTz, tz, refDate)} (your time) • {dur} min
                       </p>
                     ) : (
                       <p className="text-sm text-muted-foreground">
@@ -134,7 +126,7 @@ export function ScheduleView({ classes, nextOccurrences, viewerTimezone }: Props
                     )}
                     {tzDiff && hasSchedule && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Class timezone: {classTz}
+                        Class time: {formatScheduleTimeInViewerTz(c.scheduleStartTime, classTz, classTz, refDate)} {classTz}
                       </p>
                     )}
                   </div>

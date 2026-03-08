@@ -4,6 +4,8 @@ import * as React from "react";
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, CalendarDays, ChevronDown } from "lucide-react";
 import type { CalendarEventClient } from "@/lib/schedule/calendar-events";
+import { getDateKeyInTz } from "@/lib/schedule/tz";
+import { useViewerTimezone } from "@/lib/hooks/use-viewer-timezone";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DayEventsPanel } from "@/components/schedule/DayEventsPanel";
@@ -82,12 +84,15 @@ function buildMonthGrid(monthDate: Date): DayCell[] {
   return cells;
 }
 
+/** Group events by date in viewer timezone (so events show on correct local day). */
 function eventsByDate(
-  events: CalendarEventClient[]
+  events: CalendarEventClient[],
+  viewerTimezone: string
 ): Map<string, CalendarEventClient[]> {
   const map = new Map<string, CalendarEventClient[]>();
+  const tz = viewerTimezone || "UTC";
   for (const ev of events) {
-    const key = ev.startsAt.slice(0, 10);
+    const key = getDateKeyInTz(ev.startsAt, tz);
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(ev);
   }
@@ -149,11 +154,12 @@ export function MonthCalendar({
   viewerTimezone,
 }: Props) {
   const tSchedule = useTranslations('schedule');
+  const tz = useViewerTimezone(viewerTimezone || 'UTC');
   const initialMonthDate = startOfMonth(new Date(initialMonthStart));
   const initialMonthEndDate = endOfMonth(initialMonthDate);
   const today = new Date();
   const todayKey = formatDateKey(today);
-  const initialByDate = eventsByDate(initialEvents);
+  const initialByDate = eventsByDate(initialEvents, tz);
   const initialSelectedDateKey = getDefaultSelectedDateKeyForMonth(
     initialByDate,
     initialMonthDate,
@@ -168,7 +174,7 @@ export function MonthCalendar({
   const [selectedDateKey, setSelectedDateKey] =
     React.useState<string>(initialSelectedDateKey);
 
-  const byDate = React.useMemo(() => eventsByDate(events), [events]);
+  const byDate = React.useMemo(() => eventsByDate(events, tz), [events, tz]);
 
   const monthStart = startOfMonth(monthDate);
   const monthEnd = endOfMonth(monthDate);
@@ -188,7 +194,7 @@ export function MonthCalendar({
       );
       if (res.ok) {
         const data = (await res.json()) as CalendarEventClient[];
-        const nextByDate = eventsByDate(data);
+        const nextByDate = eventsByDate(data, tz);
         const nextSelected = getDefaultSelectedDateKeyForMonth(
           nextByDate,
           nextMonthStart,
@@ -325,7 +331,7 @@ export function MonthCalendar({
                 {visibleEvents.map((ev) => {
                   const start = new Date(ev.startsAt);
                   const timeStr = start.toLocaleTimeString(undefined, {
-                    timeZone: viewerTimezone || "UTC",
+                    timeZone: tz || "UTC",
                     hour: "numeric",
                     minute: "2-digit",
                     hour12: true,
@@ -427,7 +433,7 @@ export function MonthCalendar({
                     >
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs text-muted-foreground tabular-nums">
-                          {formatEventTimeRange(ev, viewerTimezone)}
+                          {formatEventTimeRange(ev, tz)}
                         </span>
                         <span className="text-sm font-medium truncate">
                           {ev.title}

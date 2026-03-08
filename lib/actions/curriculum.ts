@@ -13,22 +13,11 @@ import {
 } from '@/lib/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { teacherAssignedToClass } from '@/lib/db/queries/education';
-
-export const CURRICULUM_MAX_FILE_SIZE = 25 * 1024 * 1024;
-
-const ALLOWED_MIME_TYPES = [
-  'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'image/png',
-  'image/jpeg',
-  'image/jpg',
-  'audio/mpeg',
-  'audio/mp3',
-  'audio/m4a',
-  'audio/x-m4a',
-] as const;
+import {
+  CURRICULUM_UPLOAD_MAX_BYTES,
+  CURRICULUM_UPLOAD_ALLOWED,
+} from '@/lib/upload/constants';
+import { validateUpload, sanitizeStorageFilename } from '@/lib/upload/validate';
 
 const uploadSchema = z.object({
   classId: z.string().uuid(),
@@ -49,19 +38,17 @@ export async function uploadCurriculumFileAction(
   if (user.platformRole !== 'teacher') return { success: false, error: 'Teachers only.' };
 
   const file = formData.get('file') as File | null;
-  if (!file || !file.size) return { success: false, error: 'File is required.' };
-  if (file.size > CURRICULUM_MAX_FILE_SIZE) {
-    return {
-      success: false,
-      error: `File too large (max ${CURRICULUM_MAX_FILE_SIZE / 1024 / 1024} MB).`,
-    };
-  }
-  if (!ALLOWED_MIME_TYPES.includes(file.type as (typeof ALLOWED_MIME_TYPES)[number])) {
-    return {
-      success: false,
-      error: 'Invalid file type. Allowed: PDF, DOCX, PPTX, XLSX, PNG, JPG, MP3, M4A.',
-    };
-  }
+  if (!file || !(file instanceof File)) return { success: false, error: 'File is required.' };
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const validation = validateUpload(
+    buffer,
+    file.type || 'application/octet-stream',
+    file.name || '',
+    CURRICULUM_UPLOAD_ALLOWED,
+    CURRICULUM_UPLOAD_MAX_BYTES
+  );
+  if (!validation.ok) return { success: false, error: validation.error };
 
   const parsed = uploadSchema.safeParse({
     classId: formData.get('classId'),
@@ -79,8 +66,8 @@ export async function uploadCurriculumFileAction(
   try {
     const bucket = getR2Bucket();
     const client = getR2();
-    const key = `curriculum/${parsed.data.classId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const safeName = sanitizeStorageFilename(file.name || 'file');
+    const key = `curriculum/${parsed.data.classId}/${Date.now()}-${safeName}`;
 
     await client.send(
       new PutObjectCommand({

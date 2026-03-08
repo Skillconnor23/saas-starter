@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { ArrowLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/user';
@@ -40,16 +41,17 @@ export default async function TeacherFlashcardDeckDetailPage({
   ]);
 
   if (!deckWithCards) {
-    redirect('/dashboard/teacher/learning/flashcards');
+    await redirectWithLocale('/dashboard/teacher/learning/flashcards');
   }
 
   if (
     user.platformRole === 'teacher' &&
     !(await teacherCanManageFlashcardDeck(deckId, user.id))
   ) {
-    redirect('/dashboard/teacher/learning/flashcards');
+    await redirectWithLocale('/dashboard/teacher/learning/flashcards');
   }
 
+  const deck = deckWithCards!;
   const path = `/dashboard/teacher/learning/flashcards/${deckId}`;
 
   return (
@@ -64,10 +66,10 @@ export default async function TeacherFlashcardDeckDetailPage({
 
         <div>
           <h1 className="text-xl lg:text-2xl font-medium text-[#1f2937] tracking-tight">
-            {deckWithCards.deck.title}
+            {deck.deck.title}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {t('cardsInDeck', { count: deckWithCards.cards.length })}
+            {t('cardsInDeck', { count: deck.cards.length })}
           </p>
         </div>
 
@@ -99,7 +101,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                 </label>
                 <input
                   name="title"
-                  defaultValue={deckWithCards.deck.title}
+                  defaultValue={deck.deck.title}
                   required
                   className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
                 />
@@ -110,7 +112,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                 <textarea
                   name="description"
                   rows={3}
-                  defaultValue={deckWithCards.deck.description ?? ''}
+                  defaultValue={deck.deck.description ?? ''}
                   className="mt-1 w-full rounded-xl border border-[#e5e7eb] px-3 py-2 text-sm"
                 />
               </div>
@@ -120,7 +122,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                   <label className="text-sm font-medium text-[#1f2937]">{t('scopeLabel')}</label>
                   <select
                     name="scope"
-                    defaultValue={deckWithCards.deck.scope}
+                    defaultValue={deck.deck.scope}
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm"
                   >
                     <option value="class">{t('scopeClass')}</option>
@@ -131,7 +133,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                   <label className="text-sm font-medium text-[#1f2937]">{t('scopeClass')}</label>
                   <select
                     name="classId"
-                    defaultValue={deckWithCards.deck.classId ?? ''}
+                    defaultValue={deck.deck.classId ?? ''}
                     className="mt-1 w-full rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm"
                   >
                     <option value="">{t('selectClass')}</option>
@@ -157,7 +159,7 @@ export default async function TeacherFlashcardDeckDetailPage({
                 'use server';
                 const result = await setFlashcardDeckPublishedAction(
                   deckId,
-                  !deckWithCards.deck.isPublished
+                  !deck.deck.isPublished
                 );
                 if (result.error) {
                   redirect(`${path}?error=${encodeURIComponent(result.error)}`);
@@ -170,10 +172,10 @@ export default async function TeacherFlashcardDeckDetailPage({
                 type="submit"
                 className="rounded-full text-white"
                 style={{
-                  backgroundColor: deckWithCards.deck.isPublished ? '#b64b29' : '#7daf41',
+                  backgroundColor: deck.deck.isPublished ? '#b64b29' : '#7daf41',
                 }}
               >
-                {deckWithCards.deck.isPublished ? t('unpublish') : t('publish')}
+                {deck.deck.isPublished ? t('unpublish') : t('publish')}
               </Button>
             </form>
           </CardContent>
@@ -243,12 +245,12 @@ export default async function TeacherFlashcardDeckDetailPage({
             <CardTitle>{t('cards')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {deckWithCards.cards.length === 0 ? (
+            {deck.cards.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#e5e7eb] p-5 text-center">
                 <p className="text-sm text-muted-foreground">{t('noCardsYet')}</p>
               </div>
             ) : (
-              deckWithCards.cards.map((card) => (
+              deck.cards.map((card) => (
                 <div key={card.id} className="rounded-xl border border-[#e5e7eb] p-4">
                   <form
                     action={async (formData) => {

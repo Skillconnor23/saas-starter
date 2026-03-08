@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/db/queries';
+import { redirectWithLocale } from '@/lib/i18n/redirect';
 import {
   teacherAssignedToClass,
   studentEnrolledInClass,
@@ -76,15 +76,15 @@ export async function canPostToClassroom(
 export async function requireClassroomAccess(classId: string) {
   const user = await getUser();
   if (!user) {
-    redirect('/sign-in');
+    await redirectWithLocale('/sign-in');
   }
   const eduClass = await getClassById(classId);
   if (!eduClass) {
-    redirect('/dashboard');
+    await redirectWithLocale('/dashboard');
   }
   const allowed = await canAccessClassroom(user, classId, eduClass);
   if (!allowed) {
-    redirect('/dashboard');
+    await redirectWithLocale('/dashboard');
   }
-  return { user, eduClass };
+  return { user: user as NonNullable<typeof user>, eduClass: eduClass as NonNullable<typeof eduClass> };
 }
