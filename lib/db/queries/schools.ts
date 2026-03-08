@@ -1,4 +1,4 @@
-import { eq, and, sql, or, ilike, inArray, isNull } from 'drizzle-orm';
+import { eq, and, sql, or, ilike, inArray, isNull, asc } from 'drizzle-orm';
 import { db } from '../drizzle';
 import {
   schools,
@@ -35,6 +35,23 @@ export async function listSchools(filters?: ListSchoolsFilters) {
     .from(schools)
     .where(eq(schools.isArchived, false))
     .orderBy(schools.name);
+}
+
+/** Classes for student invite dropdown. Pass schoolIds to scope; null/empty = all classes (platform admin). */
+export async function getClassesForInviteSelector(schoolIds?: string[] | null): Promise<{ id: string; name: string }[]> {
+  const base = db
+    .select({ id: eduClasses.id, name: eduClasses.name })
+    .from(eduClasses)
+    .where(eq(eduClasses.isArchived, false))
+    .orderBy(asc(eduClasses.name));
+  if (schoolIds && schoolIds.length > 0) {
+    return db
+      .select({ id: eduClasses.id, name: eduClasses.name })
+      .from(eduClasses)
+      .where(and(inArray(eduClasses.schoolId, schoolIds), eq(eduClasses.isArchived, false)))
+      .orderBy(asc(eduClasses.name));
+  }
+  return base;
 }
 
 /** Schools for invite dropdown. Pass schoolId to limit to one school (school_admin). */

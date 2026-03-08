@@ -43,6 +43,7 @@ import { sendVerificationEmail } from '@/lib/auth/email';
 import { createAuditLog } from '@/lib/auth/audit';
 import { consumePlatformInvite } from '@/lib/auth/invites';
 import { schoolMemberships } from '@/lib/db/schema';
+import { enrollStudent } from '@/lib/db/queries/education';
 import { cookies, headers } from 'next/headers';
 import { getLocale } from 'next-intl/server';
 
@@ -428,6 +429,9 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
             target: [schoolMemberships.schoolId, schoolMemberships.userId],
           });
       }
+      if (consumed.platformRole === 'student' && consumed.classId) {
+        await enrollStudent({ classId: consumed.classId, studentUserId: createdUser.id });
+      }
       await createAuditLog({
         action: 'invite_acceptance',
         userId: createdUser.id,
@@ -435,6 +439,7 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
           email,
           platformRole: consumed.platformRole,
           schoolId: consumed.schoolId,
+          classId: consumed.classId,
         },
       });
       cookieStore.delete('pending_platform_invite');

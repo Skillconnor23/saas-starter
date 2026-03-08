@@ -1,12 +1,14 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, or, and } from 'drizzle-orm';
 import { db } from '../drizzle';
-import { platformInvites, schools, users } from '../schema';
+import { platformInvites, schools, users, eduClasses } from '../schema';
 export type PlatformInviteWithDetails = {
   id: string;
   email: string;
   platformRole: string;
   schoolId: string | null;
   schoolName: string | null;
+  classId: string | null;
+  className: string | null;
   expiresAt: Date;
   usedAt: Date | null;
   createdAt: Date;
@@ -31,19 +33,29 @@ export async function listPlatformInvites(schoolIdFilter?: string | null): Promi
       email: platformInvites.email,
       platformRole: platformInvites.platformRole,
       schoolId: platformInvites.schoolId,
+      classId: platformInvites.classId,
       expiresAt: platformInvites.expiresAt,
       usedAt: platformInvites.usedAt,
       createdAt: platformInvites.createdAt,
       invitedByUserId: platformInvites.invitedByUserId,
       schoolName: schools.name,
+      className: eduClasses.name,
       invitedByName: users.name,
     })
     .from(platformInvites)
     .leftJoin(schools, eq(platformInvites.schoolId, schools.id))
+    .leftJoin(eduClasses, eq(platformInvites.classId, eduClasses.id))
     .leftJoin(users, eq(platformInvites.invitedByUserId, users.id));
 
   const rows = schoolIdFilter
-    ? await baseQuery.where(eq(platformInvites.schoolId, schoolIdFilter)).orderBy(desc(platformInvites.createdAt))
+    ? await baseQuery
+        .where(
+          or(
+            eq(platformInvites.schoolId, schoolIdFilter),
+            and(eq(platformInvites.platformRole, 'student'), eq(eduClasses.schoolId, schoolIdFilter))
+          )
+        )
+        .orderBy(desc(platformInvites.createdAt))
     : await baseQuery.orderBy(desc(platformInvites.createdAt));
 
   return (rows ?? []).map((row) => ({
@@ -52,6 +64,8 @@ export async function listPlatformInvites(schoolIdFilter?: string | null): Promi
     platformRole: row.platformRole,
     schoolId: row.schoolId,
     schoolName: row.schoolName ?? null,
+    classId: row.classId ?? null,
+    className: row.className ?? null,
     expiresAt: row.expiresAt,
     usedAt: row.usedAt,
     createdAt: row.createdAt,

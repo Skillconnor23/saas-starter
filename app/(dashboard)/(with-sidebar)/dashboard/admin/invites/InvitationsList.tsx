@@ -37,13 +37,17 @@ function statusBadge(status: Invitation['status']) {
 }
 
 function roleLabel(role: string) {
-  return role === 'school_admin' ? 'School Admin' : 'Teacher';
+  if (role === 'school_admin') return 'School Admin';
+  if (role === 'student') return 'Student';
+  return 'Teacher';
 }
 
 export function InvitationsList({
   invitations,
+  locale = 'en',
 }: {
   invitations: Invitation[];
+  locale?: 'en' | 'mn';
 }) {
   const [resending, setResending] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -51,7 +55,7 @@ export function InvitationsList({
   async function handleResend(inv: Invitation) {
     setResending(inv.id);
     try {
-      const { link, error } = await resendPlatformInviteAction(inv.id);
+      const { link, error } = await resendPlatformInviteAction(inv.id, locale);
       if (error) {
         alert(error);
       } else if (link) {
@@ -83,7 +87,7 @@ export function InvitationsList({
         <Mail className="mx-auto h-12 w-12 text-slate-300" />
         <p className="mt-4 text-sm font-medium text-[#374151]">No invitations yet</p>
         <p className="mt-1 text-sm text-[#6b7280]">
-          Send a new invite above to invite a teacher or school admin.
+          Send a new invite above to invite a teacher, school admin, or student.
         </p>
       </div>
     );
@@ -101,7 +105,7 @@ export function InvitationsList({
               Role
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[#6b7280]">
-              School
+              School / Class
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[#6b7280]">
               Status
@@ -122,7 +126,9 @@ export function InvitationsList({
             <tr key={inv.id} className="hover:bg-[#f9fafb]">
               <td className="px-4 py-3 text-sm text-[#111827]">{inv.email}</td>
               <td className="px-4 py-3 text-sm text-[#374151]">{roleLabel(inv.platformRole)}</td>
-              <td className="px-4 py-3 text-sm text-[#6b7280]">{inv.schoolName ?? '—'}</td>
+              <td className="px-4 py-3 text-sm text-[#6b7280]">
+                {inv.platformRole === 'student' ? (inv.className ?? '—') : (inv.schoolName ?? '—')}
+              </td>
               <td className="px-4 py-3">{statusBadge(inv.status)}</td>
               <td className="px-4 py-3 text-sm text-[#6b7280]">{formatDate(inv.createdAt)}</td>
               <td className="px-4 py-3 text-sm text-[#6b7280]">{formatDate(inv.expiresAt)}</td>

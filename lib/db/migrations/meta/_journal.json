@@ -218,6 +218,13 @@
       "when": 1772900000000,
       "tag": "0030_password_reset_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1772950000000,
+      "tag": "0031_platform_invites_class_id",
+      "breakpoints": true
     }
   ]
 }

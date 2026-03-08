@@ -1,13 +1,12 @@
 import { randomBytes } from 'crypto';
 import { createHash } from 'crypto';
-import { eq, and, gt, isNull } from 'drizzle-orm';
+import { eq, and, gt, isNull, sql } from 'drizzle-orm';
 import { getBaseUrl } from '@/lib/config/url';
 import { db } from '@/lib/db/drizzle';
 import {
   platformInvites,
-  schoolMemberships,
   schools,
-  users,
+  eduClasses,
 } from '@/lib/db/schema';
 import type { PlatformInviteRole } from '@/lib/db/schema';
 import { sendPlatformInviteEmail } from './email';
@@ -27,16 +26,40 @@ export type CreatePlatformInviteParams = {
   email: string;
   platformRole: PlatformInviteRole;
   schoolId?: string | null;
+  classId?: string | null;
   invitedByUserId: number;
+  locale?: string | null;
 };
 
 export async function createPlatformInvite(
   params: CreatePlatformInviteParams
 ): Promise<{ ok: true; inviteLink: string } | { ok: false; error: string }> {
-  const { email, platformRole, schoolId, invitedByUserId } = params;
+  const { email, platformRole, schoolId, classId, invitedByUserId, locale } = params;
 
   if (platformRole === 'school_admin' && !schoolId) {
     return { ok: false, error: 'School is required for school_admin invites' };
+  }
+  if (platformRole === 'student' && !classId) {
+    return { ok: false, error: 'Class is required for student invites' };
+  }
+
+  if (platformRole === 'student' && classId) {
+    const [existing] = await db
+      .select({ id: platformInvites.id })
+      .from(platformInvites)
+      .where(
+        and(
+          sql`lower(${platformInvites.email}) = lower(${email})`,
+          eq(platformInvites.platformRole, 'student'),
+          eq(platformInvites.classId, classId),
+          isNull(platformInvites.usedAt),
+          gt(platformInvites.expiresAt, new Date())
+        )
+      )
+      .limit(1);
+    if (existing) {
+      return { ok: false, error: 'A pending student invite for this email and class already exists.' };
+    }
   }
 
   const token = generateToken();
@@ -47,33 +70,35 @@ export async function createPlatformInvite(
     email,
     platformRole,
     schoolId: schoolId ?? null,
+    classId: classId ?? null,
     tokenHash,
     expiresAt,
     invitedByUserId,
   });
 
-  const schoolName =
-    schoolId && platformRole === 'school_admin'
-      ? (
-          await db
-            .select({ name: schools.name })
-            .from(schools)
-            .where(eq(schools.id, schoolId))
-            .limit(1)
-        )[0]?.name ?? null
-      : null;
+  let schoolName: string | null = null;
+  let className: string | null = null;
+  if (schoolId && platformRole === 'school_admin') {
+    const [s] = await db.select({ name: schools.name }).from(schools).where(eq(schools.id, schoolId)).limit(1);
+    schoolName = s?.name ?? null;
+  }
+  if (classId && platformRole === 'student') {
+    const [c] = await db.select({ name: eduClasses.name }).from(eduClasses).where(eq(eduClasses.id, classId)).limit(1);
+    className = c?.name ?? null;
+  }
 
   const baseUrl = getBaseUrl();
-  const inviteLink = `${baseUrl}/accept-invite?token=${encodeURIComponent(token)}`;
+  const localePrefix = locale && ['en', 'mn'].includes(locale) ? locale : 'en';
+  const inviteLink = `${baseUrl}/${localePrefix}/accept-invite?token=${encodeURIComponent(token)}`;
 
-  await sendPlatformInviteEmail(email, platformRole, schoolName, token);
+  await sendPlatformInviteEmail(email, platformRole, schoolName, className, token, locale);
 
   return { ok: true, inviteLink };
 }
 
 /** Validate invite without consuming. Use for redirect flow. */
 export async function validatePlatformInvite(token: string): Promise<
-  | { ok: true; email: string; platformRole: PlatformInviteRole; schoolId: string | null }
+  | { ok: true; email: string; platformRole: PlatformInviteRole; schoolId: string | null; classId: string | null }
   | { ok: false; error: string }
 > {
   const tokenHash = hashToken(token);
@@ -100,12 +125,13 @@ export async function validatePlatformInvite(token: string): Promise<
     email: invite.email,
     platformRole: invite.platformRole as PlatformInviteRole,
     schoolId: invite.schoolId,
+    classId: invite.classId ?? null,
   };
 }
 
 /** Consume invite and return data. Call only when applying role. */
 export async function consumePlatformInvite(token: string): Promise<
-  | { ok: true; email: string; platformRole: PlatformInviteRole; schoolId: string | null }
+  | { ok: true; email: string; platformRole: PlatformInviteRole; schoolId: string | null; classId: string | null }
   | { ok: false; error: string }
 > {
   const result = await validatePlatformInvite(token);

@@ -189,6 +189,9 @@ export async function enrollStudent({
       status: 'active',
       updatedAt: new Date(),
     })
+    .onConflictDoNothing({
+      target: [eduEnrollments.classId, eduEnrollments.studentUserId],
+    })
     .returning();
   return created;
 }

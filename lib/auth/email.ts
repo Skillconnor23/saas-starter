@@ -40,6 +40,40 @@ const emailCopy = {
         `Энэ холбоос 24 цагийн дараа хүчингүй болно. Хэрэв та данс үүсгээгүй бол энэ и-мэйлийг үл тоомсорлож болно.`,
     },
   },
+  platformInvite: {
+    en: {
+      subject: (role: string, context: string) =>
+        role === 'Student' ? `You've been invited to join ${context}` : `You've been invited as ${role}${context}`,
+      title: (role: string) =>
+        role === 'Student' ? "You're invited to join a class" : `You've been invited as ${role}`,
+      body: (role: string, schoolName: string | null, className: string | null) => {
+        if (role === 'student' && className)
+          return `You've been invited to join Gecko Academy as a student in the class "${className}". Click the button below to accept and create your account.`;
+        if (role === 'school_admin' && schoolName)
+          return `You've been invited to join Gecko Academy as a School Admin at ${schoolName}. Click the button below to accept and create your account.`;
+        return `You've been invited to join Gecko Academy as a Teacher. Click the button below to accept and create your account.`;
+      },
+      cta: 'Accept invitation',
+      fallbackLabel: "If the button doesn't work, copy and paste this link into your browser:",
+      securityNote: 'This link expires in 7 days and can only be used once.',
+    },
+    mn: {
+      subject: (role: string, context: string) =>
+        role === 'Student' ? `${context}-д нэгдэх урилга` : 'Урилга',
+      title: (role: string) =>
+        role === 'Student' ? 'Ангид нэгдэх урилга' : 'Урилга хүлээн авлаа',
+      body: (role: string, schoolName: string | null, className: string | null) => {
+        if (role === 'student' && className)
+          return `Та Gecko Academy-д "${className}" ангид сурагч болох урилга хүлээн авлаа. Данс үүсгэж баталгаажуулахын тулд доорх товчийг дарна уу.`;
+        if (role === 'school_admin' && schoolName)
+          return `Та Gecko Academy-д ${schoolName}-ийн Сургуулийн Админ болох урилга хүлээн авлаа. Данс үүсгэж баталгаажуулахын тулд доорх товчийг дарна уу.`;
+        return `Та Gecko Academy-д Багш болох урилга хүлээн авлаа. Данс үүсгэж баталгаажуулахын тулд доорх товчийг дарна уу.`;
+      },
+      cta: 'Урилгыг хүлээн авах',
+      fallbackLabel: 'Хэрэв товч ажиллахгүй бол энэ холбоосыг хуулж хөтөч рүүгээ оруулна уу:',
+      securityNote: 'Энэ холбоос 7 хоногийн дараа хүчингүй болох бөгөөд нэг удаа л ашиглах боломжтой.',
+    },
+  },
   passwordReset: {
     en: {
       subject: 'Reset your password – Gecko Academy',
@@ -169,28 +203,51 @@ export async function sendPlatformInviteEmail(
   email: string,
   role: string,
   schoolName: string | null,
-  token: string
+  className: string | null,
+  token: string,
+  locale?: string | null
 ) {
   const baseUrl = getBaseUrl();
-  const inviteUrl = `${baseUrl}/accept-invite?token=${encodeURIComponent(token)}`;
+  const lang = resolveLocale(locale);
+  const copy = emailCopy.platformInvite[lang];
+
+  const roleLabel = role === 'school_admin' ? 'School Admin' : role === 'student' ? 'Student' : 'Teacher';
+  const context =
+    role === 'student' && className ? className : schoolName ? ` at ${schoolName}` : '';
+
+  const subject = typeof copy.subject === 'function'
+    ? copy.subject(roleLabel, context)
+    : copy.subject;
+
+  const title = typeof copy.title === 'function' ? copy.title(roleLabel) : copy.title;
+  const body = typeof copy.body === 'function'
+    ? copy.body(role, schoolName, className)
+    : copy.body;
+
+  const inviteUrl = `${baseUrl}/${lang}/accept-invite?token=${encodeURIComponent(token)}`;
+
+  const copyForHtml = {
+    title,
+    body,
+    cta: copy.cta,
+    fallbackLabel: copy.fallbackLabel,
+    securityNote: copy.securityNote,
+    plainText: (url: string) => `${title}\n\n${body}\n\n${url}\n\n${copy.securityNote}`,
+  };
+  const html = buildTransactionalEmailHtml(copyForHtml, inviteUrl);
+  const text = copyForHtml.plainText(inviteUrl);
 
   if (!resend) {
     console.log('[DEV] Invite email would be sent');
     return { ok: true };
   }
 
-  const roleLabel = role === 'school_admin' ? 'School Admin' : 'Teacher';
-  const context = schoolName ? ` at ${schoolName}` : '';
-
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: `You've been invited as ${roleLabel}${context}`,
-    html: `
-      <p>You've been invited to join as a ${roleLabel}${schoolName ? ` at ${schoolName}` : ''}.</p>
-      <p><a href="${inviteUrl}">Accept invitation</a></p>
-      <p>This link expires in 7 days and can only be used once.</p>
-    `,
+    subject,
+    html,
+    text,
   });
 
   if (error) {

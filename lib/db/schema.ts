@@ -219,8 +219,8 @@ export const passwordResetTokens = pgTable(
   ]
 );
 
-// --- Auth: Platform invites (teacher/school_admin only, single-use, hashed token) ---
-export const platformInviteRoleEnum = ['teacher', 'school_admin'] as const;
+// --- Auth: Platform invites (teacher/school_admin/student, single-use, hashed token) ---
+export const platformInviteRoleEnum = ['teacher', 'school_admin', 'student'] as const;
 export type PlatformInviteRole = (typeof platformInviteRoleEnum)[number];
 
 export const platformInvites = pgTable(
@@ -232,6 +232,7 @@ export const platformInvites = pgTable(
       .notNull()
       .$type<PlatformInviteRole>(),
     schoolId: uuid('school_id').references(() => schools.id, { onDelete: 'cascade' }), // Required for school_admin
+    classId: uuid('class_id').references(() => eduClasses.id, { onDelete: 'cascade' }), // Required for student
     tokenHash: text('token_hash').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     usedAt: timestamp('used_at', { withTimezone: true }),
@@ -244,6 +245,7 @@ export const platformInvites = pgTable(
     index('platform_invites_email_idx').on(table.email),
     index('platform_invites_token_hash_idx').on(table.tokenHash),
     index('platform_invites_expires_idx').on(table.expiresAt),
+    index('platform_invites_class_id_idx').on(table.classId),
   ]
 );
 

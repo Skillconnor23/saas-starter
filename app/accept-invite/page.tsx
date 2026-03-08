@@ -6,6 +6,7 @@ import { validatePlatformInvite, consumePlatformInvite } from '@/lib/auth/invite
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { users, schoolMemberships } from '@/lib/db/schema';
+import { enrollStudent } from '@/lib/db/queries/education';
 import { auth } from '@/auth';
 import { createAuditLog } from '@/lib/auth/audit';
 
@@ -86,7 +87,7 @@ export default async function AcceptInvitePage({
           />
         );
       }
-      await applyPlatformRole(dbUser.id, result.platformRole, result.schoolId);
+      await applyPlatformRole(dbUser.id, result.platformRole, result.schoolId, result.classId);
       await createAuditLog({
         action: 'invite_acceptance',
         userId: dbUser.id,
@@ -94,6 +95,7 @@ export default async function AcceptInvitePage({
           email: result.email,
           platformRole: result.platformRole,
           schoolId: result.schoolId,
+          classId: result.classId,
         },
       });
       await redirectWithLocale('/dashboard');
@@ -115,7 +117,8 @@ export default async function AcceptInvitePage({
 async function applyPlatformRole(
   userId: number,
   platformRole: string,
-  schoolId: string | null
+  schoolId: string | null,
+  classId: string | null
 ) {
   await db
     .update(users)
@@ -134,6 +137,10 @@ async function applyPlatformRole(
     }).onConflictDoNothing({
       target: [schoolMemberships.schoolId, schoolMemberships.userId],
     });
+  }
+
+  if (platformRole === 'student' && classId) {
+    await enrollStudent({ classId, studentUserId: userId });
   }
 }
 

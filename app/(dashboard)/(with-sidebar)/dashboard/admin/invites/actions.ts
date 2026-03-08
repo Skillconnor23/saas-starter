@@ -13,9 +13,11 @@ import type { PlatformInviteRole } from '@/lib/db/schema';
 
 const schema = z.object({
   email: z.string().email(),
-  role: z.enum(['teacher', 'school_admin']),
+  role: z.enum(['teacher', 'school_admin', 'student']),
   schoolId: z.string().optional(),
+  classId: z.string().optional(),
   inviterUserId: z.coerce.number(),
+  locale: z.enum(['en', 'mn']).optional(),
 });
 
 export async function createPlatformInviteAction(
@@ -31,14 +33,16 @@ export async function createPlatformInviteAction(
     email: formData.get('email'),
     role: formData.get('role'),
     schoolId: formData.get('schoolId') || undefined,
+    classId: formData.get('classId') || undefined,
     inviterUserId: formData.get('inviterUserId'),
+    locale: formData.get('locale') || undefined,
   });
 
   if (!parsed.success) {
     return { success: null, error: parsed.error.errors[0]?.message ?? 'Invalid input' };
   }
 
-  const { email, role, schoolId, inviterUserId } = parsed.data;
+  const { email, role, schoolId, classId, inviterUserId, locale } = parsed.data;
 
   if (role === 'school_admin') {
     if (user.platformRole === 'school_admin' && user.schoolId) {
@@ -50,11 +54,19 @@ export async function createPlatformInviteAction(
     }
   }
 
+  if (role === 'student') {
+    if (!classId?.trim()) {
+      return { success: null, error: 'Class is required for student invites.' };
+    }
+  }
+
   const result = await createPlatformInvite({
     email,
     platformRole: role as PlatformInviteRole,
     schoolId: role === 'school_admin' ? schoolId ?? null : null,
+    classId: role === 'student' ? classId ?? null : null,
     invitedByUserId: inviterUserId,
+    locale: locale ?? null,
   });
 
   if (!result.ok) {
@@ -64,7 +76,7 @@ export async function createPlatformInviteAction(
   await createAuditLog({
     action: 'invite_creation',
     userId: inviterUserId,
-    metadata: { email, platformRole: role, schoolId: schoolId ?? null },
+    metadata: { email, platformRole: role, schoolId: schoolId ?? null, classId: classId ?? null },
   });
 
   revalidatePath('/dashboard/admin/invites');
@@ -72,7 +84,10 @@ export async function createPlatformInviteAction(
 }
 
 /** Resend a platform invite (creates new invite for same email/role/school). */
-export async function resendPlatformInviteAction(inviteId: string): Promise<{ link: string | null; error: string | null }> {
+export async function resendPlatformInviteAction(
+  inviteId: string,
+  locale?: string | null
+): Promise<{ link: string | null; error: string | null }> {
   const user = await requirePermission('invites:create');
 
   const [inv] = await db.select().from(platformInvites).where(eq(platformInvites.id, inviteId)).limit(1);
@@ -84,7 +99,9 @@ export async function resendPlatformInviteAction(inviteId: string): Promise<{ li
     email: inv.email,
     platformRole: inv.platformRole as PlatformInviteRole,
     schoolId: inv.schoolId,
+    classId: inv.classId ?? null,
     invitedByUserId: user.id,
+    locale: locale ?? null,
   });
 
   if (!result.ok) {
@@ -94,7 +111,7 @@ export async function resendPlatformInviteAction(inviteId: string): Promise<{ li
   await createAuditLog({
     action: 'invite_creation',
     userId: user.id,
-    metadata: { email: inv.email, platformRole: inv.platformRole, schoolId: inv.schoolId, resend: true },
+    metadata: { email: inv.email, platformRole: inv.platformRole, schoolId: inv.schoolId, classId: inv.classId, resend: true },
   });
 
   revalidatePath('/dashboard/admin/invites');
