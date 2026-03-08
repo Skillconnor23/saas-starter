@@ -192,6 +192,49 @@ export async function addFlashcardCardAction(
   return {};
 }
 
+const bulkCardSchema = z.object({
+  front: z.string().trim().min(1, 'Front text is required').max(500),
+  back: z.string().trim().min(1, 'Back text is required').max(500),
+  example: z.string().trim().max(700).optional(),
+});
+
+export async function addFlashcardCardsBulkAction(
+  deckId: string,
+  cards: Array<{ front: string; back: string; example?: string }>
+): Promise<{ error?: string; added?: number }> {
+  const user = await requireRole(['teacher', 'admin', 'school_admin']);
+  const allowed = await canManageDeck(user, deckId);
+  if (!allowed) return { error: 'You cannot edit cards in this deck.' };
+
+  if (!Array.isArray(cards) || cards.length === 0) {
+    return { error: 'No cards to add.' };
+  }
+  if (cards.length > 20) {
+    return { error: 'Maximum 20 cards per bulk add.' };
+  }
+
+  let added = 0;
+  for (const raw of cards) {
+    const parsed = bulkCardSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { error: parsed.error.errors[0]?.message ?? 'Invalid card data.' };
+    }
+    await createFlashcardCard({
+      deckId,
+      front: parsed.data.front,
+      back: parsed.data.back,
+      example: parsed.data.example ?? null,
+    });
+    added++;
+  }
+
+  revalidatePath(`/dashboard/teacher/learning/flashcards/${deckId}`);
+  revalidatePath('/dashboard/teacher/learning/flashcards');
+  revalidatePath('/dashboard/student/learning');
+  revalidatePath(`/dashboard/student/learning/flashcards/${deckId}`);
+  return { added };
+}
+
 export async function updateFlashcardCardAction(
   deckId: string,
   cardId: string,

@@ -29,6 +29,39 @@ export async function markReadingCompleteAction(formData: FormData): Promise<voi
   revalidatePath(`/dashboard/student/learning/reading/${readingId}`);
 }
 
+export type CreateReadingFromDraftPayload = {
+  title: string;
+  description?: string | null;
+  content: string;
+  vocab?: string[];
+  questions?: string[];
+};
+
+export async function createReadingFromDraftAction(
+  classId: string,
+  draft: CreateReadingFromDraftPayload
+): Promise<{ error?: string }> {
+  const user = await requireRole(['teacher', 'admin', 'school_admin']);
+  const classes = await listClassesForTeacher(user.id);
+  if (!classes.some((c) => c.id === classId)) {
+    return { error: 'You do not have access to that class.' };
+  }
+  if (!draft.title?.trim() || !draft.content?.trim()) {
+    return { error: 'Title and reading content are required.' };
+  }
+  const reading = await dbCreateReading({
+    classId,
+    title: draft.title.trim(),
+    description: draft.description ?? null,
+    content: draft.content.trim(),
+    vocab: draft.vocab ?? [],
+    questions: draft.questions ?? [],
+  });
+  revalidatePath('/dashboard/teacher/learning-tools');
+  await redirectWithLocale(`/dashboard/teacher/learning-tools/readings/${reading.id}/edit`);
+  return { error: undefined }; // unreachable; redirect throws
+}
+
 export async function createReadingAction(formData: FormData): Promise<void> {
   const user = await requireRole(['teacher', 'admin', 'school_admin']);
   const classId = formData.get('classId');

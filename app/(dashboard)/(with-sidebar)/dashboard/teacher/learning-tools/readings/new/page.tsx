@@ -7,6 +7,7 @@ import { listClassesForTeacher } from '@/lib/db/queries/education';
 import { createReadingAction } from '@/lib/actions/learning/readings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GenerateReadingButton } from '@/components/learning/GenerateReadingButton';
 import { ArrowLeft } from 'lucide-react';
 
 export default async function NewReadingPage({
@@ -58,7 +59,10 @@ export default async function NewReadingPage({
         ) : (
           <Card className="rounded-2xl border border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">{t('newTitle')}</CardTitle>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="text-base">{t('newTitle')}</CardTitle>
+                <GenerateReadingButton classes={classes} label={t('generateWithAI')} />
+              </div>
             </CardHeader>
             <CardContent>
               <form action={createReadingAction} className="space-y-5">

@@ -20,6 +20,7 @@ import {
 } from '@/lib/db/queries/flashcards';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GenerateVocabButton } from '@/components/learning/GenerateVocabButton';
 
 type Props = {
   params: Promise<{ deckId: string }>;
@@ -183,7 +184,13 @@ export default async function TeacherFlashcardDeckDetailPage({
 
         <Card className="rounded-2xl border border-[#e5e7eb]">
           <CardHeader>
-            <CardTitle>{t('addCard')}</CardTitle>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <CardTitle>{t('addCard')}</CardTitle>
+              <GenerateVocabButton
+                deckId={deckId}
+                label={t('generateWithAI')}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <form

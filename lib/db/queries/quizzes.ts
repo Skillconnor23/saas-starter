@@ -135,6 +135,36 @@ export async function publishQuiz(quizId: string): Promise<EduQuiz | null> {
   return updated ?? null;
 }
 
+export async function addQuestionsBulk(
+  quizId: string,
+  questions: CreateQuestionData[]
+): Promise<EduQuizQuestion[]> {
+  const created: EduQuizQuestion[] = [];
+  let nextOrder = 0;
+  const [maxRow] = await db
+    .select({ maxOrder: sql<number>`coalesce(max(${eduQuizQuestions.order}), 0)` })
+    .from(eduQuizQuestions)
+    .where(eq(eduQuizQuestions.quizId, quizId));
+  nextOrder = (maxRow?.maxOrder ?? 0) + 1;
+
+  for (const data of questions) {
+    const [row] = await db
+      .insert(eduQuizQuestions)
+      .values({
+        quizId,
+        type: data.type,
+        prompt: data.prompt,
+        choices: data.choices ?? null,
+        correctAnswer: data.correctAnswer,
+        explanation: data.explanation ?? null,
+        order: nextOrder++,
+      })
+      .returning();
+    if (row) created.push(row);
+  }
+  return created;
+}
+
 export async function addQuestion(
   data: CreateQuestionData
 ): Promise<EduQuizQuestion> {

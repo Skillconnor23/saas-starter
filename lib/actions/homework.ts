@@ -215,6 +215,41 @@ const createHomeworkSchema = z.object({
   attachmentUrl: z.string().url().optional().nullable(),
 });
 
+export type CreateHomeworkFromDraftPayload = {
+  title: string;
+  instructions: string;
+};
+
+export async function createHomeworkFromDraftAction(
+  classId: string,
+  draft: CreateHomeworkFromDraftPayload
+): Promise<{ error?: string }> {
+  const user = await getUser();
+  if (!user) return { error: 'Not signed in.' };
+  if (!canCreateHomework(user)) return { error: 'Not allowed to create homework.' };
+
+  const canPost = await canPostToClassroom(user, classId);
+  if (!canPost) return { error: 'You do not have permission to create homework for this class.' };
+
+  if (!draft.title?.trim() || !draft.instructions?.trim()) {
+    return { error: 'Title and instructions are required.' };
+  }
+
+  await createHomework({
+    classId,
+    title: draft.title.trim(),
+    instructions: draft.instructions.trim(),
+    dueDate: null,
+    attachmentUrl: null,
+    createdByUserId: user.id,
+  });
+
+  revalidatePath('/dashboard/homework');
+  revalidatePath('/dashboard/student/homework');
+  await redirectWithLocale('/dashboard/homework');
+  return { error: undefined }; // unreachable; redirect throws
+}
+
 export type CreateHomeworkResult = { success: true } | { success: false; error: string };
 
 export async function createHomeworkAction(

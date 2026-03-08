@@ -11,6 +11,7 @@ import {
   updateQuiz as dbUpdateQuiz,
   publishQuiz as dbPublishQuiz,
   addQuestion as dbAddQuestion,
+  addQuestionsBulk as dbAddQuestionsBulk,
   updateQuestion as dbUpdateQuestion,
   deleteQuestion as dbDeleteQuestion,
   reorderQuestions as dbReorderQuestions,
@@ -52,27 +53,28 @@ export async function createQuizAction(formData: FormData) {
     classIds: classIdsArr,
   });
   if (!parsed.success) {
-    redirect(`/teacher/quizzes/new?error=${encodeURIComponent(parsed.error.errors[0]?.message ?? 'Validation failed')}`);
+    await redirectWithLocale(`/teacher/quizzes/new?error=${encodeURIComponent(parsed.error.errors[0]?.message ?? 'Validation failed')}`);
   }
+  const data = parsed.data!;
 
   if (user.platformRole === 'teacher') {
-    for (const classId of parsed.data.classIds) {
+    for (const classId of data.classIds) {
       const assigned = await hasTeacherAssignment(classId, user.id);
       if (!assigned) {
-        redirect(`/teacher/quizzes/new?error=${encodeURIComponent('You are not assigned to one or more selected classes')}`);
+        await redirectWithLocale(`/teacher/quizzes/new?error=${encodeURIComponent('You are not assigned to one or more selected classes')}`);
       }
     }
   }
 
   const quiz = await dbCreateQuiz({
     createdByUserId: user.id,
-    title: parsed.data.title,
-    description: parsed.data.description,
-    classIds: parsed.data.classIds,
+    title: data.title,
+    description: data.description,
+    classIds: data.classIds,
   });
 
   revalidatePath('/teacher/quizzes');
-  redirect(`/teacher/quizzes/${quiz.id}/edit`);
+  await redirectWithLocale(`/teacher/quizzes/${quiz.id}/edit`);
 }
 
 const updateQuizSchema = z.object({
@@ -123,6 +125,21 @@ export async function updateQuizAction(
   const updated = await dbUpdateQuiz(quizId, updateData);
   if (!updated) return { error: 'Quiz not found' };
 
+  revalidatePath(`/teacher/quizzes/${quizId}/edit`);
+  return {};
+}
+
+export async function updateQuizMetadataAction(
+  quizId: string,
+  data: { title?: string; description?: string | null }
+): Promise<{ error?: string }> {
+  const user = await requireRole(['teacher', 'admin', 'school_admin']);
+  if (user.platformRole === 'teacher') {
+    const canManage = await teacherCanManageQuiz(quizId, user.id);
+    if (!canManage) return { error: 'You cannot edit this quiz' };
+  }
+  const updated = await dbUpdateQuiz(quizId, data);
+  if (!updated) return { error: 'Quiz not found' };
   revalidatePath(`/teacher/quizzes/${quizId}/edit`);
   return {};
 }
@@ -231,6 +248,46 @@ export async function addQuestionAction(
 
   revalidatePath(`/teacher/quizzes/${quizId}/edit`);
   return {};
+}
+
+export async function addQuestionsBulkAction(
+  quizId: string,
+  questions: Array<{
+    type: QuizQuestionType;
+    prompt: string;
+    choices?: { id: string; label: string; value: string }[] | null;
+    correctAnswer: unknown;
+    explanation?: string | null;
+  }>
+): Promise<{ error?: string; added?: number }> {
+  const user = await requireRole(['teacher', 'admin', 'school_admin']);
+  const { getQuizById } = await import('@/lib/db/queries/quizzes');
+  const quiz = await getQuizById(quizId);
+  if (!quiz) return { error: 'Quiz not found' };
+  if (user.platformRole === 'teacher') {
+    const canManage = await teacherCanManageQuiz(quizId, user.id);
+    if (!canManage) return { error: 'You cannot edit this quiz' };
+  }
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return { error: 'No questions to add.' };
+  }
+  if (questions.length > 15) {
+    return { error: 'Maximum 15 questions per bulk add.' };
+  }
+
+  const payloads = questions.map((q) => ({
+    quizId,
+    type: q.type,
+    prompt: q.prompt,
+    choices: q.choices,
+    correctAnswer: q.correctAnswer,
+    explanation: q.explanation,
+  }));
+
+  await dbAddQuestionsBulk(quizId, payloads);
+  revalidatePath(`/teacher/quizzes/${quizId}/edit`);
+  revalidatePath('/teacher/quizzes');
+  return { added: questions.length };
 }
 
 export async function updateQuestionAction(

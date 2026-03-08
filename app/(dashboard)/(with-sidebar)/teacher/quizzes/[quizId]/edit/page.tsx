@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { AddQuestionButton } from '@/components/quizzes/AddQuestionButton';
+import { GenerateQuizButton } from '@/components/quizzes/GenerateQuizButton';
 
 type Props = { params: Promise<{ quizId: string }> };
 
@@ -146,12 +147,17 @@ export default async function EditQuizPage({ params }: Props) {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('questions')}</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <CardTitle>{t('questions')}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
               {q.questions.length === 0
-                ? t('addOneToPublish')
-                : t('questionsCount', { count: q.questions.length })}
-            </p>
+                  ? t('addOneToPublish')
+                  : t('questionsCount', { count: q.questions.length })}
+                </p>
+              </div>
+              <GenerateQuizButton quizId={quizId} label={t('generateWithAI')} />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {q.questions.length === 0 ? (
