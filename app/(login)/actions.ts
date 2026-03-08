@@ -128,7 +128,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
       }
     }
     if (process.env.NODE_ENV === 'production') {
-      console.error('[signin] Unexpected error:', error instanceof Error ? error.message : String(error));
+      console.error('[signin] Unexpected auth error');
     }
     return {
       error: 'invalidCredentials',
@@ -248,9 +248,9 @@ export async function resendVerificationEmail(
   const locale = await getLocale();
   const sendResult = await sendVerificationEmailIfNeeded(sendEmail, locale);
   if (!sendResult.sent) {
-    console.error('[resend-verification] Failed to send:', sendResult.error, '| user:', user.id, '| email:', sendEmail);
+    console.error('[resend-verification] Failed to send:', sendResult.error);
   } else if (process.env.NODE_ENV !== 'production') {
-    console.log('[resend-verification] Sent to:', sendEmail);
+    console.log('[resend-verification] Sent');
   }
   return { success: true };
 }
@@ -313,7 +313,7 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
     createdUser = user;
 
     if (isAuthDebug) {
-      console.log('[signup] User row created: id=', createdUser.id, 'email=', createdUser.email);
+      console.log('[signup] User row created');
     }
 
     if (inviteId) {
@@ -348,7 +348,7 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
       });
 
       if (isAuthDebug) {
-        console.log('[signup] Joined existing team: teamId=', teamId);
+        console.log('[signup] Joined existing team');
       }
     } else {
       const newTeam: NewTeam = {
@@ -369,7 +369,7 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
       });
 
       if (isAuthDebug) {
-        console.log('[signup] Team row created: teamId=', teamId);
+        console.log('[signup] Team row created');
       }
     }
 
@@ -381,7 +381,7 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
     });
 
     if (isAuthDebug) {
-      console.log('[signup] Team membership created: userId=', createdUser.id, 'teamId=', teamId);
+      console.log('[signup] Team membership created');
     }
   });
   } catch (err) {
@@ -394,7 +394,7 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
   }
 
   if (isAuthDebug) {
-    console.log('[signup] Provisioning complete. User id=', createdUser.id, '| teamId=', teamId);
+    console.log('[signup] Provisioning complete');
   }
 
   const cookieStore = await cookies();
@@ -445,9 +445,9 @@ export const signUp = validatedAction(signUpSchema, async (data) => {
   const locale = await getLocale();
   const sendResult = await sendVerificationEmail(emailNormalized, token, locale);
   if (!sendResult.ok) {
-    console.error('[signup] Verification email failed:', sendResult.error, '| email:', email);
+    console.error('[signup] Verification email failed:', sendResult.error);
   } else if (process.env.NODE_ENV !== 'production') {
-    console.log('[signup] Verification email sent to:', email);
+    console.log('[signup] Verification email sent');
   }
 
   await createAuditLog({

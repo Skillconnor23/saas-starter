@@ -7,9 +7,6 @@ import { users } from '@/lib/db/schema';
 import { comparePasswords } from '@/lib/auth/session';
 import { authConfig } from './auth.config';
 
-const isDev = process.env.NODE_ENV !== 'production';
-const authDebug = process.env.AUTH_DEBUG === 'true' || isDev;
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
@@ -37,60 +34,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           )
           .limit(1);
 
-        const dbHost = process.env.POSTGRES_URL
-          ? new URL(process.env.POSTGRES_URL.replace('postgresql://', 'https://')).hostname
-          : 'unknown';
-
         if (!user) {
-          if (authDebug) {
-            console.log('[auth] User not found | normalized_email:', email, '| DB:', dbHost, '| rejection: user_not_found');
-          }
+          console.log('[auth] Login failed: invalid credentials');
           return null;
         }
 
         const hasPasswordHash = !!user.passwordHash && typeof user.passwordHash === 'string' && user.passwordHash.length > 0;
-        const hashPrefix = hasPasswordHash ? user.passwordHash.slice(0, 7) : 'N/A';
         if (!hasPasswordHash) {
-          if (authDebug) {
-            console.log('[auth] User found but password_hash missing/empty | user_id:', user.id, '| email:', user.email, '| DB:', dbHost, '| rejection: no_password_hash');
-          }
+          console.log('[auth] Login failed: invalid credentials');
           return null;
         }
 
         const valid = await comparePasswords(password, user.passwordHash);
-        const emailVerifiedRaw = user.emailVerified;
-        const emailVerifiedTruthy = !!emailVerifiedRaw;
+        const emailVerifiedTruthy = !!user.emailVerified;
 
-        if (authDebug) {
-          const rejection =
-            !valid
-              ? 'password_mismatch'
-              : !emailVerifiedTruthy
-                ? 'email_not_verified'
-                : 'none';
-          console.log(
-            '[auth] Sign-in attempt | normalized_email:',
-            email,
-            '| user_id:',
-            user.id,
-            '| user.email(DB):',
-            user.email,
-            '| password_hash_exists:',
-            hasPasswordHash,
-            '| password_hash_prefix:',
-            hashPrefix,
-            '| password_compare:',
-            valid,
-            '| email_verified(column):',
-            emailVerifiedRaw ?? 'null',
-            '| rejection:',
-            rejection,
-            '| DB:',
-            dbHost
-          );
+        if (!valid) {
+          console.log('[auth] Login failed: invalid credentials');
+          return null;
         }
-
-        if (!valid) return null;
 
         if (!emailVerifiedTruthy) {
           throw new EmailNotVerifiedError();

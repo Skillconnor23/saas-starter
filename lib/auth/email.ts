@@ -132,15 +132,15 @@ export async function sendVerificationEmail(
 
   if (!resend) {
     if (process.env.NODE_ENV !== 'production') {
-      console.log('[verification] DEV: Would send to:', email, '| URL:', verifyUrl);
+      console.log('[verification] DEV: Would send verification email');
       return { ok: true };
     }
-    console.error('[verification] RESEND_API_KEY not set in production — email not sent to:', email);
+    console.error('[verification] RESEND_API_KEY not set in production — verification email not sent');
     return { ok: false, error: 'Email provider not configured' };
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    console.log('[verification] Sending verification email to:', email);
+    console.log('[verification] Sending verification email');
   }
 
   const html = buildTransactionalEmailHtml(copy, verifyUrl);
@@ -156,11 +156,11 @@ export async function sendVerificationEmail(
 
   if (error) {
     const errMsg = typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error);
-    console.error('[verification] Resend failed:', errMsg, '| to:', email);
+    console.error('[verification] Resend failed:', errMsg);
     return { ok: false, error: errMsg };
   }
   if (process.env.NODE_ENV !== 'production') {
-    console.log('[verification] Verification email sent to:', email);
+    console.log('[verification] Verification email sent');
   }
   return { ok: true };
 }
@@ -175,8 +175,7 @@ export async function sendPlatformInviteEmail(
   const inviteUrl = `${baseUrl}/accept-invite?token=${encodeURIComponent(token)}`;
 
   if (!resend) {
-    console.log('[DEV] Invite email would be sent to:', email);
-    console.log('[DEV] Invite URL:', inviteUrl);
+    console.log('[DEV] Invite email would be sent');
     return { ok: true };
   }
 
@@ -213,11 +212,10 @@ export async function sendPasswordResetEmail(
 
   if (!resend) {
     if (process.env.NODE_ENV !== 'production') {
-      console.log('[DEV] Password reset email would be sent to:', email);
-      console.log('[DEV] Reset URL:', resetUrl);
+      console.log('[DEV] Password reset email would be sent');
       return { ok: true };
     }
-    console.error('[password-reset] RESEND_API_KEY not set in production — email not sent to:', email);
+    console.error('[password-reset] RESEND_API_KEY not set in production — password reset email not sent');
     return { ok: false, error: 'Email provider not configured' };
   }
 
@@ -234,11 +232,11 @@ export async function sendPasswordResetEmail(
 
   if (error) {
     const errMsg = typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error);
-    console.error('[password-reset] Resend failed:', errMsg, '| to:', email);
+    console.error('[password-reset] Resend failed:', errMsg);
     return { ok: false, error: errMsg };
   }
   if (process.env.NODE_ENV !== 'production') {
-    console.log('[DEV] Password reset email sent to:', email);
+    console.log('[DEV] Password reset email sent');
   }
   return { ok: true };
 }

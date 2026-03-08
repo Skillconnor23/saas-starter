@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { cookies } from 'next/headers';
 
@@ -36,6 +35,7 @@ function getFormDataFromArgs(args: [unknown, unknown?]): FormData | null {
 
 /**
  * Set invite cookie then redirect to sign-up. Use as form action for "Sign up" on join page.
+ * Redirects to locale-prefixed /sign-up (safe internal path).
  */
 export async function setClassInviteCookieAndRedirectToSignUp(
   ...args: [unknown, unknown?]
@@ -43,16 +43,16 @@ export async function setClassInviteCookieAndRedirectToSignUp(
   const formData = getFormDataFromArgs(args);
   if (!formData) await redirectWithLocale('/sign-in');
   const token = formData!.get('token');
-  const path = formData!.get('redirectPath');
-  if (typeof token !== 'string' || !token.trim() || typeof path !== 'string' || !path.trim()) {
+  if (typeof token !== 'string' || !token.trim()) {
     await redirectWithLocale('/sign-in');
   }
   await setClassInviteCookie((token as string).trim());
-  redirect(path as string);
+  await redirectWithLocale('/sign-up');
 }
 
 /**
  * Set invite cookie then redirect to sign-in. Use as form action for "Log in" on join page.
+ * Redirects to locale-prefixed /sign-in (safe internal path).
  */
 export async function setClassInviteCookieAndRedirectToSignIn(
   ...args: [unknown, unknown?]
@@ -60,12 +60,11 @@ export async function setClassInviteCookieAndRedirectToSignIn(
   const formData = getFormDataFromArgs(args);
   if (!formData) await redirectWithLocale('/sign-in');
   const token = formData!.get('token');
-  const path = formData!.get('redirectPath');
-  if (typeof token !== 'string' || !token.trim() || typeof path !== 'string' || !path.trim()) {
+  if (typeof token !== 'string' || !token.trim()) {
     await redirectWithLocale('/sign-in');
   }
   await setClassInviteCookie((token as string).trim());
-  redirect(path as string);
+  await redirectWithLocale('/sign-in');
 }
 import { requirePermission, can } from '@/lib/auth/permissions';
 import { checkRateLimit } from '@/lib/auth/rate-limit';

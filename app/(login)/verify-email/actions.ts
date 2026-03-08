@@ -27,7 +27,7 @@ export async function verifyEmailAction(token: string): Promise<{
     .returning({ id: users.id });
 
   if (updated.length === 0) {
-    console.error('[verify-email] User not found for email:', tokenData.email);
+    console.error('[verify-email] User not found for token');
     return {
       success: false,
       error: 'User not found. The account may have been deleted.',

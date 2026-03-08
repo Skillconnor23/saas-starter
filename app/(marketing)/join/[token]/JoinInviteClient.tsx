@@ -18,14 +18,10 @@ type Labels = {
 export function JoinInviteClient({
   token,
   isLoggedInAsStudent,
-  signInPath,
-  signUpPath,
   labels,
 }: {
   token: string;
   isLoggedInAsStudent: boolean;
-  signInPath: string;
-  signUpPath: string;
   labels: Labels;
 }) {
   const [state, formAction, isPending] = useActionState(
@@ -64,14 +60,12 @@ export function JoinInviteClient({
       <div className="flex flex-wrap gap-3">
         <form action={setClassInviteCookieAndRedirectToSignUp}>
           <input type="hidden" name="token" value={token} />
-          <input type="hidden" name="redirectPath" value={signUpPath} />
           <Button type="submit" variant="default">
             {labels.createStudentAccount}
           </Button>
         </form>
         <form action={setClassInviteCookieAndRedirectToSignIn}>
           <input type="hidden" name="token" value={token} />
-          <input type="hidden" name="redirectPath" value={signInPath} />
           <Button type="submit" variant="outline">
             {labels.logIn}
           </Button>

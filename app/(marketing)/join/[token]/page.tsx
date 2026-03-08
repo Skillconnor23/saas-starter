@@ -107,9 +107,6 @@ export default async function JoinInvitePage({
       safeLog('user lookup error', { err: userErr instanceof Error ? userErr.message : String(userErr) });
     }
 
-    const signInPath = `/${locale}/sign-in`;
-    const signUpPath = `/${locale}/sign-up`;
-
     if (!invite) {
       return (
         <main className="min-h-[100dvh] flex flex-col items-center justify-center p-6">
@@ -152,8 +149,6 @@ export default async function JoinInvitePage({
           <JoinInviteClient
             token={token}
             isLoggedInAsStudent={isLoggedInAsStudent}
-            signInPath={signInPath}
-            signUpPath={signUpPath}
             labels={{
               joinThisClass: t('joinThisClass'),
               createStudentAccount: t('createStudentAccount'),

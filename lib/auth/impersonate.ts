@@ -44,11 +44,6 @@ export async function getImpersonateUserIdFromCookie(): Promise<number | null> {
  */
 export async function getConnorTeacherUserId(): Promise<number | null> {
   const email = getTeacherTestEmail();
-  const debug = process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true';
-
-  if (debug) {
-    console.log('[impersonate] Teacher lookup email:', email);
-  }
 
   const [row] = await db
     .select({ id: users.id, platformRole: users.platformRole })
@@ -62,10 +57,6 @@ export async function getConnorTeacherUserId(): Promise<number | null> {
     )
     .limit(1);
 
-  if (debug) {
-    console.log('[impersonate] Teacher lookup result:', row ? { id: row.id, platformRole: row.platformRole } : 'no user found');
-  }
-
   return row?.id ?? null;
 }
 
@@ -75,12 +66,7 @@ export async function getConnorTeacherUserId(): Promise<number | null> {
 export async function setImpersonateTeacherCookie(): Promise<
   { ok: true; redirectTo: string } | { ok: false; error: string }
 > {
-  const debug = process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true';
   const userId = await getConnorTeacherUserId();
-
-  if (debug) {
-    console.log('[impersonate] setImpersonateTeacherCookie: userId=', userId ?? 'null');
-  }
 
   if (!userId) {
     return {

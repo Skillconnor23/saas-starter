@@ -105,7 +105,7 @@ export async function resetPasswordWithToken(
   }
 
   if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {
-    console.log('[password-reset] Updating password for userId:', tokenData.userId);
+    console.log('[password-reset] Updating password');
   }
 
   const passwordHash = await hashPassword(newPassword);
@@ -117,7 +117,7 @@ export async function resetPasswordWithToken(
     .returning({ id: users.id });
 
   if (updated.length === 0) {
-    console.error('[password-reset] No rows updated for userId:', tokenData.userId);
+    console.error('[password-reset] No rows updated');
     return { success: false, error: 'invalid_or_expired' };
   }
 
@@ -125,7 +125,7 @@ export async function resetPasswordWithToken(
   await invalidateOtherResetTokensForUser(tokenData.userId);
 
   if (process.env.NODE_ENV !== 'production' || process.env.AUTH_DEBUG === 'true') {
-    console.log('[password-reset] Password updated for user:', updated[0].id);
+    console.log('[password-reset] Password updated');
   }
 
   return { success: true };
