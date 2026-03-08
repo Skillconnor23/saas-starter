@@ -1,5 +1,6 @@
 'use server';
 
+import { redirect } from 'next/navigation';
 import { redirectWithLocale } from '@/lib/i18n/redirect';
 import { cookies } from 'next/headers';
 
@@ -41,13 +42,13 @@ export async function setClassInviteCookieAndRedirectToSignUp(
   ...args: [unknown, unknown?]
 ): Promise<never> {
   const formData = getFormDataFromArgs(args);
-  if (!formData) await redirectWithLocale('/sign-in');
-  const token = formData!.get('token');
+  if (!formData) return redirectWithLocale('/sign-in');
+  const token = formData.get('token');
   if (typeof token !== 'string' || !token.trim()) {
-    await redirectWithLocale('/sign-in');
+    return redirectWithLocale('/sign-in');
   }
   await setClassInviteCookie((token as string).trim());
-  await redirectWithLocale('/sign-up');
+  return redirectWithLocale('/sign-up');
 }
 
 /**
@@ -58,13 +59,13 @@ export async function setClassInviteCookieAndRedirectToSignIn(
   ...args: [unknown, unknown?]
 ): Promise<never> {
   const formData = getFormDataFromArgs(args);
-  if (!formData) await redirectWithLocale('/sign-in');
-  const token = formData!.get('token');
+  if (!formData) return redirectWithLocale('/sign-in');
+  const token = formData.get('token');
   if (typeof token !== 'string' || !token.trim()) {
-    await redirectWithLocale('/sign-in');
+    return redirectWithLocale('/sign-in');
   }
   await setClassInviteCookie((token as string).trim());
-  await redirectWithLocale('/sign-in');
+  return redirectWithLocale('/sign-in');
 }
 import { requirePermission, can } from '@/lib/auth/permissions';
 import { checkRateLimit } from '@/lib/auth/rate-limit';
@@ -121,12 +122,12 @@ export async function joinClassWithInviteFormAction(
     return { error: 'Invalid invite' };
   }
   const result = await joinClassWithInviteAction(token.trim());
-  if (result.success) {
-    const { getLocale } = await import('next-intl/server');
-    const locale = (await getLocale()) || 'en';
-    redirect(`/${locale}/dashboard/student`);
+  if (!result.success) {
+    return { error: result.error };
   }
-  return { error: result.error };
+  const { getLocale } = await import('next-intl/server');
+  const locale = (await getLocale()) || 'en';
+  redirect(`/${locale}/dashboard/student`);
 }
 
 /**
