@@ -115,7 +115,7 @@ export default async function AcademyPage() {
             {
               step: 3,
               text: t("howItWorks.step3"),
-              image: "/images/how-it-works/practice-homework.png",
+              image: "/learning-at-kitchen-table.jpg",
               imageAlt: "Practice homework",
               badgeClass: "bg-red-100 text-red-700",
             },

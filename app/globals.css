@@ -9,7 +9,6 @@
 @variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
 
@@ -58,6 +57,11 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
+/* --font-nunito on html for components using font-sans or var(--font-nunito) */
+@theme inline {
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -73,12 +77,6 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
-  }
-}
-
-@layer utilities {
-  body {
-    font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
   }
 }
 

@@ -50,8 +50,8 @@ export default async function RootLayout({
   ]);
   const safeUser = toSafeUserDto(user);
   return (
-    <html lang="en" className="bg-white dark:bg-gray-950 text-black dark:text-white">
-      <body className={`${nunito.variable} min-h-[100dvh] bg-white antialiased font-sans`}>
+    <html lang="en" className={`${nunito.className} ${nunito.variable} bg-white dark:bg-gray-950 text-black dark:text-white`}>
+      <body className={`${nunito.className} ${nunito.variable} min-h-[100dvh] bg-white antialiased`}>
         <SWRConfig
           value={{
             fallback: {
