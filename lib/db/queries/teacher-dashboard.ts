@@ -1,10 +1,14 @@
-import { eq, and, gte, asc, sql, inArray } from 'drizzle-orm';
+import { eq, and, gte, lt, asc, desc, sql, inArray, isNull } from 'drizzle-orm';
 import { db } from '../drizzle';
 import {
   eduClasses,
   eduClassTeachers,
   eduEnrollments,
   eduSessions,
+  classSessions,
+  attendanceRecords,
+  homework,
+  homeworkSubmissions,
   users,
   eduQuizClasses,
   eduQuizzes,
@@ -43,9 +47,24 @@ export type TeacherNextSession = {
   sessionId: string;
   classId: string;
   className: string;
+  geckoLevel: string | null;
+  studentCount: number;
   startsAt: Date;
   meetingUrl: string | null;
   title: string | null;
+};
+
+export type AttendanceNeededItem = {
+  classId: string;
+  className: string;
+  sessionId: string;
+  sessionStartsAt: Date;
+};
+
+export type TeacherTodaySummary = {
+  classesTodayCount: number;
+  homeworkToReviewCount: number;
+  attendanceNeeded: AttendanceNeededItem[];
 };
 
 export async function getTeacherDashboardClasses(
@@ -399,22 +418,35 @@ export async function getTeacherNextSession(
   teacherUserId: number
 ): Promise<TeacherNextSession | null> {
   const now = new Date();
+  const classIds = (
+    await db
+      .select({ classId: eduClassTeachers.classId })
+      .from(eduClassTeachers)
+      .where(
+        and(
+          eq(eduClassTeachers.teacherUserId, teacherUserId),
+          eq(eduClassTeachers.isActive, true)
+        )
+      )
+  ).map((r) => r.classId);
+
+  if (classIds.length === 0) return null;
+
   const [row] = await db
     .select({
       sessionId: eduSessions.id,
       classId: eduClasses.id,
       className: eduClasses.name,
+      geckoLevel: eduClasses.geckoLevel,
       startsAt: eduSessions.startsAt,
       meetingUrl: eduSessions.meetingUrl,
       title: eduSessions.title,
     })
     .from(eduSessions)
     .innerJoin(eduClasses, eq(eduSessions.classId, eduClasses.id))
-    .innerJoin(eduClassTeachers, eq(eduClassTeachers.classId, eduClasses.id))
     .where(
       and(
-        eq(eduClassTeachers.teacherUserId, teacherUserId),
-        eq(eduClassTeachers.isActive, true),
+        inArray(eduSessions.classId, classIds),
         gte(eduSessions.startsAt, now)
       )
     )
@@ -423,12 +455,179 @@ export async function getTeacherNextSession(
 
   if (!row) return null;
 
+  const [studentCountRow] = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+    })
+    .from(eduEnrollments)
+    .where(
+      and(
+        eq(eduEnrollments.classId, row.classId),
+        eq(eduEnrollments.status, 'active')
+      )
+    );
+
   return {
     sessionId: row.sessionId,
     classId: row.classId,
     className: row.className,
+    geckoLevel: row.geckoLevel,
+    studentCount: studentCountRow?.count ?? 0,
     startsAt: row.startsAt,
     meetingUrl: row.meetingUrl,
     title: row.title,
+  };
+}
+
+/** Sessions (class_sessions) that have passed but attendance has not been taken or is incomplete. */
+export async function getSessionsNeedingAttendance(
+  teacherUserId: number
+): Promise<AttendanceNeededItem[]> {
+  const now = new Date();
+  const classIds = (
+    await db
+      .select({ classId: eduClassTeachers.classId })
+      .from(eduClassTeachers)
+      .where(
+        and(
+          eq(eduClassTeachers.teacherUserId, teacherUserId),
+          eq(eduClassTeachers.isActive, true)
+        )
+      )
+  ).map((r) => r.classId);
+
+  if (classIds.length === 0) return [];
+
+  const pastSessions = await db
+    .select({
+      sessionId: classSessions.id,
+      classId: classSessions.classId,
+      className: eduClasses.name,
+      startsAt: classSessions.startsAt,
+    })
+    .from(classSessions)
+    .innerJoin(eduClasses, eq(classSessions.classId, eduClasses.id))
+    .where(
+      and(
+        inArray(classSessions.classId, classIds),
+        lt(classSessions.startsAt, now)
+      )
+    )
+    .orderBy(desc(classSessions.startsAt));
+
+  const result: AttendanceNeededItem[] = [];
+
+  for (const s of pastSessions) {
+    const [enrolled] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(eduEnrollments)
+      .where(
+        and(
+          eq(eduEnrollments.classId, s.classId),
+          eq(eduEnrollments.status, 'active')
+        )
+      );
+
+    const [recordCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(attendanceRecords)
+      .where(eq(attendanceRecords.sessionId, s.sessionId));
+
+    const rosterCount = enrolled?.count ?? 0;
+    const markedCount = recordCount?.count ?? 0;
+    const needsAttendance = rosterCount > 0 && markedCount < rosterCount;
+
+    if (needsAttendance) {
+      result.push({
+        classId: s.classId,
+        className: s.className,
+        sessionId: s.sessionId,
+        sessionStartsAt: s.startsAt,
+      });
+    }
+  }
+
+  return result.slice(0, 10);
+}
+
+/** Homework submissions without feedback, for classes teacher teaches. */
+export async function getHomeworkToReviewCount(
+  teacherUserId: number
+): Promise<number> {
+  const classIds = (
+    await db
+      .select({ classId: eduClassTeachers.classId })
+      .from(eduClassTeachers)
+      .where(
+        and(
+          eq(eduClassTeachers.teacherUserId, teacherUserId),
+          eq(eduClassTeachers.isActive, true)
+        )
+      )
+  ).map((r) => r.classId);
+
+  if (classIds.length === 0) return 0;
+
+  const [row] = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+    })
+    .from(homeworkSubmissions)
+    .innerJoin(homework, eq(homeworkSubmissions.homeworkId, homework.id))
+    .where(
+      and(
+        inArray(homework.classId, classIds),
+        isNull(homeworkSubmissions.feedback)
+      )
+    );
+
+  return row?.count ?? 0;
+}
+
+/** Today's summary: classes today, homework to review, attendance needed. */
+export async function getTeacherTodaySummary(
+  teacherUserId: number
+): Promise<TeacherTodaySummary> {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
+
+  const classIds = (
+    await db
+      .select({ classId: eduClassTeachers.classId })
+      .from(eduClassTeachers)
+      .where(
+        and(
+          eq(eduClassTeachers.teacherUserId, teacherUserId),
+          eq(eduClassTeachers.isActive, true)
+        )
+      )
+  ).map((r) => r.classId);
+
+  if (classIds.length === 0) {
+    return { classesTodayCount: 0, homeworkToReviewCount: 0, attendanceNeeded: [] };
+  }
+
+  const [classesTodayRows, homeworkCount, attendanceNeeded] = await Promise.all([
+    db
+      .select({ count: sql<number>`count(distinct ${eduSessions.classId})::int` })
+      .from(eduSessions)
+      .where(
+        and(
+          inArray(eduSessions.classId, classIds),
+          gte(eduSessions.startsAt, todayStart),
+          lt(eduSessions.startsAt, todayEnd)
+        )
+      ),
+    getHomeworkToReviewCount(teacherUserId),
+    getSessionsNeedingAttendance(teacherUserId),
+  ]);
+
+  return {
+    classesTodayCount: classesTodayRows[0]?.count ?? 0,
+    homeworkToReviewCount: homeworkCount,
+    attendanceNeeded,
   };
 }
