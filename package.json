@@ -57,6 +57,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "tsx": "^4.21.0",
     "vitest": "^2.1.0"
   }
 }
