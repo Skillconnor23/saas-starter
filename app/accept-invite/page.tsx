@@ -61,12 +61,7 @@ export default async function AcceptInvitePage({
   try {
     const params = await searchParams;
     const tokenRaw = params?.token;
-    const token =
-      typeof tokenRaw === 'string'
-        ? tokenRaw.trim()
-        : Array.isArray(tokenRaw) && tokenRaw.length > 0
-          ? String(tokenRaw[0]).trim()
-          : '';
+    const token = typeof tokenRaw === 'string' ? tokenRaw.trim() : '';
 
     const hdrs = await headers();
     const ip = (await import('@/lib/auth/rate-limit')).getClientIp(hdrs);
