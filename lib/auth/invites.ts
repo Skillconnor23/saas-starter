@@ -101,22 +101,45 @@ export async function validatePlatformInvite(token: string): Promise<
   | { ok: true; email: string; platformRole: PlatformInviteRole; schoolId: string | null; classId: string | null }
   | { ok: false; error: string }
 > {
-  const tokenHash = hashToken(token);
+  const tokenNormalized = typeof token === 'string' ? token.trim() : '';
+  if (!tokenNormalized) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[validatePlatformInvite] Rejected: empty token');
+    }
+    return { ok: false, error: 'Invalid or expired invite' };
+  }
+
+  const tokenHash = hashToken(tokenNormalized);
   const now = new Date();
 
   const [invite] = await db
     .select()
     .from(platformInvites)
-    .where(
-      and(
-        eq(platformInvites.tokenHash, tokenHash),
-        gt(platformInvites.expiresAt, now),
-        isNull(platformInvites.usedAt)
-      )
-    )
+    .where(eq(platformInvites.tokenHash, tokenHash))
     .limit(1);
 
   if (!invite) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[validatePlatformInvite] Rejected: token not found (no matching hash)');
+    }
+    return { ok: false, error: 'Invalid or expired invite' };
+  }
+
+  if (invite.usedAt) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[validatePlatformInvite] Rejected: invite already used');
+    }
+    return { ok: false, error: 'Invalid or expired invite' };
+  }
+
+  const expiresAt = invite.expiresAt instanceof Date ? invite.expiresAt : new Date(invite.expiresAt);
+  if (expiresAt <= now) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[validatePlatformInvite] Rejected: expired', {
+        expiresAt: expiresAt.toISOString(),
+        now: now.toISOString(),
+      });
+    }
     return { ok: false, error: 'Invalid or expired invite' };
   }
 
@@ -124,7 +147,7 @@ export async function validatePlatformInvite(token: string): Promise<
     ok: true,
     email: invite.email,
     platformRole: invite.platformRole as PlatformInviteRole,
-    schoolId: invite.schoolId,
+    schoolId: invite.schoolId ?? null,
     classId: invite.classId ?? null,
   };
 }
@@ -134,10 +157,11 @@ export async function consumePlatformInvite(token: string): Promise<
   | { ok: true; email: string; platformRole: PlatformInviteRole; schoolId: string | null; classId: string | null }
   | { ok: false; error: string }
 > {
+  const tokenNormalized = typeof token === 'string' ? token.trim() : '';
   const result = await validatePlatformInvite(token);
   if (!result.ok) return result;
 
-  const tokenHash = hashToken(token);
+  const tokenHash = hashToken(tokenNormalized);
   const now = new Date();
 
   await db

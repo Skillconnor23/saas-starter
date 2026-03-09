@@ -60,7 +60,13 @@ export default async function AcceptInvitePage({
 
   try {
     const params = await searchParams;
-    const token = params?.token;
+    const tokenRaw = params?.token;
+    const token =
+      typeof tokenRaw === 'string'
+        ? tokenRaw.trim()
+        : Array.isArray(tokenRaw) && tokenRaw.length > 0
+          ? String(tokenRaw[0]).trim()
+          : '';
 
     const hdrs = await headers();
     const ip = (await import('@/lib/auth/rate-limit')).getClientIp(hdrs);
@@ -76,7 +82,7 @@ export default async function AcceptInvitePage({
       );
     }
 
-    if (!token || typeof token !== 'string' || !token.trim()) {
+    if (!token) {
       return (
         <InviteError
           title={tAccept('invalidTitle')}
@@ -87,7 +93,7 @@ export default async function AcceptInvitePage({
       );
     }
 
-    const result = await validatePlatformInvite(token.trim());
+    const result = await validatePlatformInvite(token);
 
     if (!result.ok) {
       return (
