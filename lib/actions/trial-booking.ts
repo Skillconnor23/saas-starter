@@ -230,12 +230,11 @@ export async function createTrialBookingAction(
       ];
       const smsText = lines.join('\n');
 
-      if (isDev) {
-        console.log(LOG_PREFIX, 'about to invoke sendSmsViaUnimtx', {
-          phone: parsed.data.phone,
-          portalLink,
-        });
-      }
+      // Log in prod too so we can confirm SMS path is reached in Vercel logs
+      console.log(LOG_PREFIX, 'SMS_BLOCK_REACHED', {
+        phone: parsed.data.phone ? `${parsed.data.phone.slice(0, 4)}***` : '',
+        textLen: smsText.length,
+      });
 
       // Do not await; allow booking redirect to proceed.
       void sendSmsViaUnimtx(parsed.data.phone, smsText);

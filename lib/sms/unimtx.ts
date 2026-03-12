@@ -1,8 +1,16 @@
 const LOG_PREFIX = '[sms-unimtx]';
 
 const UNIMTX_ENDPOINT = 'https://api.unimtx.com';
-const UNIMTX_ACCESS_KEY_ID = process.env.UNIMTX_ACCESS_KEY_ID;
-const UNIMTX_SIGNATURE = process.env.UNIMTX_SIGNATURE;
+
+/**
+ * Read env at call time (not module load) so Vercel runtime injects correctly.
+ */
+function getUnimtxEnv() {
+  return {
+    accessKeyId: process.env.UNIMTX_ACCESS_KEY_ID ?? undefined,
+    signature: process.env.UNIMTX_SIGNATURE ?? undefined,
+  };
+}
 
 /**
  * Normalize a phone number to E.164.
@@ -70,61 +78,56 @@ export function normalizePhoneToE164(
  * - Failures are logged but not thrown (so booking, etc. are not blocked).
  */
 export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<void> {
+  const { accessKeyId, signature } = getUnimtxEnv();
   const isDev = process.env.NODE_ENV === 'development';
   const smsEnabled = process.env.UNIMTX_ENABLE_SMS === 'true';
 
-  console.log(LOG_PREFIX, 'sendSmsViaUnimtx invoked', {
+  const diag = {
+    hasKey: !!accessKeyId,
+    hasSignature: !!signature,
     env: process.env.NODE_ENV,
     smsEnabled,
-    toRaw,
+    toRaw: toRaw ? `${toRaw.slice(0, 4)}***` : '',
     textLength: text?.length ?? 0,
-  });
+  };
+  console.log(LOG_PREFIX, 'ENTRY sendSmsViaUnimtx', diag);
 
   const to = normalizePhoneToE164(toRaw, 'MN');
   if (!to) {
-    console.warn(LOG_PREFIX, 'skip send: invalid phone', { toRaw });
+    console.warn(LOG_PREFIX, 'EARLY_RETURN: invalid phone', { toRaw });
     return;
   }
 
-  if (!UNIMTX_ACCESS_KEY_ID) {
-    console.warn(LOG_PREFIX, 'skip send: UNIMTX_ACCESS_KEY_ID not configured');
+  if (!accessKeyId) {
+    console.warn(LOG_PREFIX, 'EARLY_RETURN: UNIMTX_ACCESS_KEY_ID missing');
     return;
   }
 
   if (!text?.trim()) {
-    console.warn(LOG_PREFIX, 'skip send: empty text');
+    console.warn(LOG_PREFIX, 'EARLY_RETURN: empty text');
     return;
   }
 
   if (isDev && !smsEnabled) {
-    console.log(LOG_PREFIX, '(dev) would send SMS (UNIMTX_ENABLE_SMS!=true)', {
-      to,
-      preview: text.slice(0, 80),
-    });
+    console.log(LOG_PREFIX, 'EARLY_RETURN: dev mode and UNIMTX_ENABLE_SMS!=true', { to });
     return;
   }
 
   const url = `${UNIMTX_ENDPOINT}/?action=sms.message.send&accessKeyId=${encodeURIComponent(
-    UNIMTX_ACCESS_KEY_ID
+    accessKeyId
   )}`;
 
   const body: Record<string, unknown> = {
     to,
-    // UniMTX accepts either `text` or `content`; docs examples use `text`.
     text,
     content: text,
   };
-  if (UNIMTX_SIGNATURE) {
-    body.signature = UNIMTX_SIGNATURE;
+  if (signature) {
+    body.signature = signature;
   }
 
   try {
-    console.log(LOG_PREFIX, 'sending request to UniMTX', {
-      url: UNIMTX_ENDPOINT,
-      to,
-      hasSignature: !!UNIMTX_SIGNATURE,
-      textLength: text.length,
-    });
+    console.log(LOG_PREFIX, 'FETCH_START', { to, urlHost: UNIMTX_ENDPOINT });
 
     const res = await fetch(url, {
       method: 'POST',
@@ -134,7 +137,7 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
       body: JSON.stringify(body),
     });
 
-    console.log(LOG_PREFIX, 'UniMTX response status', res.status);
+    console.log(LOG_PREFIX, 'FETCH_DONE', { status: res.status });
 
     if (!res.ok) {
       const errorText = await res.text().catch(() => '<no body>');
