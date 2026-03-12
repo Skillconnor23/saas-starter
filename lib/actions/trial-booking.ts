@@ -199,6 +199,8 @@ export async function createTrialBookingAction(
       console.log(LOG_PREFIX, 'db.insert(trialBookings) success');
     }
 
+    const locale = (await getLocale()) || 'en';
+
     if (isDev) {
       console.log(LOG_PREFIX, 'createTrialAccessToken start');
     }
@@ -209,7 +211,11 @@ export async function createTrialBookingAction(
 
     // Fire-and-forget confirmation SMS. Booking must still succeed even if SMS fails.
     try {
-      const portalBase = (process.env.BASE_URL || '').replace(/\/+$/, '');
+      const base =
+        process.env.APP_BASE_URL ||
+        process.env.BASE_URL ||
+        '';
+      const portalBase = base.replace(/\/+$/, '');
       const portalPath = `/${locale}/trial/portal?token=${token}`;
       const portalLink = portalBase ? `${portalBase}${portalPath}` : portalPath;
 
@@ -241,8 +247,6 @@ export async function createTrialBookingAction(
       },
       parsed.data.locale ?? undefined
     );
-
-    const locale = (await getLocale()) || 'en';
     const params = new URLSearchParams({
       name: parsed.data.fullName,
       slot: parsed.data.slotLabel,
