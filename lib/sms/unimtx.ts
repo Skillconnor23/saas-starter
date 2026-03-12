@@ -117,14 +117,22 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
     accessKeyId
   )}`;
 
+  const isMongolia = to.startsWith('+976');
+  const includeSignature = isMongolia && !!signature;
+
   const body: Record<string, unknown> = {
     to,
     text,
-    content: text,
   };
-  if (signature) {
+  if (includeSignature) {
     body.signature = signature;
   }
+
+  const phonePrefix = to.slice(0, 5);
+  const modeLog = includeSignature
+    ? 'MODE mongolia_signature_enabled'
+    : 'MODE international_no_signature';
+  console.log(LOG_PREFIX, modeLog, { phonePrefix, signatureIncluded: includeSignature });
 
   try {
     console.log(LOG_PREFIX, 'FETCH_START', { to, urlHost: UNIMTX_ENDPOINT });
