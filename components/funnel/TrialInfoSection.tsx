@@ -2,65 +2,58 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Wallet, BookOpen, HelpCircle } from 'lucide-react';
 import { TrialInfoDialog } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-const TRIAL_INFO_ITEMS = [
-  {
-    id: 'payment',
-    label: 'Төлбөр',
-    icon: Wallet,
-    title: 'Төлбөр',
-    body: `Туршилтын хичээл үнэгүй.
-
-Туршилтын хичээлийн дараа ангиуд сар сараар төлбөртэй үргэлжилнэ.
-
-• Жижиг групп
-• Уугуул англи хэлтэй багш
-• Сар сараар төлбөрөө төлнө
-
-Урт хугацааны гэрээ шаардлагагүй.`,
-  },
-  {
-    id: 'program',
-    label: 'Хөтөлбөр',
-    icon: BookOpen,
-    title: 'Хөтөлбөр',
-    body: `Сурагчид монгол сурагчдад зориулсан Gecko English хөтөлбөрөөр суралцана.
-
-Хичээл бүрт:
-• Ярианы дасгал
-• Үгсийн сан болон дүрэм
-• Идэвхтэй дасгал ажил
-• Давтлага болон гэрийн даалгавар
-
-Сурагчид англи хэлний түвшин ахих тусам дараагийн шат руу шилжинэ.`,
-  },
-  {
-    id: 'how-lessons',
-    label: 'Хэрхэн явагдах вэ',
-    icon: HelpCircle,
-    title: 'Хичээл хэрхэн явагдах вэ',
-    body: `1. Үнэгүй туршилтын хичээлээ захиална
-2. Багштайгаа уулзаж англиар дадлага хийнэ
-3. Өөрт тохирох түвшний зөвлөмж авна
-4. Жижиг групп ангид элсэж эхэлнэ
-
-Хичээлүүд ихэвчлэн амралтын өдрүүдэд долоо хоногт 2 удаа орно.
-
-Эцэг эх хүсвэл туршилтын хичээлийг ажиглаж болно.`,
-  },
+const TRIAL_INFO_IDS = [
+  { id: 'payment', icon: Wallet },
+  { id: 'program', icon: BookOpen },
+  { id: 'how-lessons', icon: HelpCircle },
 ] as const;
 
+type TrialInfoId = (typeof TRIAL_INFO_IDS)[number]['id'];
+
+function buildPricingBody(t: (key: string) => string): string {
+  const base = 'pricing';
+  return [
+    t(`${base}.trialFree`),
+    t(`${base}.noCard`),
+    t(`${base}.afterTrial`),
+    `${t(`${base}.programPrice`)}\n${t(`${base}.priceAmount`)}`,
+    `${t(`${base}.includes`)}\n\n• ${t(`${base}.bullet1`)}\n• ${t(`${base}.bullet2`)}\n• ${t(`${base}.bullet3`)}\n• ${t(`${base}.bullet4`)}`,
+    t(`${base}.noContract`),
+  ].join('\n\n');
+}
+
+function buildProgramBody(t: (key: string) => string): string {
+  const base = 'program';
+  return [
+    t(`${base}.intro`),
+    `${t(`${base}.eachClass`)}\n\n• ${t(`${base}.bullet1`)}\n• ${t(`${base}.bullet2`)}\n• ${t(`${base}.bullet3`)}\n• ${t(`${base}.bullet4`)}`,
+    t(`${base}.levels`),
+  ].join('\n\n');
+}
+
+function buildHowItWorksBody(t: (key: string) => string): string {
+  const base = 'howItWorks';
+  return [
+    `1. ${t(`${base}.step1`)}\n2. ${t(`${base}.step2`)}\n3. ${t(`${base}.step3`)}\n4. ${t(`${base}.step4`)}`,
+    t(`${base}.frequency`),
+    t(`${base}.observe`),
+  ].join('\n\n');
+}
+
 function InfoItemCard({
-  item,
+  label,
+  icon: Icon,
   onClick,
 }: {
-  item: (typeof TRIAL_INFO_ITEMS)[number];
+  label: string;
+  icon: typeof Wallet;
   onClick: () => void;
 }) {
-  const Icon = item.icon;
   return (
     <button
       type="button"
@@ -72,11 +65,11 @@ function InfoItemCard({
         'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7daf41]/40 focus-visible:ring-offset-1',
         'min-w-0 touch-manipulation'
       )}
-      aria-label={item.label}
+      aria-label={label}
     >
       <Icon className="h-4 w-4 text-slate-500 shrink-0" aria-hidden />
       <span className="text-[11px] sm:text-xs font-medium text-slate-600 text-center leading-tight truncate min-w-0 flex-1">
-        {item.label}
+        {label}
       </span>
     </button>
   );
@@ -113,40 +106,80 @@ function ModalBody({ body }: { body: string }) {
 }
 
 export function TrialInfoSection() {
+  const t = useTranslations('funnel.infoBar');
   const pathname = usePathname();
-  const [openId, setOpenId] = useState<string | null>(null);
-  const currentItem = TRIAL_INFO_ITEMS.find((i) => i.id === openId);
+  const [openId, setOpenId] = useState<TrialInfoId | null>(null);
 
   const isConfirmed = pathname?.includes('/trial/confirmed') ?? false;
   const isPortal = pathname?.includes('/trial/portal') ?? false;
   if (isConfirmed || isPortal) return null;
+
+  const getLabel = (id: TrialInfoId): string => {
+    switch (id) {
+      case 'payment':
+        return t('labelPricing');
+      case 'program':
+        return t('labelProgram');
+      case 'how-lessons':
+        return t('labelHowItWorks');
+      default:
+        return '';
+    }
+  };
+
+  const getTitle = (id: TrialInfoId): string => {
+    switch (id) {
+      case 'payment':
+        return t('pricing.title');
+      case 'program':
+        return t('program.title');
+      case 'how-lessons':
+        return t('howItWorks.title');
+      default:
+        return '';
+    }
+  };
+
+  const getBody = (id: TrialInfoId): string => {
+    switch (id) {
+      case 'payment':
+        return buildPricingBody(t);
+      case 'program':
+        return buildProgramBody(t);
+      case 'how-lessons':
+        return buildHowItWorksBody(t);
+      default:
+        return '';
+    }
+  };
 
   return (
     <>
       <div
         className="pt-3 pb-2 border-b border-slate-200/60 mb-4"
         role="region"
-        aria-label="Дэлгэрэнгүй мэдээлэл"
+        aria-label={t('regionAriaLabel')}
       >
         <div className="grid grid-cols-3 gap-2">
-          {TRIAL_INFO_ITEMS.map((item) => (
+          {TRIAL_INFO_IDS.map((item) => (
             <InfoItemCard
               key={item.id}
-              item={item}
+              label={getLabel(item.id)}
+              icon={item.icon}
               onClick={() => setOpenId(item.id)}
             />
           ))}
         </div>
       </div>
 
-      {currentItem && (
+      {openId && (
         <TrialInfoDialog
           open={!!openId}
           onOpenChange={(open) => !open && setOpenId(null)}
-          title={currentItem.title}
+          title={getTitle(openId)}
           sheetOnMobile
         >
-          <ModalBody body={currentItem.body} />
+          <ModalBody body={getBody(openId)} />
         </TrialInfoDialog>
       )}
     </>

@@ -136,7 +136,10 @@ export function TrialInfoDialog({
             </Button>
           </DialogPrimitive.Close>
         </div>
-        <div className="px-5 pb-6 pt-2 sm:px-6 max-h-[60vh] overflow-y-auto lg:max-h-none">
+        <div
+          className="px-5 pt-2 sm:px-6 max-h-[60vh] overflow-y-auto lg:max-h-none"
+          style={{ paddingBottom: 'max(40px, env(safe-area-inset-bottom))' }}
+        >
           {children}
         </div>
       </DialogContent>

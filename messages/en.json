@@ -528,7 +528,46 @@
       "backToAcademy": "Back to Gecko Academy"
     },
     "back": "Back",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "infoBar": {
+      "regionAriaLabel": "More information",
+      "labelPricing": "Pricing",
+      "labelProgram": "Program",
+      "labelHowItWorks": "How it works",
+      "pricing": {
+        "title": "Pricing",
+        "trialFree": "The trial lesson is free.",
+        "noCard": "No credit card is required to book the trial.",
+        "afterTrial": "After the trial, students can join the Gecko Academy program.",
+        "programPrice": "Program price:",
+        "priceAmount": "220,000₮ per month",
+        "includes": "Includes:",
+        "bullet1": "Small group classes",
+        "bullet2": "Native English-speaking teacher",
+        "bullet3": "Two classes per week",
+        "bullet4": "Month-to-month payments",
+        "noContract": "No long-term contract required."
+      },
+      "program": {
+        "title": "Program",
+        "intro": "Gecko Academy follows an English program designed for Mongolian learners.",
+        "eachClass": "Each class includes:",
+        "bullet1": "Speaking practice",
+        "bullet2": "Vocabulary and grammar",
+        "bullet3": "Interactive learning activities",
+        "bullet4": "Homework and review",
+        "levels": "Students move to higher levels as their English improves."
+      },
+      "howItWorks": {
+        "title": "How classes work",
+        "step1": "Book a free trial lesson",
+        "step2": "Meet the teacher and practice speaking",
+        "step3": "The teacher recommends the student's level",
+        "step4": "The student joins the appropriate small group class",
+        "frequency": "Classes meet twice per week.",
+        "observe": "Parents are welcome to observe the trial lesson."
+      }
+    }
   },
   "classroom": {
     "composer": {
