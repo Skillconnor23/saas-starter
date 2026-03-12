@@ -14,6 +14,7 @@ export function normalizePhoneToE164(
   raw: string | null | undefined,
   defaultCountry: 'MN' | 'US' = 'MN'
 ): string | null {
+  console.log(LOG_PREFIX, 'normalizePhoneToE164 called', { raw, defaultCountry });
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
@@ -69,6 +70,16 @@ export function normalizePhoneToE164(
  * - Failures are logged but not thrown (so booking, etc. are not blocked).
  */
 export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<void> {
+  const isDev = process.env.NODE_ENV === 'development';
+  const smsEnabled = process.env.UNIMTX_ENABLE_SMS === 'true';
+
+  console.log(LOG_PREFIX, 'sendSmsViaUnimtx invoked', {
+    env: process.env.NODE_ENV,
+    smsEnabled,
+    toRaw,
+    textLength: text?.length ?? 0,
+  });
+
   const to = normalizePhoneToE164(toRaw, 'MN');
   if (!to) {
     console.warn(LOG_PREFIX, 'skip send: invalid phone', { toRaw });
@@ -85,11 +96,11 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
     return;
   }
 
-  const isDev = process.env.NODE_ENV === 'development';
-  const smsEnabled = process.env.UNIMTX_ENABLE_SMS === 'true';
-
   if (isDev && !smsEnabled) {
-    console.log(LOG_PREFIX, '(dev) would send SMS', { to, text });
+    console.log(LOG_PREFIX, '(dev) would send SMS (UNIMTX_ENABLE_SMS!=true)', {
+      to,
+      preview: text.slice(0, 80),
+    });
     return;
   }
 
@@ -99,6 +110,8 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
 
   const body: Record<string, unknown> = {
     to,
+    // UniMTX accepts either `text` or `content`; docs examples use `text`.
+    text,
     content: text,
   };
   if (UNIMTX_SIGNATURE) {
@@ -106,6 +119,13 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
   }
 
   try {
+    console.log(LOG_PREFIX, 'sending request to UniMTX', {
+      url: UNIMTX_ENDPOINT,
+      to,
+      hasSignature: !!UNIMTX_SIGNATURE,
+      textLength: text.length,
+    });
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -113,6 +133,8 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
       },
       body: JSON.stringify(body),
     });
+
+    console.log(LOG_PREFIX, 'UniMTX response status', res.status);
 
     if (!res.ok) {
       const errorText = await res.text().catch(() => '<no body>');
@@ -123,9 +145,11 @@ export async function sendSmsViaUnimtx(toRaw: string, text: string): Promise<voi
       return;
     }
 
-    if (isDev) {
-      console.log(LOG_PREFIX, 'SMS sent successfully', { to });
-    }
+    const respText = await res.text().catch(() => '<no body>');
+    console.log(LOG_PREFIX, 'SMS sent successfully', {
+      to,
+      body: respText,
+    });
   } catch (err) {
     console.error(LOG_PREFIX, 'UniMTX request failed', err);
   }

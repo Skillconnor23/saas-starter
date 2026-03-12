@@ -230,6 +230,13 @@ export async function createTrialBookingAction(
       ];
       const smsText = lines.join('\n');
 
+      if (isDev) {
+        console.log(LOG_PREFIX, 'about to invoke sendSmsViaUnimtx', {
+          phone: parsed.data.phone,
+          portalLink,
+        });
+      }
+
       // Do not await; allow booking redirect to proceed.
       void sendSmsViaUnimtx(parsed.data.phone, smsText);
     } catch (e) {
