@@ -23,6 +23,7 @@ import {
   ClipboardList,
   FileText,
   ChevronRight,
+  Flame,
 } from 'lucide-react';
 import { PercentRing } from '@/components/dashboard/PercentRing';
 import { ProgressBar } from '@/components/dashboard/ProgressBar';
@@ -102,6 +103,8 @@ export default async function StudentDashboardPage({
 
   const firstName = user.name?.split(/\s+/)[0] ?? 'there';
   const attendanceRate30d = Math.round((stats.activeDays30d / 30) * 100);
+  // TODO: Replace with real consecutive class attendance streak when available
+  const currentStreak = 0;
 
   return (
     <section className="flex-1">
@@ -173,12 +176,23 @@ export default async function StudentDashboardPage({
               />
             </div>
             <div className="flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <span className="text-xs font-medium text-muted-foreground min-w-0">
-                {t('quizzesCompletedTitle')}
-              </span>
-              <p className="text-lg font-bold text-gray-900 shrink-0 sm:text-xl" aria-label={t('quizzesCompletedAria', { count: stats.quizzesCompleted })}>
-                {stats.quizzesCompleted}
-              </p>
+              <div className="flex min-w-0 flex-col gap-0">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('streakTitle')}
+                </span>
+                <p className="text-lg font-semibold text-gray-900 sm:text-xl" aria-label={t('streakAria', { count: currentStreak })}>
+                  {t('streakValue', { count: currentStreak })}
+                </p>
+                <span className="text-xs text-muted-foreground mt-0.5">
+                  {t('streakSupportingText')}
+                </span>
+              </div>
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50"
+                aria-hidden
+              >
+                <Flame className="h-5 w-5 text-amber-600" strokeWidth={2} />
+              </div>
             </div>
           </div>
 
