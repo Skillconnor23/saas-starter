@@ -252,33 +252,33 @@ export async function addQuestionAction(
   }
 
   const rawType = formData.get('type') as QuizQuestionType | null;
-  let parsed: z.infer<typeof createQuestionSchema> | null = null;
+  let parseResult: z.SafeParseReturnType<unknown, z.infer<typeof createQuestionSchema>> | null = null;
 
   if (rawType === 'MCQ') {
-    parsed = createQuestionSchema.safeParse({
+    parseResult = createQuestionSchema.safeParse({
       type: 'MCQ',
       prompt: formData.get('prompt') || '',
       explanation: formData.get('explanation') || undefined,
       choices: JSON.parse((formData.get('choicesJson') as string) || '[]'),
       correctAnswer: formData.get('correctAnswer') || '',
-    }) as z.SafeParseReturnType<unknown, z.infer<typeof createQuestionSchema>>;
+    });
   } else if (rawType === 'TRUE_FALSE') {
-    parsed = createQuestionSchema.safeParse({
+    parseResult = createQuestionSchema.safeParse({
       type: 'TRUE_FALSE',
       prompt: formData.get('prompt') || '',
       explanation: formData.get('explanation') || undefined,
       correctAnswer: formData.get('correctAnswer') === 'true',
-    }) as z.SafeParseReturnType<unknown, z.infer<typeof createQuestionSchema>>;
+    });
   } else if (rawType === 'FILL_BLANK') {
-    parsed = createQuestionSchema.safeParse({
+    parseResult = createQuestionSchema.safeParse({
       type: 'FILL_BLANK',
       prompt: formData.get('prompt') || '',
       explanation: formData.get('explanation') || undefined,
       correctAnswer: formData.get('correctAnswer') || '',
-    }) as z.SafeParseReturnType<unknown, z.infer<typeof createQuestionSchema>>;
+    });
   } else if (rawType === 'SPELLING') {
     const acceptedRaw = formData.get('acceptedAnswers') as string | null;
-    parsed = createQuestionSchema.safeParse({
+    parseResult = createQuestionSchema.safeParse({
       type: 'SPELLING',
       prompt: formData.get('prompt') || '',
       explanation: formData.get('explanation') || undefined,
@@ -287,7 +287,7 @@ export async function addQuestionAction(
       hint: (formData.get('hint') as string)?.trim() || undefined,
       imageUrl: (formData.get('imageUrl') as string)?.trim() || null,
       audioUrl: (formData.get('audioUrl') as string)?.trim() || null,
-    }) as z.SafeParseReturnType<unknown, z.infer<typeof createQuestionSchema>>;
+    });
   } else if (rawType === 'SENTENCE_BUILDER') {
     const tokensRaw = formData.get('tokensJson') as string | null;
     const distractorRaw = formData.get('distractorTokensJson') as string | null;
@@ -303,7 +303,7 @@ export async function addQuestionAction(
     } catch {
       distractorTokens = undefined;
     }
-    parsed = createQuestionSchema.safeParse({
+    parseResult = createQuestionSchema.safeParse({
       type: 'SENTENCE_BUILDER',
       prompt: formData.get('prompt') || '',
       explanation: formData.get('explanation') || undefined,
@@ -311,14 +311,14 @@ export async function addQuestionAction(
       tokens,
       distractorTokens,
       alternativeCorrectSentence: (formData.get('alternativeCorrectSentence') as string)?.trim() || null,
-    }) as z.SafeParseReturnType<unknown, z.infer<typeof createQuestionSchema>>;
+    });
   }
 
-  if (!parsed?.success) {
-    return { error: parsed?.error?.errors?.[0]?.message ?? 'Validation failed' };
+  if (!parseResult || !parseResult.success) {
+    return { error: parseResult?.error?.errors?.[0]?.message ?? 'Validation failed' };
   }
 
-  const data = parsed.data;
+  const data = parseResult.data;
   const payload: Parameters<typeof dbAddQuestion>[0] = {
     quizId,
     type: data.type,
